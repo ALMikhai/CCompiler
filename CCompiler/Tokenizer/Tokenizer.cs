@@ -43,7 +43,8 @@ namespace CCompiler.Tokenizer
             var tokenReceived = false;
             while (!tokenReceived)
             {
-                _machines.ForEach(fsm => fsm.ReadChar(_lastString?[_lastIndex] ?? '\0'));
+                var input = _lastString?.Length == _lastIndex ? '\n' : _lastString?[_lastIndex] ?? '\0';
+                _machines.ForEach(fsm => fsm.ReadChar(input));
 
                 if (_machines.FindIndex(fsm => fsm.GetState() == FSMState.RUNNING) == -1)
                 {
@@ -73,7 +74,7 @@ namespace CCompiler.Tokenizer
                 }
 
                 ++_lastIndex;
-                if (_lastString?.Length <= _lastIndex)
+                if (_lastString?.Length < _lastIndex)
                 {
                     _lastString = _reader.ReadLine();
                     ++_lastStringNumber;
