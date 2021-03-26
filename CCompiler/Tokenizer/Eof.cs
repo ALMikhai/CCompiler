@@ -55,6 +55,8 @@ namespace CCompiler.Tokenizer
         public override void Reset(Position tokenPosition)
         {
             _state = State.START;
+            _position = tokenPosition;
+            _exception = null;
         }
 
         public override Token GetToken()
