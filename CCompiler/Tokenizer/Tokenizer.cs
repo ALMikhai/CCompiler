@@ -19,6 +19,7 @@ namespace CCompiler.Tokenizer
         {
             _reader = new StreamReader(filePath);
             _machines = ImmutableList.Create<FSM>(
+                new Identifier(),
             );
             _lastToken = null;
             _lastString = _reader.ReadLine();
