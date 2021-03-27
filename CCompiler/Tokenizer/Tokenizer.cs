@@ -21,7 +21,8 @@ namespace CCompiler.Tokenizer
             _machines = ImmutableList.Create<FSM>(
                 new Identifier(),
                 new Eof(),
-                new Space()
+                new Space(),
+                new Int()
             );
             _lastToken = null;
             _lastString = _reader.ReadLine();
