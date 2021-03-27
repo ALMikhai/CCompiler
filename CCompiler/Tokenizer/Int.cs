@@ -16,10 +16,20 @@ namespace CCompiler.Tokenizer
 
         public IntType Type { get; private set; }
 
-        public IntToken(Position position, TokenType tokenType, string source, object value, IntType type) : base(position, tokenType, source, value)
+        public IntToken(Position position, TokenType tokenType, string source, object value, IntType type) : base(
+            position, tokenType, source, value)
         {
             Type = type;
         }
+
+        #region Debug
+
+        public override string ToString()
+        {
+            return base.ToString() + $"\t{Type}";
+        }
+
+        #endregion
     }
 
     public class Int : FSM
@@ -250,7 +260,26 @@ namespace CCompiler.Tokenizer
         public override Token GetToken()
         {
             var source = _value.Remove(_value.Length - 1, 1).ToString();
-            var value = Convert(source);
+            string number;
+            switch (_intType)
+            {
+                case IntToken.IntType.INT:
+                    number = _value.ToString();
+                    break;
+                case IntToken.IntType.LONG:
+                    number = _value.Remove(_value.Length - 1, 1).ToString();
+                    break;
+                case IntToken.IntType.ULONG:
+                    number = _value.Remove(_value.Length - 2, 2).ToString();
+                    break;
+                case IntToken.IntType.UINT:
+                    number = _value.Remove(_value.Length - 1, 1).ToString();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            var value = Convert(number);
             var token = new IntToken(_position, TokenType.INT, source, value, _intType);
             return token;
         }
