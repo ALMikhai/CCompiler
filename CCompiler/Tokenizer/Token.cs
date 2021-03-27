@@ -38,21 +38,21 @@ namespace CCompiler.Tokenizer
     public class Token
     {
         public Position Position { get; private set; }
-        public TokenType Type { get; private set; }
+        public TokenType TokenType { get; private set; }
         public string Source { get; private set; }
         public object Value { get; private set; }
 
         public Token(Position position, TokenType tokenType, string source, object value)
         {
             Position = position;
-            Type = tokenType;
+            TokenType = tokenType;
             Source = source;
             Value = value;
         }
 
         public override string ToString()
         {
-            return $"{Position}\t{Type}\t{Source}\t{Value}";
+            return $"{Position}\t{TokenType}\t{Source}\t{Value}";
         }
     }
 }

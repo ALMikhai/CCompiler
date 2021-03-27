@@ -79,14 +79,7 @@ namespace CCompiler.Tokenizer
                 State.START => FSMState.NONE,
                 State.END => FSMState.END,
                 State.ERROR => FSMState.ERROR,
-                State.ZERO => FSMState.RUNNING,
-                State.OCTAL => FSMState.RUNNING,
-                State.DECIMAL => FSMState.RUNNING,
-                State.SIXTEEN => FSMState.RUNNING,
-                State.L => FSMState.RUNNING,
-                State.U => FSMState.RUNNING,
-                State.UL => FSMState.RUNNING,
-                State.X => FSMState.RUNNING,
+                _ => FSMState.RUNNING
             };
         }
 

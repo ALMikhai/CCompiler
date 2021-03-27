@@ -37,7 +37,7 @@ namespace CCompiler.Tokenizer
 
         public Token Get()
         {
-            if (_lastToken?.Type == TokenType.EOF)
+            if (_lastToken?.TokenType == TokenType.EOF)
             {
                 return _lastToken;
             }
@@ -65,7 +65,7 @@ namespace CCompiler.Tokenizer
                     }
 
                     var token = _machines[index].GetToken();
-                    if (token.Type != TokenType.NONE)
+                    if (token.TokenType != TokenType.NONE)
                     {
                         _lastToken = token;
                         tokenReceived = true;

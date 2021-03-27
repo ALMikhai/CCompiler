@@ -17,7 +17,7 @@ namespace CCompiler
                 {
                     token = tokenizer.Get();
                     Console.WriteLine(token);
-                } while (token.Type != TokenType.EOF);
+                } while (token.TokenType != TokenType.EOF);
             }
             catch (TokenizerException e)
             {
