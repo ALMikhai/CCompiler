@@ -15,6 +15,12 @@ namespace CCompiler.Tokenizer
             _message = message;
         }
 
+        public void Update(Position position, string message)
+        {
+            _position = position;
+            _message = message;
+        }
+
         public override string ToString()
         {
             return $"{_position}: error: {_message}";

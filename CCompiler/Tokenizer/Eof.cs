@@ -15,7 +15,6 @@ namespace CCompiler.Tokenizer
 
         private State _state;
         private Position _position;
-        private TokenizerException _exception;
 
         public Eof()
         {
@@ -45,7 +44,7 @@ namespace CCompiler.Tokenizer
                     else
                     {
                         _state = State.ERROR;
-                        _exception = new TokenizerException(_position, "EOF is not found");
+                        Tokenizer.LastException.Update(_position, "EOF is not found");
                     }
 
                     break;
@@ -56,17 +55,11 @@ namespace CCompiler.Tokenizer
         {
             _state = State.START;
             _position = tokenPosition;
-            _exception = null;
         }
 
         public override Token GetToken()
         {
             return new Token(_position, TokenType.EOF, "", "");
-        }
-
-        public override TokenizerException GetException()
-        {
-            return _exception;
         }
     }
 }

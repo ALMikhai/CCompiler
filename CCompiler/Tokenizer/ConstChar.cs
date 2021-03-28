@@ -20,7 +20,6 @@ namespace CCompiler.Tokenizer
         private StringBuilder _value;
         private State _state;
         private Position _position;
-        private TokenizerException _exception;
         private char _charValue;
         private StringSymbol _stringSymbol;
 
@@ -60,7 +59,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        _exception = new TokenizerException(_position, "opening quote is not found");
+                        Tokenizer.LastException.Update(_position, "opening quote is not found");
                         _state = State.ERROR;
                     }
                     break;
@@ -72,7 +71,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        _exception = new TokenizerException(_position, "after L, opening quote is not found");
+                        Tokenizer.LastException.Update(_position, "after L, opening quote is not found");
                         _state = State.ERROR;
                     }
                     break;
@@ -87,7 +86,6 @@ namespace CCompiler.Tokenizer
                             ReadChar(ch);
                             break;
                         case FSMState.ERROR:
-                            _exception = _stringSymbol.GetException();
                             _state = State.ERROR;
                             break;
                     }
@@ -99,7 +97,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        _exception = new TokenizerException(_position, "closing quote is not found");
+                        Tokenizer.LastException.Update(_position, "closing quote is not found");
                         _state = State.ERROR;
                     }
                     break;
@@ -114,18 +112,12 @@ namespace CCompiler.Tokenizer
             _value.Clear();
             _state = State.START;
             _position = tokenPosition;
-            _exception = null;
             _stringSymbol.Reset(tokenPosition);
         }
 
         public override Token GetToken()
         {
             return new Token(_position, TokenType.CHAR, _value.ToString(0, _value.Length - 2), _charValue);
-        }
-
-        public override TokenizerException GetException()
-        {
-            return _exception;
         }
     }
 }

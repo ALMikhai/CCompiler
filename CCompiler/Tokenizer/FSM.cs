@@ -16,6 +16,5 @@ namespace CCompiler.Tokenizer
         public abstract void ReadChar(char ch);
         public abstract void Reset(Position tokenPosition);
         public abstract Token GetToken();
-        public abstract TokenizerException GetException();
     }
 }

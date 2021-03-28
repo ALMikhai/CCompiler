@@ -16,7 +16,6 @@ namespace CCompiler.Tokenizer
 
         private State _state;
         private Position _position;
-        private TokenizerException _exception;
 
         public Space()
         {
@@ -47,7 +46,7 @@ namespace CCompiler.Tokenizer
                     else
                     {
                         _state = State.ERROR;
-                        _exception = new TokenizerException(_position, "space symbol not found");
+                        Tokenizer.LastException.Update(_position, "space symbol not found");
                     }
                     break;
                 case State.IDL:
@@ -67,17 +66,11 @@ namespace CCompiler.Tokenizer
         {
             _state = State.START;
             _position = tokenPosition;
-            _exception = null;
         }
 
         public override Token GetToken()
         {
             return new Token(_position, TokenType.NONE, "", "");
-        }
-
-        public override TokenizerException GetException()
-        {
-            return _exception;
         }
     }
 }

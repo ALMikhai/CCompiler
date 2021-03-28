@@ -8,6 +8,8 @@ namespace CCompiler.Tokenizer
 {
     class Tokenizer
     {
+        public static TokenizerException LastException = new TokenizerException(new Position(1, 1), "");
+
         private StreamReader _reader;
         private readonly ImmutableList<FSM> _machines;
         private Token _lastToken;
@@ -62,7 +64,7 @@ namespace CCompiler.Tokenizer
                         }
                         else
                         {
-                            throw _machines[errorIndex].GetException();
+                            throw LastException;
                         }
                     }
 

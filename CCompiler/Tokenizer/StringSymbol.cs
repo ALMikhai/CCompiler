@@ -34,7 +34,6 @@ namespace CCompiler.Tokenizer
         private char _quote;
         private State _state;
         private Position _position;
-        private TokenizerException _exception;
         private BitType _bitType;
 
         public StringSymbol(char quote)
@@ -73,7 +72,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        _exception = new TokenizerException(_position, "char is empty or contain invalid symbol");
+                        Tokenizer.LastException.Update(_position, "char is empty or contain invalid symbol");
                         _state = State.ERROR;
                     }
                     break;
@@ -95,7 +94,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        _exception = new TokenizerException(_position, "invalid escape sequences");
+                        Tokenizer.LastException.Update(_position, "invalid escape sequences");
                         _state = State.ERROR;
                     }
                     break;
@@ -130,7 +129,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        _exception = new TokenizerException(_position, "after \\x must be hexadecimal number");
+                        Tokenizer.LastException.Update(_position, "after \\x must be hexadecimal number");
                         _state = State.ERROR;
                     }
                     break;
@@ -156,7 +155,6 @@ namespace CCompiler.Tokenizer
             _value.Clear();
             _state = State.START;
             _position = tokenPosition;
-            _exception = null;
             _bitType = BitType.CHAR;
         }
 
@@ -221,11 +219,6 @@ namespace CCompiler.Tokenizer
         public string GetSource()
         {
             return _value.ToString(0, _value.Length - 1);
-        }
-
-        public override TokenizerException GetException()
-        {
-            return _exception;
         }
 
         private bool IsChar(char ch)

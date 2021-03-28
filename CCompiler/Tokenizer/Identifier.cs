@@ -17,7 +17,6 @@ namespace CCompiler.Tokenizer
         private StringBuilder _value;
         private State _state;
         private Position _position;
-        private TokenizerException _exception;
 
         public Identifier()
         {
@@ -49,7 +48,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        _exception = new TokenizerException(_position,
+                        Tokenizer.LastException.Update(_position,
                             "the identifier must start with a letter or '_'");
                         _state = State.ERROR;
                     }
@@ -74,18 +73,12 @@ namespace CCompiler.Tokenizer
             _value.Clear();
             _state = State.START;
             _position = tokenPosition;
-            _exception = null;
         }
 
         public override Token GetToken()
         {
             var token = new Token(_position, TokenType.IDENTIFIER, _value.ToString(), _value.ToString());
             return token;
-        }
-
-        public override TokenizerException GetException()
-        {
-            return _exception;
         }
     }
 }
