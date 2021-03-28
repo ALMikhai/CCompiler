@@ -16,6 +16,7 @@ namespace CCompiler.Tokenizer
         private string _lastString;
         private int _lastIndex;
         private int _lastStringNumber;
+        private Position _lastTokenPosition;
 
         public Tokenizer(string filePath)
         {
@@ -32,6 +33,7 @@ namespace CCompiler.Tokenizer
             _lastString = _reader.ReadLine();
             _lastIndex = 0;
             _lastStringNumber = 0;
+            _lastTokenPosition = new Position(1, 1);
         }
 
         public Token Peek()
@@ -64,18 +66,19 @@ namespace CCompiler.Tokenizer
                         }
                         else
                         {
-                            throw LastException;
+                            throw LastException.AddPosition(_lastTokenPosition);
                         }
                     }
 
                     var token = _machines[index].GetToken();
                     if (token.TokenType != TokenType.NONE)
                     {
-                        _lastToken = token;
+                        _lastToken = token.AddPosition(_lastTokenPosition);
                         tokenReceived = true;
                     }
 
-                    _machines.ForEach(fsm => fsm.Reset(new Position(_lastStringNumber + 1, _lastIndex + 1)));
+                    _lastTokenPosition = new Position(_lastStringNumber + 1, _lastIndex + 1);
+                    _machines.ForEach(fsm => fsm.Reset());
                     --_lastIndex;
                 }
 

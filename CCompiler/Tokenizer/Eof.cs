@@ -14,12 +14,10 @@ namespace CCompiler.Tokenizer
         }
 
         private State _state;
-        private Position _position;
 
         public Eof()
         {
             _state = State.START;
-            _position = new Position(1, 1);
         }
 
         public override FSMState GetState()
@@ -44,22 +42,21 @@ namespace CCompiler.Tokenizer
                     else
                     {
                         _state = State.ERROR;
-                        Tokenizer.LastException.Update(_position, "EOF is not found");
+                        Tokenizer.LastException.AddMessage("EOF is not found");
                     }
 
                     break;
             }
         }
 
-        public override void Reset(Position tokenPosition)
+        public override void Reset()
         {
             _state = State.START;
-            _position = tokenPosition;
         }
 
         public override Token GetToken()
         {
-            return new Token(_position, TokenType.EOF, "", "");
+            return new Token(TokenType.EOF, "", "");
         }
     }
 }

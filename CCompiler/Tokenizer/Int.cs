@@ -16,8 +16,7 @@ namespace CCompiler.Tokenizer
 
         public IntType Type { get; private set; }
 
-        public IntToken(Position position, TokenType tokenType, string source, object value, IntType type) : base(
-            position, tokenType, source, value)
+        public IntToken(TokenType tokenType, string source, object value, IntType type) : base(tokenType, source, value)
         {
             Type = type;
         }
@@ -58,7 +57,6 @@ namespace CCompiler.Tokenizer
 
         private StringBuilder _value;
         private State _state;
-        private Position _position;
         private BitType _bitType;
         private IntToken.IntType _intType;
 
@@ -66,7 +64,6 @@ namespace CCompiler.Tokenizer
         {
             _value = new StringBuilder();
             _state = State.START;
-            _position = new Position(1, 1);
             _bitType = BitType.DECIMAL;
             _intType = IntToken.IntType.INT;
         }
@@ -99,7 +96,7 @@ namespace CCompiler.Tokenizer
                     else
                     {
                         _state = State.ERROR;
-                        Tokenizer.LastException.Update(_position, "int must start with a number");
+                        Tokenizer.LastException.AddMessage("int must start with a number");
                     }
 
                     break;
@@ -115,7 +112,7 @@ namespace CCompiler.Tokenizer
                     else if (ch == '9' || ch == '8')
                     {
                         _state = State.ERROR;
-                        Tokenizer.LastException.Update(_position, "invalid int");
+                        Tokenizer.LastException.AddMessage("invalid int");
                     }
                     else if (ch == 'L' || ch == 'l')
                     {
@@ -140,7 +137,7 @@ namespace CCompiler.Tokenizer
                     else if (ch == '9' || ch == '8')
                     {
                         _state = State.ERROR;
-                        Tokenizer.LastException.Update(_position, "invalid int");
+                        Tokenizer.LastException.AddMessage("invalid int");
                     }
                     else if (ch == 'L' || ch == 'l')
                     {
@@ -232,18 +229,17 @@ namespace CCompiler.Tokenizer
                     else
                     {
                         _state = State.ERROR;
-                        Tokenizer.LastException.Update(_position, "invalid int");
+                        Tokenizer.LastException.AddMessage("invalid int");
                     }
 
                     break;
             }
         }
 
-        public override void Reset(Position tokenPosition)
+        public override void Reset()
         {
             _value.Clear();
             _state = State.START;
-            _position = tokenPosition;
             _bitType = BitType.DECIMAL;
             _intType = IntToken.IntType.INT;
         }
@@ -271,7 +267,7 @@ namespace CCompiler.Tokenizer
             }
 
             var value = Convert(number);
-            var token = new IntToken(_position, TokenType.INT, source, value, _intType);
+            var token = new IntToken(TokenType.INT, source, value, _intType);
             return token;
         }
 

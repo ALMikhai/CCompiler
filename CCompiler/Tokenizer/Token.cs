@@ -42,12 +42,17 @@ namespace CCompiler.Tokenizer
         public string Source { get; private set; }
         public object Value { get; private set; }
 
-        public Token(Position position, TokenType tokenType, string source, object value)
+        public Token(TokenType tokenType, string source, object value)
         {
-            Position = position;
             TokenType = tokenType;
             Source = source;
             Value = value;
+        }
+
+        public Token AddPosition(Position position)
+        {
+            Position = position;
+            return this;
         }
 
         public override string ToString()

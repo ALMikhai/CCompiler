@@ -15,10 +15,16 @@ namespace CCompiler.Tokenizer
             _message = message;
         }
 
-        public void Update(Position position, string message)
+        public TokenizerException AddMessage(string message)
+        {
+            _message = message;
+            return this;
+        }
+
+        public TokenizerException AddPosition(Position position)
         {
             _position = position;
-            _message = message;
+            return this;
         }
 
         public override string ToString()

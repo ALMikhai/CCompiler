@@ -16,13 +16,11 @@ namespace CCompiler.Tokenizer
 
         private StringBuilder _value;
         private State _state;
-        private Position _position;
 
         public Identifier()
         {
             _value = new StringBuilder();
             _state = State.START;
-            _position = new Position(1, 1);
         }
 
         public override FSMState GetState()
@@ -48,7 +46,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        Tokenizer.LastException.Update(_position,
+                        Tokenizer.LastException.AddMessage(
                             "the identifier must start with a letter or '_'");
                         _state = State.ERROR;
                     }
@@ -68,16 +66,15 @@ namespace CCompiler.Tokenizer
             }
         }
 
-        public override void Reset(Position tokenPosition)
+        public override void Reset()
         {
             _value.Clear();
             _state = State.START;
-            _position = tokenPosition;
         }
 
         public override Token GetToken()
         {
-            var token = new Token(_position, TokenType.IDENTIFIER, _value.ToString(), _value.ToString());
+            var token = new Token(TokenType.IDENTIFIER, _value.ToString(), _value.ToString());
             return token;
         }
     }

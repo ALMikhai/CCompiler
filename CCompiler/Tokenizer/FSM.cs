@@ -14,7 +14,7 @@ namespace CCompiler.Tokenizer
     {
         public abstract FSMState GetState();
         public abstract void ReadChar(char ch);
-        public abstract void Reset(Position tokenPosition);
+        public abstract void Reset();
         public abstract Token GetToken();
     }
 }

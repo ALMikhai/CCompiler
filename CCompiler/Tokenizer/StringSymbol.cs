@@ -33,14 +33,12 @@ namespace CCompiler.Tokenizer
         private StringBuilder _value;
         private char _quote;
         private State _state;
-        private Position _position;
         private BitType _bitType;
 
         public StringSymbol(char quote)
         {
             _value = new StringBuilder();
             _state = State.START;
-            _position = new Position(1, 1);
             _bitType = BitType.CHAR;
             _quote = quote;
         }
@@ -72,7 +70,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        Tokenizer.LastException.Update(_position, "char is empty or contain invalid symbol");
+                        Tokenizer.LastException.AddMessage("char is empty or contain invalid symbol");
                         _state = State.ERROR;
                     }
                     break;
@@ -94,7 +92,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        Tokenizer.LastException.Update(_position, "invalid escape sequences");
+                        Tokenizer.LastException.AddMessage("invalid escape sequences");
                         _state = State.ERROR;
                     }
                     break;
@@ -129,7 +127,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        Tokenizer.LastException.Update(_position, "after \\x must be hexadecimal number");
+                        Tokenizer.LastException.AddMessage("after \\x must be hexadecimal number");
                         _state = State.ERROR;
                     }
                     break;
@@ -150,17 +148,16 @@ namespace CCompiler.Tokenizer
             }
         }
 
-        public override void Reset(Position tokenPosition)
+        public override void Reset()
         {
             _value.Clear();
             _state = State.START;
-            _position = tokenPosition;
             _bitType = BitType.CHAR;
         }
 
         public override Token GetToken()
         {
-            return new Token(_position, TokenType.CHAR, GetSource(), GetChar());
+            return new Token(TokenType.CHAR, GetSource(), GetChar());
         }
 
         public char GetChar()

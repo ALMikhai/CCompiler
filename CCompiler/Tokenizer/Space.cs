@@ -15,12 +15,10 @@ namespace CCompiler.Tokenizer
         }
 
         private State _state;
-        private Position _position;
 
         public Space()
         {
             _state = State.START;
-            _position = new Position(1, 1);
         }
 
         public override FSMState GetState()
@@ -46,7 +44,7 @@ namespace CCompiler.Tokenizer
                     else
                     {
                         _state = State.ERROR;
-                        Tokenizer.LastException.Update(_position, "space symbol not found");
+                        Tokenizer.LastException.AddMessage("space symbol not found");
                     }
                     break;
                 case State.IDL:
@@ -62,15 +60,14 @@ namespace CCompiler.Tokenizer
             }
         }
 
-        public override void Reset(Position tokenPosition)
+        public override void Reset()
         {
             _state = State.START;
-            _position = tokenPosition;
         }
 
         public override Token GetToken()
         {
-            return new Token(_position, TokenType.NONE, "", "");
+            return new Token(TokenType.NONE, "", "");
         }
     }
 }

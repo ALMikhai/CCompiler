@@ -19,7 +19,6 @@ namespace CCompiler.Tokenizer
 
         private StringBuilder _value;
         private State _state;
-        private Position _position;
         private char _charValue;
         private StringSymbol _stringSymbol;
 
@@ -27,7 +26,6 @@ namespace CCompiler.Tokenizer
         {
             _value = new StringBuilder();
             _state = State.START;
-            _position = new Position(1, 1);
             _stringSymbol = new StringSymbol('\'');
         }
 
@@ -55,11 +53,11 @@ namespace CCompiler.Tokenizer
                     else if (ch == '\'')
                     {
                         _state = State.QUOTE;
-                        _stringSymbol.Reset(_position);
+                        _stringSymbol.Reset();
                     }
                     else
                     {
-                        Tokenizer.LastException.Update(_position, "opening quote is not found");
+                        Tokenizer.LastException.AddMessage("opening quote is not found");
                         _state = State.ERROR;
                     }
                     break;
@@ -67,11 +65,11 @@ namespace CCompiler.Tokenizer
                     if (ch == '\'')
                     {
                         _state = State.QUOTE;
-                        _stringSymbol.Reset(_position);
+                        _stringSymbol.Reset();
                     }
                     else
                     {
-                        Tokenizer.LastException.Update(_position, "after L, opening quote is not found");
+                        Tokenizer.LastException.AddMessage("after L, opening quote is not found");
                         _state = State.ERROR;
                     }
                     break;
@@ -82,7 +80,7 @@ namespace CCompiler.Tokenizer
                         case FSMState.END:
                             _state = State.CHAR;
                             _charValue = _stringSymbol.GetChar();
-                            _stringSymbol.Reset(_position);
+                            _stringSymbol.Reset();
                             ReadChar(ch);
                             break;
                         case FSMState.ERROR:
@@ -97,7 +95,7 @@ namespace CCompiler.Tokenizer
                     }
                     else
                     {
-                        Tokenizer.LastException.Update(_position, "closing quote is not found");
+                        Tokenizer.LastException.AddMessage("closing quote is not found");
                         _state = State.ERROR;
                     }
                     break;
@@ -107,17 +105,16 @@ namespace CCompiler.Tokenizer
             }
         }
 
-        public override void Reset(Position tokenPosition)
+        public override void Reset()
         {
             _value.Clear();
             _state = State.START;
-            _position = tokenPosition;
-            _stringSymbol.Reset(tokenPosition);
+            _stringSymbol.Reset();
         }
 
         public override Token GetToken()
         {
-            return new Token(_position, TokenType.CHAR, _value.ToString(0, _value.Length - 2), _charValue);
+            return new Token(TokenType.CHAR, _value.ToString(0, _value.Length - 2), _charValue);
         }
     }
 }
