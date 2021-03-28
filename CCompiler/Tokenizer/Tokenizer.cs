@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace CCompiler.Tokenizer
@@ -49,29 +50,22 @@ namespace CCompiler.Tokenizer
                 return _lastToken;
             }
 
+            var runningMachines = _machines.Select(fsm => fsm).ToList();
             var tokenReceived = false;
             while (!tokenReceived)
             {
                 var input = _lastString?.Length == _lastIndex ? '\n' : _lastString?[_lastIndex] ?? '\0';
-                _machines.ForEach(fsm => fsm.ReadChar(input));
+                runningMachines.ForEach(fsm => fsm.ReadChar(input));
 
-                if (_machines.FindIndex(fsm => fsm.GetState() == FSMState.RUNNING) == -1)
+                if (runningMachines.Any(fsm => fsm.GetState() == FSMState.RUNNING) == false)
                 {
-                    var index = _machines.FindIndex(fsm => fsm.GetState() == FSMState.END);
+                    var index = runningMachines.FindIndex(fsm => fsm.GetState() == FSMState.END);
                     if (index == -1)
                     {
-                        var errorIndex = _machines.FindIndex(fsm => fsm.GetState() == FSMState.ERROR);
-                        if (errorIndex == -1)
-                        {
-                            throw new NotImplementedException("WTF");
-                        }
-                        else
-                        {
-                            throw LastException.AddPosition(_lastTokenPosition);
-                        }
+                        throw LastException.AddPosition(_lastTokenPosition);
                     }
 
-                    var token = _machines[index].GetToken();
+                    var token = runningMachines[index].GetToken();
                     if (token.TokenType != TokenType.NONE)
                     {
                         _lastToken = token.AddPosition(_lastTokenPosition);
@@ -80,7 +74,12 @@ namespace CCompiler.Tokenizer
 
                     _lastTokenPosition = new Position(_lastStringNumber + 1, _lastIndex + 1);
                     _machines.ForEach(fsm => fsm.Reset());
+                    runningMachines = _machines.Select(fsm => fsm).ToList();
                     --_lastIndex;
+                }
+                else
+                {
+                    runningMachines = runningMachines.Where(fsm => fsm.GetState() != FSMState.END).ToList();
                 }
 
                 ++_lastIndex;
