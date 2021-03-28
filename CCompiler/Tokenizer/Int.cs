@@ -109,7 +109,7 @@ namespace CCompiler.Tokenizer
                     {
                         _state = State.X;
                     }
-                    else if (IsOct(ch))
+                    else if (Utils.IsOct(ch))
                     {
                         _state = State.OCTAL;
                     }
@@ -134,7 +134,7 @@ namespace CCompiler.Tokenizer
                     break;
                 case State.OCTAL:
                     _bitType = BitType.OCTAL;
-                    if (IsOct(ch))
+                    if (Utils.IsOct(ch))
                     {
                         _state = State.OCTAL;
                     }
@@ -179,7 +179,7 @@ namespace CCompiler.Tokenizer
                     break;
                 case State.SIXTEEN:
                     _bitType = BitType.SIXTEEN;
-                    if (IsHex(ch))
+                    if (Utils.IsHex(ch))
                     {
                         _state = State.SIXTEEN;
                     }
@@ -226,7 +226,7 @@ namespace CCompiler.Tokenizer
                     _state = State.END;
                     break;
                 case State.X:
-                    if (IsHex(ch))
+                    if (Utils.IsHex(ch))
                     {
                         _state = State.SIXTEEN;
                     }
@@ -252,21 +252,21 @@ namespace CCompiler.Tokenizer
 
         public override Token GetToken()
         {
-            var source = _value.Remove(_value.Length - 1, 1).ToString();
+            var source = _value.ToString(0, _value.Length - 1);
             string number;
             switch (_intType)
             {
                 case IntToken.IntType.INT:
-                    number = _value.ToString();
+                    number = _value.ToString(0, _value.Length - 1);
                     break;
                 case IntToken.IntType.LONG:
-                    number = _value.Remove(_value.Length - 1, 1).ToString();
+                    number = _value.ToString(0, _value.Length - 2);
                     break;
                 case IntToken.IntType.ULONG:
-                    number = _value.Remove(_value.Length - 2, 2).ToString();
+                    number = _value.ToString(0, _value.Length - 3);
                     break;
                 case IntToken.IntType.UINT:
-                    number = _value.Remove(_value.Length - 1, 1).ToString();
+                    number = _value.ToString(0, _value.Length - 2);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -280,17 +280,6 @@ namespace CCompiler.Tokenizer
         public override TokenizerException GetException()
         {
             return _exception;
-        }
-
-        private bool IsHex(char ch)
-        {
-            return char.IsDigit(ch) || ch == 'A' || ch == 'a' || ch == 'B' || ch == 'b' || ch == 'C' || ch == 'c' ||
-                   ch == 'D' || ch == 'd' || ch == 'E' || ch == 'e' || ch == 'F' || ch == 'f';
-        }
-
-        private bool IsOct(char ch)
-        {
-            return char.IsDigit(ch) && ch != '9' && ch != '8';
         }
 
         private long Convert(string source)
