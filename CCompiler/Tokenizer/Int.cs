@@ -81,7 +81,9 @@ namespace CCompiler.Tokenizer
 
         public override void ReadChar(char ch)
         {
-            _value.Append(ch);
+            if (GetState() != FSMState.END)
+                _value.Append(ch);
+
             switch (_state)
             {
                 case State.START:
