@@ -74,7 +74,13 @@ namespace CCompiler.Tokenizer
 
         public override Token GetToken()
         {
-            var token = new Token(TokenType.IDENTIFIER, _value.ToString(), _value.ToString());
+            var source = _value.ToString();
+            if (KeywordToken.Keywords.ContainsKey(source))
+            {
+                var keywordType = KeywordToken.Keywords[source];
+                return new KeywordToken(TokenType.KEYWORD, source, keywordType, keywordType);
+            }
+            var token = new Token(TokenType.IDENTIFIER, source, source);
             return token;
         }
     }
