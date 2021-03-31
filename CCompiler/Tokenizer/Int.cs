@@ -114,7 +114,7 @@ namespace CCompiler.Tokenizer
                     else if (ch == '9' || ch == '8')
                     {
                         _state = State.ERROR;
-                        Tokenizer.LastException.AddMessage("invalid int");
+                        Tokenizer.LastException.AddMessage($"octal number cannot contain {ch}");
                     }
                     else if (ch == 'L' || ch == 'l')
                     {
@@ -139,7 +139,7 @@ namespace CCompiler.Tokenizer
                     else if (ch == '9' || ch == '8')
                     {
                         _state = State.ERROR;
-                        Tokenizer.LastException.AddMessage("invalid int");
+                        Tokenizer.LastException.AddMessage($"octal number cannot contain {ch}");
                     }
                     else if (ch == 'L' || ch == 'l')
                     {
@@ -231,7 +231,7 @@ namespace CCompiler.Tokenizer
                     else
                     {
                         _state = State.ERROR;
-                        Tokenizer.LastException.AddMessage("invalid int");
+                        Tokenizer.LastException.AddMessage("after 'x' must be a hexadecimal number");
                     }
 
                     break;
@@ -249,7 +249,7 @@ namespace CCompiler.Tokenizer
         public override Token GetToken()
         {
             var source = _value.ToString(0, _value.Length - 1);
-            string number;
+            string number = "";
             switch (_intType)
             {
                 case IntToken.IntType.INT:
@@ -264,8 +264,6 @@ namespace CCompiler.Tokenizer
                 case IntToken.IntType.UINT:
                     number = _value.ToString(0, _value.Length - 2);
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
 
             var value = Convert(number);
