@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using CCompiler.Tokenizer;
 
 namespace CCompiler
@@ -8,22 +9,30 @@ namespace CCompiler
     {
         static void Main(string[] args)
         {
+            if (args.Length == 0)
+            {
+                // TODO Display help info.
+                return;
+            }
+
             try
             {
-                var tokenizer =
-                    new Tokenizer.Tokenizer(@"D:\Documents\All my projects\CCompiler\CCompiler\TestProgram.txt");
-                Token token;
-                do
+                var tokenizer = new Tokenizer.Tokenizer(args[0]);
+                if (args.Contains("-l"))
                 {
-                    token = tokenizer.Get();
-                    Console.WriteLine(token);
-                } while (token.TokenType != TokenType.EOF);
-            }
-            catch (TokenizerException e)
-            {
-                Console.WriteLine(e);
+                    var token = tokenizer.Get();
+                    while (token.TokenType != TokenType.EOF)
+                    {
+                        Console.WriteLine(token);
+                        token = tokenizer.Get();
+                    }
+                }
             }
             catch (FileNotFoundException e)
+            {
+                Console.WriteLine($"error: file {e.FileName} not found");
+            }
+            catch (TokenizerException e)
             {
                 Console.WriteLine(e);
             }

@@ -66,10 +66,10 @@ namespace CCompiler.Tokenizer
 
         #region Debug
 
-        public override string ToString()
-        {
-            return base.ToString() + $"\t{Type}";
-        }
+        //public override string ToString()
+        //{
+        //    return base.ToString() + $"\t{Type}";
+        //}
 
         #endregion
 
