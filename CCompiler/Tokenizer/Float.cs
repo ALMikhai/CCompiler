@@ -15,7 +15,8 @@ namespace CCompiler.Tokenizer
 
         public FloatType Type { get; private set; }
 
-        public FloatToken(TokenType tokenType, string source, object value, FloatType type) : base(tokenType, source, value)
+        public FloatToken(TokenType tokenType, string source, object value, FloatType type) : base(tokenType, source,
+            value)
         {
             Type = type;
         }
@@ -91,6 +92,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("float must start with a number or '.'");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.D:
                     if (char.IsDigit(ch))
@@ -100,16 +102,18 @@ namespace CCompiler.Tokenizer
                     else if (ch == '.')
                     {
                         _state = State.DDOT;
-                    } 
+                    }
                     else if (ch == 'e' || ch == 'E')
                     {
                         _state = State.DE;
                     }
                     else
                     {
-                        Tokenizer.LastException.AddMessage("is not a double");
+                        // If this error happened it is int number and the error will throw from int
+                        //Tokenizer.LastException.AddMessage("is not a double");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.DOT:
                     if (char.IsDigit(ch))
@@ -121,6 +125,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("after . must be a number");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.DDOT:
                     if (char.IsDigit(ch))
@@ -143,6 +148,7 @@ namespace CCompiler.Tokenizer
                     {
                         _state = State.END;
                     }
+
                     break;
                 case State.DOTD:
                     if (char.IsDigit(ch))
@@ -165,6 +171,7 @@ namespace CCompiler.Tokenizer
                     {
                         _state = State.END;
                     }
+
                     break;
                 case State.DE:
                     if (ch == '+' || ch == '-')
@@ -180,6 +187,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("after 'e' must be a number or sign");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.DES:
                     if (char.IsDigit(ch))
@@ -191,6 +199,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("after sign must be a number");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.DED:
                     if (char.IsDigit(ch))
@@ -209,6 +218,7 @@ namespace CCompiler.Tokenizer
                     {
                         _state = State.END;
                     }
+
                     break;
                 case State.L:
                     _floatType = FloatToken.FloatType.LONG;
@@ -243,6 +253,7 @@ namespace CCompiler.Tokenizer
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
             return new FloatToken(TokenType.FLOAT, _value.ToString(0, _value.Length - 1), value, _floatType);
         }
     }
