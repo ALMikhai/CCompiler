@@ -1,0 +1,3 @@
+﻿(1:1)	IDENTIFIER	l	l
+(1:2)	CHAR	'a'	a
+(2:1)	IDENTIFIER	L	L

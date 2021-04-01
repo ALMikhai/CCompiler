@@ -10,7 +10,7 @@ namespace Tests.TokenizerTests
     {
         public static bool CheckCorrect(string fileName)
         {
-            var testsDirectory = @"D:\Documents\All my projects\CCompiler\TokenizerTests\TokenizerTests\Tests\";
+            var testsDirectory = @"D:\Documents\All my projects\CCompiler\Tests\TokenizerTests\Tests\";
             var inputPath = testsDirectory + @"Input\" + fileName;
             var outputPath = testsDirectory + @"Output\" + fileName;
 

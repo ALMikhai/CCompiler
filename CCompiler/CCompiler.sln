@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31025.194
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CCompiler", "CCompiler.csproj", "{EA1B33FB-243F-4DF6-9F20-B85CEFFFFCD4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "..\TokenizerTests\Tests.csproj", "{FBCD5CB4-5937-4E22-BA6D-136859C6B1ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "..\Tests\Tests.csproj", "{FBCD5CB4-5937-4E22-BA6D-136859C6B1ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

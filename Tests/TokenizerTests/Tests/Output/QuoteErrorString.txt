@@ -1,0 +1,1 @@
+﻿(1:1): error: char is empty or contain invalid symbol
