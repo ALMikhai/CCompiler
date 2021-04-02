@@ -12,21 +12,21 @@ namespace Tests.TokenizerTests
         [TestMethod]
         public void Empty()
         {
-            const string fileName = "Empty.txt";
+            const string fileName = "Empty";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void Spaces()
         {
-            const string fileName = "Space.txt";
+            const string fileName = "Space";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void LineBreak()
         {
-            const string fileName = "LineBreak.txt";
+            const string fileName = "LineBreak";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
     }

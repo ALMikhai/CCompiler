@@ -11,7 +11,7 @@ namespace Tests.TokenizerTests
         [TestMethod]
         public void AllOperators()
         {
-            const string fileName = "AllOperators.txt";
+            const string fileName = "AllOperators";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
     }

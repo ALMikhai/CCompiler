@@ -10,9 +10,9 @@ namespace Tests.TokenizerTests
     {
         public static bool CheckCorrect(string fileName)
         {
-            var testsDirectory = @"D:\Documents\All my projects\CCompiler\Tests\TokenizerTests\Tests\";
-            var inputPath = testsDirectory + @"Input\" + fileName;
-            var outputPath = testsDirectory + @"Output\" + fileName;
+            var testsDirectory = @"..\..\..\TokenizerTests\Tests\";
+            var inputPath = $"{testsDirectory}{fileName}.in";
+            var outputPath = $"{testsDirectory}{fileName}.out";
 
             var output = RunAndGetOutput(inputPath);
             var correctOutput = new StreamReader(outputPath).ReadToEnd();
@@ -24,7 +24,7 @@ namespace Tests.TokenizerTests
         {
             var args = $"\"{path}\" -l";
             using var proc =
-                Process.Start(@"D:\Documents\All my projects\CCompiler\CCompiler\bin\Debug\netcoreapp3.1\CCompiler.exe",
+                Process.Start(@"..\..\..\..\CCompiler\bin\Debug\netcoreapp3.1\CCompiler.exe",
                     args);
             if (proc != null)
             {

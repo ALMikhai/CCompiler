@@ -11,63 +11,63 @@ namespace Tests.TokenizerTests
         [TestMethod]
         public void StandardChar()
         {
-            const string fileName = "StandardChar.txt";
+            const string fileName = "StandardChar";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void EscapeSequencesChar()
         {
-            const string fileName = "EscapeSequencesChar.txt";
+            const string fileName = "EscapeSequencesChar";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void OctalChar()
         {
-            const string fileName = "OctalChar.txt";
+            const string fileName = "OctalChar";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void HexChar()
         {
-            const string fileName = "HexChar.txt";
+            const string fileName = "HexChar";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void LChar()
         {
-            const string fileName = "LChar.txt";
+            const string fileName = "LChar";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void QuoteErrorChar()
         {
-            const string fileName = "QuoteErrorChar.txt";
+            const string fileName = "QuoteErrorChar";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void OctalErrorChar()
         {
-            const string fileName = "OctalErrorChar.txt";
+            const string fileName = "OctalErrorChar";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void HexErrorChar()
         {
-            const string fileName = "HexErrorChar.txt";
+            const string fileName = "HexErrorChar";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void LErrorChar()
         {
-            const string fileName = "LErrorChar.txt";
+            const string fileName = "LErrorChar";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
     }

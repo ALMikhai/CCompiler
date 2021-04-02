@@ -11,7 +11,7 @@ namespace Tests.TokenizerTests
         [TestMethod]
         public void AllKeywords()
         {
-            const string fileName = "AllKeywords.txt";
+            const string fileName = "AllKeywords";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
     }

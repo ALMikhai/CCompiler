@@ -11,21 +11,21 @@ namespace Tests.TokenizerTests
         [TestMethod]
         public void StandardIdentifier()
         {
-            const string fileName = "StandardIdentifier.txt";
+            const string fileName = "StandardIdentifier";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void IdentifierNumbers()
         {
-            const string fileName = "IdentifierNumbers.txt";
+            const string fileName = "IdentifierNumbers";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void IdentifierUnderline()
         {
-            const string fileName = "IdentifierUnderline.txt";
+            const string fileName = "IdentifierUnderline";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
     }

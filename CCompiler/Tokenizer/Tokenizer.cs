@@ -75,7 +75,7 @@ namespace CCompiler.Tokenizer
 
                     _lastTokenPosition = new Position(_lastStringNumber + 1, _lastIndex + 1);
                     _machines.ForEach(fsm => fsm.Reset());
-                    runningMachines = _machines.Select(fsm => fsm).ToList();
+                    runningMachines = _machines.ToList();
                     --_lastIndex;
                 }
                 else

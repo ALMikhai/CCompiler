@@ -11,28 +11,28 @@ namespace Tests.TokenizerTests
         [TestMethod]
         public void StandardString()
         {
-            const string fileName = "StandardString.txt";
+            const string fileName = "StandardString";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void LString()
         {
-            const string fileName = "LString.txt";
+            const string fileName = "LString";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void EscapeSequencesString()
         {
-            const string fileName = "EscapeSequencesString.txt";
+            const string fileName = "EscapeSequencesString";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
 
         [TestMethod]
         public void QuoteErrorString()
         {
-            const string fileName = "QuoteErrorString.txt";
+            const string fileName = "QuoteErrorString";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
     }
