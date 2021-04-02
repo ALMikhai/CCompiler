@@ -30,7 +30,8 @@ namespace CCompiler.Tokenizer
                 new Int(),
                 new Identifier(),
                 new Eof(),
-                new Space()
+                new Space(),
+                new Comment()
             );
             _lastToken = null;
             _lastString = _reader.ReadLine();
