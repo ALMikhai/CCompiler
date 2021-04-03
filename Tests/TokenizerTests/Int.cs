@@ -67,5 +67,12 @@ namespace Tests.TokenizerTests
             const string fileName = "HexErrorInt";
             Assert.IsTrue(Utils.CheckCorrect(fileName));
         }
+
+        [TestMethod]
+        public void OverflowErrorInt()
+        {
+            const string fileName = "OverflowErrorInt";
+            Assert.IsTrue(Utils.CheckCorrect(fileName));
+        }
     }
 }

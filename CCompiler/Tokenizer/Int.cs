@@ -110,6 +110,7 @@ namespace CCompiler.Tokenizer
                     else if (Utils.IsOct(ch))
                     {
                         _state = State.OCTAL;
+                        _bitType = BitType.OCTAL;
                     }
                     else if (ch == '9' || ch == '8')
                     {
@@ -131,7 +132,6 @@ namespace CCompiler.Tokenizer
 
                     break;
                 case State.OCTAL:
-                    _bitType = BitType.OCTAL;
                     if (Utils.IsOct(ch))
                     {
                         _state = State.OCTAL;
@@ -156,7 +156,6 @@ namespace CCompiler.Tokenizer
 
                     break;
                 case State.DECIMAL:
-                    _bitType = BitType.DECIMAL;
                     if (char.IsDigit(ch))
                     {
                         _state = State.DECIMAL;
@@ -176,7 +175,6 @@ namespace CCompiler.Tokenizer
 
                     break;
                 case State.SIXTEEN:
-                    _bitType = BitType.SIXTEEN;
                     if (Utils.IsHex(ch))
                     {
                         _state = State.SIXTEEN;
@@ -227,6 +225,7 @@ namespace CCompiler.Tokenizer
                     if (Utils.IsHex(ch))
                     {
                         _state = State.SIXTEEN;
+                        _bitType = BitType.SIXTEEN;
                     }
                     else
                     {
@@ -235,6 +234,20 @@ namespace CCompiler.Tokenizer
                     }
 
                     break;
+            }
+
+            if (_state == State.DECIMAL || _state == State.OCTAL || _state == State.SIXTEEN)
+            {
+                try
+                {
+                    Convert(_value.ToString(), _intType, _bitType);
+                }
+                catch (OverflowException)
+                {
+                    Tokenizer.LastException.AddMessage(
+                        "integer literal is too large to be represented in any integer type");
+                    _state = State.ERROR;
+                }
             }
         }
 
@@ -249,43 +262,29 @@ namespace CCompiler.Tokenizer
         public override Token GetToken()
         {
             var source = _value.ToString(0, _value.Length - 1);
-            string number = "";
-            switch (_intType)
-            {
-                case IntToken.IntType.INT:
-                    number = _value.ToString(0, _value.Length - 1);
-                    break;
-                case IntToken.IntType.LONG:
-                    number = _value.ToString(0, _value.Length - 2);
-                    break;
-                case IntToken.IntType.ULONG:
-                    number = _value.ToString(0, _value.Length - 3);
-                    break;
-                case IntToken.IntType.UINT:
-                    number = _value.ToString(0, _value.Length - 2);
-                    break;
-            }
-
-            var value = Convert(number);
+            var value = Convert(source, _intType, _bitType);
             var token = new IntToken(TokenType.INT, source, value, _intType);
             return token;
         }
 
-        private long Convert(string source)
+        private static ulong Convert(string source, IntToken.IntType intType, BitType bitType)
         {
-            long res = 0;
-            switch (_bitType)
+            var number = intType switch
             {
-                case BitType.OCTAL:
-                    res = System.Convert.ToInt64(source, 8);
-                    break;
-                case BitType.DECIMAL:
-                    res = System.Convert.ToInt64(source, 10);
-                    break;
-                case BitType.SIXTEEN:
-                    res = System.Convert.ToInt64(source, 16);
-                    break;
-            }
+                IntToken.IntType.INT => source,
+                IntToken.IntType.LONG => source.Substring(0, source.Length - 1),
+                IntToken.IntType.ULONG => source.Substring(0, source.Length - 2),
+                IntToken.IntType.UINT => source.Substring(0, source.Length - 1),
+                _ => throw new ArgumentOutOfRangeException(nameof(intType), intType, null)
+            };
+
+            var res = bitType switch
+            {
+                BitType.OCTAL => System.Convert.ToUInt64(number, 8),
+                BitType.DECIMAL => System.Convert.ToUInt64(number, 10),
+                BitType.SIXTEEN => System.Convert.ToUInt64(number, 16),
+                _ => throw new ArgumentOutOfRangeException(nameof(bitType), bitType, null)
+            };
 
             return res;
         }
