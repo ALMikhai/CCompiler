@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using CCompiler.Parser;
 using CCompiler.Tokenizer;
 
 namespace CCompiler
@@ -26,6 +27,11 @@ namespace CCompiler
                         Console.WriteLine(token);
                         token = tokenizer.Get();
                     }
+                }
+
+                if (args.Contains("-p"))
+                {
+                    var parser = new SyntaxParser(tokenizer);
                 }
             }
             catch (FileNotFoundException e)

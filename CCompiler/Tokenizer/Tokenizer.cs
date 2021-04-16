@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CCompiler.Tokenizer
 {
-    class Tokenizer
+    public class Tokenizer
     {
         public static TokenizerException LastException = new TokenizerException(new Position(1, 1), "");
 
