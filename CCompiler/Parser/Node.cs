@@ -14,52 +14,61 @@ namespace CCompiler.Parser
         UNARYEXP,
         CASTEXP
     }
-    
+
     public class Node
     {
-        public NodeType Type { get; }
-
-        public Node(NodeType type)
-        {
-            Type = type;
-        }
+        public virtual NodeType Type { get; }
 
         public override string ToString()
         {
-            return ToString(0);
+            return ToString("", true);
         }
 
-        public virtual string ToString(int spaces)
+        public virtual string ToString(string indent, bool last)
         {
             return "";
         }
+
+        public static string NodePrefix(bool last)
+        {
+            return last ? "\\-" : "|-";
+        }
+
+        public static string ChildrenPrefix(bool last)
+        {
+            return last ? "  " : "| ";
+        }
     }
-    
+
     public class Const : Node
     {
         public Token Token { get; }
-        public Const(Token token) : base(NodeType.CONST)
+        public override NodeType Type => NodeType.CONST;
+
+        public Const(Token token)
         {
             Token = token;
         }
 
-        public override string ToString(int spaces)
+        public override string ToString(string indent, bool last)
         {
-            return new String(' ', spaces) + $"-{Token.Value}\n";
+            return indent + NodePrefix(last) + $"{Token.Value}\n";
         }
     }
 
     public class PrimaryExp : Node
     {
         public Token Token { get; }
-        public PrimaryExp(Token token) : base(NodeType.PRIMARYEXP)
+        public override NodeType Type => NodeType.PRIMARYEXP;
+
+        public PrimaryExp(Token token)
         {
             Token = token;
         }
-        
-        public override string ToString(int spaces)
+
+        public override string ToString(string indent, bool last)
         {
-            return new String(' ', spaces) + $"-{Token.Value}\n";
+            return indent + NodePrefix(last) + $"{Token.Value}\n";
         }
     }
 
@@ -67,14 +76,15 @@ namespace CCompiler.Parser
     {
         public Token Token { get; }
         public Node Child { get; }
+        public override NodeType Type => NodeType.POSTFIXEXP;
 
-        public PostfixExp(Token token, Node child) : base(NodeType.POSTFIXEXP)
+        public PostfixExp(Token token, Node child)
         {
             Child = child;
             Token = token;
         }
-        
-        public override string ToString(int spaces)
+
+        public override string ToString(string indent, bool last)
         {
             throw new NotImplementedException();
         }
@@ -82,69 +92,79 @@ namespace CCompiler.Parser
 
     public class UnaryOperator : Node
     {
-        public Token Token { get; }
+        public OperatorToken Token { get; }
+        public override NodeType Type => NodeType.UNARYOPERATOR;
 
-        public UnaryOperator(Token token) : base(NodeType.UNARYOPERATOR)
+        public UnaryOperator(OperatorToken token)
         {
             Token = token;
         }
-        
-        public override string ToString(int spaces)
+
+        public override string ToString(string indent, bool last)
         {
-            return new String(' ', spaces) + $"-{Token.Value}\n";
+            return indent + NodePrefix(last) + $"{Token.Value}\n";
         }
     }
 
     public class UnaryExp : Node
     {
-        public UnaryExp() : base(NodeType.UNARYEXP)
+        public override NodeType Type => NodeType.UNARYEXP;
+
+        public UnaryExp()
         {
         }
     }
-    
+
     public class CastExp : Node
     {
-        public CastExp() : base(NodeType.CASTEXP)
+        public override NodeType Type => NodeType.CASTEXP;
+
+        public CastExp()
         {
         }
     }
 
     public class AdditiveExp : Node
     {
-        public Token Token { get; }
+        public OperatorToken Token { get; }
         public Node Left { get; }
         public Node Right { get; }
+        public override NodeType Type => NodeType.ADDITIVEEXP;
 
-        public AdditiveExp(Token token, Node left, Node right) : base(
-            NodeType.ADDITIVEEXP)
+        public AdditiveExp(OperatorToken token, Node left, Node right)
         {
             Token = token;
             Left = left;
             Right = right;
         }
-        
-        public override string ToString(int spaces)
+
+        public override string ToString(string indent, bool last)
         {
-            return new String(' ', spaces) + $"-{Token.Value}\n" + Left.ToString(spaces + 1) + Right.ToString(spaces + 1);
+            return indent + NodePrefix(last) + $"{Token.Value}\n" +
+                   Left.ToString(indent + ChildrenPrefix(last), false) +
+                   Right.ToString(indent + ChildrenPrefix(last), true);
         }
     }
 
     public class MultExp : Node
     {
-        public Token Token { get; }
+        public OperatorToken Token { get; }
         public Node Left { get; }
         public Node Right { get; }
+        public override NodeType Type => NodeType.MULTEXP;
 
-        public MultExp(Token token, Node left, Node right) : base(NodeType.MULTEXP)
+        public MultExp(OperatorToken token, Node left, Node right)
         {
             Token = token;
             Left = left;
             Right = right;
         }
-        
-        public override string ToString(int spaces)
+
+        public override string ToString(string indent, bool last)
         {
-            return new String(' ', spaces) + $"-{Token.Value}\n" + Left.ToString(spaces + 1) + Right.ToString(spaces + 1);
+            return indent + NodePrefix(last) + $"{Token.Value}\n" +
+                   Left.ToString(indent + ChildrenPrefix(last), false) +
+                   Right.ToString(indent + ChildrenPrefix(last), true);
         }
     }
 }
