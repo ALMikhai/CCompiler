@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CCompiler.Tokenizer
+﻿namespace CCompiler.Tokenizer
 {
     public class Utils
     {

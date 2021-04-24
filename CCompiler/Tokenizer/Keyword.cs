@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Text;
 
 namespace CCompiler.Tokenizer
 {
@@ -44,26 +41,18 @@ namespace CCompiler.Tokenizer
         SIZEOF
     }
 
-    class KeywordToken : Token
+    internal class KeywordToken : Token
     {
-        public KeywordType Type { get; private set; }
-
-        public KeywordToken(TokenType tokenType, string source, object value, KeywordType type) : base(tokenType, source, value)
+        public KeywordToken(TokenType tokenType, string source, object value, KeywordType type) : base(tokenType,
+            source, value)
         {
             Type = type;
         }
 
-        #region Debug
+        public KeywordType Type { get; }
 
-        //public override string ToString()
-        //{
-        //    return base.ToString() + $"\t{Type}";
-        //}
-
-        #endregion
-
-        public static Dictionary<String, KeywordType> Keywords { get; } =
-            new Dictionary<String, KeywordType>(StringComparer.InvariantCultureIgnoreCase)
+        public static Dictionary<string, KeywordType> Keywords { get; } =
+            new Dictionary<string, KeywordType>(StringComparer.InvariantCultureIgnoreCase)
             {
                 {"case", KeywordType.CASE},
                 {"enum", KeywordType.ENUM},
@@ -100,5 +89,14 @@ namespace CCompiler.Tokenizer
                 {"goto", KeywordType.GOTO},
                 {"sizeof", KeywordType.SIZEOF}
             };
+
+        #region Debug
+
+        //public override string ToString()
+        //{
+        //    return base.ToString() + $"\t{Type}";
+        //}
+
+        #endregion
     }
 }

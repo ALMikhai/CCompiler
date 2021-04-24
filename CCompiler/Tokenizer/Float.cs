@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace CCompiler.Tokenizer
@@ -13,13 +12,13 @@ namespace CCompiler.Tokenizer
             LONG
         }
 
-        public FloatType Type { get; private set; }
-
         public FloatToken(TokenType tokenType, string source, object value, FloatType type) : base(tokenType, source,
             value)
         {
             Type = type;
         }
+
+        public FloatType Type { get; }
 
         #region Debug
 
@@ -31,27 +30,12 @@ namespace CCompiler.Tokenizer
         #endregion
     }
 
-    class Float : FSM
+    internal class Float : FSM
     {
-        private enum State
-        {
-            START,
-            END,
-            ERROR,
-            D,
-            DOT,
-            DDOT,
-            DOTD,
-            DE,
-            DES,
-            DED,
-            L,
-            F
-        }
-
-        private StringBuilder _value;
-        private State _state;
         private FloatToken.FloatType _floatType;
+        private State _state;
+
+        private readonly StringBuilder _value;
 
         public Float()
         {
@@ -96,23 +80,15 @@ namespace CCompiler.Tokenizer
                     break;
                 case State.D:
                     if (char.IsDigit(ch))
-                    {
                         _state = State.D;
-                    }
                     else if (ch == '.')
-                    {
                         _state = State.DDOT;
-                    }
                     else if (ch == 'e' || ch == 'E')
-                    {
                         _state = State.DE;
-                    }
                     else
-                    {
                         // If this error happened it is int number and the error will throw from int
                         //Tokenizer.LastException.AddMessage("is not a double");
                         _state = State.ERROR;
-                    }
 
                     break;
                 case State.DOT:
@@ -129,48 +105,28 @@ namespace CCompiler.Tokenizer
                     break;
                 case State.DDOT:
                     if (char.IsDigit(ch))
-                    {
                         _state = State.DOTD;
-                    }
                     else if (ch == 'e' || ch == 'E')
-                    {
                         _state = State.DE;
-                    }
                     else if (ch == 'l' || ch == 'L')
-                    {
                         _state = State.L;
-                    }
                     else if (ch == 'f' || ch == 'F')
-                    {
                         _state = State.F;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
 
                     break;
                 case State.DOTD:
                     if (char.IsDigit(ch))
-                    {
                         _state = State.DOTD;
-                    }
                     else if (ch == 'e' || ch == 'E')
-                    {
                         _state = State.DE;
-                    }
                     else if (ch == 'l' || ch == 'L')
-                    {
                         _state = State.L;
-                    }
                     else if (ch == 'f' || ch == 'F')
-                    {
                         _state = State.F;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
 
                     break;
                 case State.DE:
@@ -203,21 +159,13 @@ namespace CCompiler.Tokenizer
                     break;
                 case State.DED:
                     if (char.IsDigit(ch))
-                    {
                         _state = State.DED;
-                    }
                     else if (ch == 'l' || ch == 'L')
-                    {
                         _state = State.L;
-                    }
                     else if (ch == 'f' || ch == 'F')
-                    {
                         _state = State.F;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
 
                     break;
                 case State.L:
@@ -255,6 +203,22 @@ namespace CCompiler.Tokenizer
             }
 
             return new FloatToken(TokenType.FLOAT, _value.ToString(0, _value.Length - 1), value, _floatType);
+        }
+
+        private enum State
+        {
+            START,
+            END,
+            ERROR,
+            D,
+            DOT,
+            DDOT,
+            DOTD,
+            DE,
+            DES,
+            DED,
+            L,
+            F
         }
     }
 }

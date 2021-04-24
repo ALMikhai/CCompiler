@@ -1,23 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CCompiler.Tokenizer
+﻿namespace CCompiler.Tokenizer
 {
-    class Comment : FSM
+    internal class Comment : FSM
     {
-        private enum State
-        {
-            START,
-            END,
-            ERROR,
-            S,
-            LINE,
-            MLINE,
-            STAR,
-            FINISH
-        }
-
         private State _state;
 
         public Comment()
@@ -50,6 +34,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("comment must start with a '//' or '/*'");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.S:
                     if (ch == '/')
@@ -65,12 +50,10 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("after '/' must be a '/' or '*'");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.LINE:
-                    if (ch == '\n')
-                    {
-                        _state = State.FINISH;
-                    }
+                    if (ch == '\n') _state = State.FINISH;
                     break;
                 case State.MLINE:
                     if (ch == '*')
@@ -82,16 +65,13 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("unterminated comment");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.STAR:
                     if (ch == '/')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.MLINE;
-                    }
                     break;
                 case State.FINISH:
                     _state = State.END;
@@ -107,6 +87,18 @@ namespace CCompiler.Tokenizer
         public override Token GetToken()
         {
             return new Token(TokenType.NONE, "", null);
+        }
+
+        private enum State
+        {
+            START,
+            END,
+            ERROR,
+            S,
+            LINE,
+            MLINE,
+            STAR,
+            FINISH
         }
     }
 }

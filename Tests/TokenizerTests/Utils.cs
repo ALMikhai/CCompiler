@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 
 namespace Tests.TokenizerTests
 {
@@ -17,7 +15,7 @@ namespace Tests.TokenizerTests
             var output = RunAndGetOutput(inputPath);
             var correctOutput = new StreamReader(outputPath).ReadToEnd();
 
-            return string.Equals(output ,correctOutput);
+            return string.Equals(output, correctOutput);
         }
 
         public static string RunAndGetOutput(string path)
@@ -36,10 +34,8 @@ namespace Tests.TokenizerTests
                 proc.WaitForExit();
                 return res;
             }
-            else
-            {
-                throw new ArgumentException("path is not correct");
-            }
+
+            throw new ArgumentException("path is not correct");
         }
     }
 }

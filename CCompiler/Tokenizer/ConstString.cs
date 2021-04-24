@@ -1,25 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace CCompiler.Tokenizer
 {
-    class ConstString : FSM
+    internal class ConstString : FSM
     {
-        private enum State
-        {
-            START,
-            END,
-            ERROR,
-            L,
-            QUOTE,
-            QUOTE2
-        }
-
-        private StringBuilder _value;
         private State _state;
-        private StringSymbol _stringSymbol;
-        private StringBuilder _stringValue;
+        private readonly StringSymbol _stringSymbol;
+        private readonly StringBuilder _stringValue;
+
+        private readonly StringBuilder _value;
 
         public ConstString()
         {
@@ -60,6 +49,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("opening quote is not found");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.L:
                     _value.Append(ch);
@@ -73,6 +63,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("after L, opening quote is not found");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.QUOTE:
                     if (ch == '\"' && _stringSymbol.GetState() == FSMState.NONE)
@@ -82,6 +73,7 @@ namespace CCompiler.Tokenizer
                         _stringSymbol.Reset();
                         break;
                     }
+
                     _stringSymbol.ReadChar(ch);
                     switch (_stringSymbol.GetState())
                     {
@@ -96,6 +88,7 @@ namespace CCompiler.Tokenizer
                             _state = State.ERROR;
                             break;
                     }
+
                     break;
                 case State.QUOTE2:
                     _state = State.END;
@@ -114,6 +107,16 @@ namespace CCompiler.Tokenizer
         public override Token GetToken()
         {
             return new Token(TokenType.STRING, _value.ToString(), _stringValue.ToString());
+        }
+
+        private enum State
+        {
+            START,
+            END,
+            ERROR,
+            L,
+            QUOTE,
+            QUOTE2
         }
     }
 }

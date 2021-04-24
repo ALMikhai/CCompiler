@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Generic;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
@@ -45,13 +43,13 @@ namespace CCompiler.Parser
 
     public class Const : Node
     {
-        public Token Token { get; }
-        public override NodeType Type => NodeType.CONST;
-
         public Const(Token token)
         {
             Token = token;
         }
+
+        public Token Token { get; }
+        public override NodeType Type => NodeType.CONST;
 
         public override string ToString(string indent, bool last)
         {
@@ -61,13 +59,13 @@ namespace CCompiler.Parser
 
     public class PrimaryExp : Node
     {
-        public Token Token { get; }
-        public override NodeType Type => NodeType.PRIMARYEXP;
-
         public PrimaryExp(Token token)
         {
             Token = token;
         }
+
+        public Token Token { get; }
+        public override NodeType Type => NodeType.PRIMARYEXP;
 
         public override string ToString(string indent, bool last)
         {
@@ -77,88 +75,95 @@ namespace CCompiler.Parser
 
     public class PostfixExp : Node
     {
-        public Node PostfixNode { get; }
-        public OperatorToken Token { get; }
-        public Node Child { get; }
-        public Token Identifier { get; }
-        public override NodeType Type => NodeType.POSTFIXEXP;
-
-        public PostfixExp(Node postfixNode, OperatorToken token, Node child)
+        public PostfixExp(Node postfixNode, OperatorToken @operator, Node suffixNode)
         {
             PostfixNode = postfixNode;
-            Child = child;
-            Token = token;
+            SuffixNode = suffixNode;
+            Operator = @operator;
             Identifier = null;
         }
 
-        public PostfixExp(Node postfixNode, OperatorToken token, Token identifier)
+        public PostfixExp(Node postfixNode, OperatorToken @operator, Token identifier)
         {
             PostfixNode = postfixNode;
-            Child = null;
-            Token = token;
+            SuffixNode = null;
+            Operator = @operator;
             Identifier = identifier;
         }
+
+        public Node PostfixNode { get; }
+        public OperatorToken Operator { get; }
+        public Node SuffixNode { get; }
+        public Token Identifier { get; }
+        public override NodeType Type => NodeType.POSTFIXEXP;
 
         public override string ToString(string indent, bool last)
         {
             return
                 PostfixNode.ToString(indent, last) +
-                indent + ChildrenPrefix(last) + NodePrefix(Child == null && Identifier == null) + $"{Token.Value}\n" +
-                (Child != null ? Child.ToString(indent + ChildrenPrefix(last), true) : "") +
+                indent + ChildrenPrefix(last) + NodePrefix(SuffixNode == null && Identifier == null) + $"{Operator.Value}\n" +
+                (SuffixNode != null ? SuffixNode.ToString(indent + ChildrenPrefix(last), true) : "") +
                 (Identifier != null ? new PrimaryExp(Identifier).ToString(indent + ChildrenPrefix(last), true) : "");
         }
     }
 
     public class UnaryOperator : Node
     {
-        public OperatorToken Token { get; }
-        public override NodeType Type => NodeType.UNARYOPERATOR;
-
-        public UnaryOperator(OperatorToken token)
+        public UnaryOperator(OperatorToken @operator)
         {
-            Token = token;
+            Operator = @operator;
         }
+
+        public OperatorToken Operator { get; }
+        public override NodeType Type => NodeType.UNARYOPERATOR;
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{Token.Value}\n";
+            return indent + NodePrefix(last) + $"{Operator.Value}\n";
         }
     }
 
     public class UnaryExp : Node
     {
-        public Node UnaryExpNode { get; }
-        public OperatorToken OperatorToken { get; }
-        public UnaryOperator UnaryOperator { get; }
-        
-        public override NodeType Type => NodeType.UNARYEXP;
-
-        public UnaryExp(Node unaryExpNode, OperatorToken token, UnaryOperator unaryOperator)
+        public UnaryExp(Node unaryExpNode, UnaryOperator unaryOperator)
         {
             UnaryOperator = unaryOperator;
-            OperatorToken = token;
+            OperatorOperator = null;
             UnaryExpNode = unaryExpNode;
         }
         
+        public UnaryExp(Node unaryExpNode, OperatorToken @operator)
+        {
+            UnaryOperator = null;
+            OperatorOperator = @operator;
+            UnaryExpNode = unaryExpNode;
+        }
+
+        public Node UnaryExpNode { get; }
+        public OperatorToken OperatorOperator { get; }
+        public UnaryOperator UnaryOperator { get; }
+
+        public override NodeType Type => NodeType.UNARYEXP;
+
         public override string ToString(string indent, bool last)
         {
-            return (OperatorToken != null ? indent + NodePrefix(last) + $"{OperatorToken.Value}\n" : "") +
+            return (OperatorOperator != null ? indent + NodePrefix(last) + $"{OperatorOperator.Value}\n" : "") +
                    (UnaryOperator != null ? UnaryOperator.ToString(indent, last) : "") +
                    UnaryExpNode.ToString(indent + ChildrenPrefix(last), true);
         }
     }
 
-    public class CastExp : Node 
+    public class CastExp : Node
     {
-        public Typename Typename { get; }
-        public Node CastExpNode { get; }
-        public override NodeType Type => NodeType.CASTEXP;
-
         public CastExp(Typename typename, Node castExpNode)
         {
             Typename = typename;
             CastExpNode = castExpNode;
         }
+
+        public Typename Typename { get; }
+        public Node CastExpNode { get; }
+        public override NodeType Type => NodeType.CASTEXP;
 
         public override string ToString(string indent, bool last)
         {
@@ -204,46 +209,70 @@ namespace CCompiler.Parser
         }
 
         public static Dictionary<TypenameTypes, List<KeywordType>> Nodes2Type =
-            new Dictionary<TypenameTypes, List<KeywordType>>()
+            new Dictionary<TypenameTypes, List<KeywordType>>
             {
-                {TypenameTypes.CHAR, new List<KeywordType>() {KeywordType.CHAR}},
-                {TypenameTypes.SCHAR, new List<KeywordType>() {KeywordType.SIGNED, KeywordType.CHAR}},
-                {TypenameTypes.UCHAR, new List<KeywordType>() {KeywordType.UNSIGNED, KeywordType.CHAR}},
-                {TypenameTypes.SHORT, new List<KeywordType>() {KeywordType.SHORT}},
-                {TypenameTypes.SHORTINT, new List<KeywordType>() {KeywordType.SHORT, KeywordType.INT}},
-                {TypenameTypes.SSHORT, new List<KeywordType>() {KeywordType.SIGNED, KeywordType.SHORT}},
-                {TypenameTypes.SSHORTINT, new List<KeywordType>() {KeywordType.SIGNED, KeywordType.SHORT, KeywordType.INT}},
-                {TypenameTypes.USHORT, new List<KeywordType>() {KeywordType.UNSIGNED, KeywordType.SHORT}},
-                {TypenameTypes.USHORTINT, new List<KeywordType>() {KeywordType.UNSIGNED, KeywordType.SHORT, KeywordType.INT}},
-                {TypenameTypes.INT, new List<KeywordType>() {KeywordType.INT}},
-                {TypenameTypes.SIGNED, new List<KeywordType>() {KeywordType.SIGNED}},
-                {TypenameTypes.SINT, new List<KeywordType>() {KeywordType.SIGNED, KeywordType.INT}},
-                {TypenameTypes.UNSIGNED, new List<KeywordType>() {KeywordType.UNSIGNED}},
-                {TypenameTypes.UINT, new List<KeywordType>() {KeywordType.UNSIGNED, KeywordType.INT}},
-                {TypenameTypes.LONG, new List<KeywordType>() {KeywordType.LONG}},
-                {TypenameTypes.LINT, new List<KeywordType>() {KeywordType.LONG, KeywordType.INT}},
-                {TypenameTypes.SLONG, new List<KeywordType>() {KeywordType.SIGNED, KeywordType.LONG}},
-                {TypenameTypes.SLONGINT, new List<KeywordType>() {KeywordType.SIGNED, KeywordType.LONG, KeywordType.INT}},
-                {TypenameTypes.ULONG, new List<KeywordType>() {KeywordType.UNSIGNED, KeywordType.LONG}},
-                {TypenameTypes.ULONGINT, new List<KeywordType>() {KeywordType.UNSIGNED, KeywordType.LONG, KeywordType.INT}},
-                {TypenameTypes.LONGLONG, new List<KeywordType>() {KeywordType.LONG, KeywordType.LONG}},
-                {TypenameTypes.LONGLONGINT, new List<KeywordType>() {KeywordType.LONG, KeywordType.LONG, KeywordType.INT}},
-                {TypenameTypes.SLONGLONG, new List<KeywordType>() {KeywordType.SIGNED, KeywordType.LONG, KeywordType.LONG}},
-                {TypenameTypes.SLONGLONGINT, new List<KeywordType>() {KeywordType.SIGNED, KeywordType.LONG, KeywordType.LONG, KeywordType.INT}},
-                {TypenameTypes.ULONGLONG, new List<KeywordType>() {KeywordType.UNSIGNED, KeywordType.LONG, KeywordType.LONG}},
-                {TypenameTypes.ULONGLONGINT, new List<KeywordType>() {KeywordType.UNSIGNED, KeywordType.LONG, KeywordType.LONG, KeywordType.INT}},
-                {TypenameTypes.FLOAT, new List<KeywordType>() {KeywordType.FLOAT}},
-                {TypenameTypes.DOUBLE, new List<KeywordType>() {KeywordType.DOUBLE}},
-                {TypenameTypes.LDOUBLE, new List<KeywordType>() {KeywordType.LONG, KeywordType.DOUBLE}}
+                {TypenameTypes.CHAR, new List<KeywordType> {KeywordType.CHAR}},
+                {TypenameTypes.SCHAR, new List<KeywordType> {KeywordType.SIGNED, KeywordType.CHAR}},
+                {TypenameTypes.UCHAR, new List<KeywordType> {KeywordType.UNSIGNED, KeywordType.CHAR}},
+                {TypenameTypes.SHORT, new List<KeywordType> {KeywordType.SHORT}},
+                {TypenameTypes.SHORTINT, new List<KeywordType> {KeywordType.SHORT, KeywordType.INT}},
+                {TypenameTypes.SSHORT, new List<KeywordType> {KeywordType.SIGNED, KeywordType.SHORT}},
+                {
+                    TypenameTypes.SSHORTINT,
+                    new List<KeywordType> {KeywordType.SIGNED, KeywordType.SHORT, KeywordType.INT}
+                },
+                {TypenameTypes.USHORT, new List<KeywordType> {KeywordType.UNSIGNED, KeywordType.SHORT}},
+                {
+                    TypenameTypes.USHORTINT,
+                    new List<KeywordType> {KeywordType.UNSIGNED, KeywordType.SHORT, KeywordType.INT}
+                },
+                {TypenameTypes.INT, new List<KeywordType> {KeywordType.INT}},
+                {TypenameTypes.SIGNED, new List<KeywordType> {KeywordType.SIGNED}},
+                {TypenameTypes.SINT, new List<KeywordType> {KeywordType.SIGNED, KeywordType.INT}},
+                {TypenameTypes.UNSIGNED, new List<KeywordType> {KeywordType.UNSIGNED}},
+                {TypenameTypes.UINT, new List<KeywordType> {KeywordType.UNSIGNED, KeywordType.INT}},
+                {TypenameTypes.LONG, new List<KeywordType> {KeywordType.LONG}},
+                {TypenameTypes.LINT, new List<KeywordType> {KeywordType.LONG, KeywordType.INT}},
+                {TypenameTypes.SLONG, new List<KeywordType> {KeywordType.SIGNED, KeywordType.LONG}},
+                {TypenameTypes.SLONGINT, new List<KeywordType> {KeywordType.SIGNED, KeywordType.LONG, KeywordType.INT}},
+                {TypenameTypes.ULONG, new List<KeywordType> {KeywordType.UNSIGNED, KeywordType.LONG}},
+                {
+                    TypenameTypes.ULONGINT,
+                    new List<KeywordType> {KeywordType.UNSIGNED, KeywordType.LONG, KeywordType.INT}
+                },
+                {TypenameTypes.LONGLONG, new List<KeywordType> {KeywordType.LONG, KeywordType.LONG}},
+                {
+                    TypenameTypes.LONGLONGINT,
+                    new List<KeywordType> {KeywordType.LONG, KeywordType.LONG, KeywordType.INT}
+                },
+                {
+                    TypenameTypes.SLONGLONG,
+                    new List<KeywordType> {KeywordType.SIGNED, KeywordType.LONG, KeywordType.LONG}
+                },
+                {
+                    TypenameTypes.SLONGLONGINT,
+                    new List<KeywordType> {KeywordType.SIGNED, KeywordType.LONG, KeywordType.LONG, KeywordType.INT}
+                },
+                {
+                    TypenameTypes.ULONGLONG,
+                    new List<KeywordType> {KeywordType.UNSIGNED, KeywordType.LONG, KeywordType.LONG}
+                },
+                {
+                    TypenameTypes.ULONGLONGINT,
+                    new List<KeywordType> {KeywordType.UNSIGNED, KeywordType.LONG, KeywordType.LONG, KeywordType.INT}
+                },
+                {TypenameTypes.FLOAT, new List<KeywordType> {KeywordType.FLOAT}},
+                {TypenameTypes.DOUBLE, new List<KeywordType> {KeywordType.DOUBLE}},
+                {TypenameTypes.LDOUBLE, new List<KeywordType> {KeywordType.LONG, KeywordType.DOUBLE}}
             };
-
-        public TypenameTypes TypenameType { get; }
-        public override NodeType Type => NodeType.TYPENAME;
 
         public Typename(TypenameTypes typenameType)
         {
             TypenameType = typenameType;
         }
+
+        public TypenameTypes TypenameType { get; }
+        public override NodeType Type => NodeType.TYPENAME;
 
         public override string ToString(string indent, bool last)
         {
@@ -253,17 +282,17 @@ namespace CCompiler.Parser
 
     public class AdditiveExp : Node
     {
-        public OperatorToken Token { get; }
-        public Node Left { get; }
-        public Node Right { get; }
-        public override NodeType Type => NodeType.ADDITIVEEXP;
-
         public AdditiveExp(OperatorToken token, Node left, Node right)
         {
             Token = token;
             Left = left;
             Right = right;
         }
+
+        public OperatorToken Token { get; }
+        public Node Left { get; }
+        public Node Right { get; }
+        public override NodeType Type => NodeType.ADDITIVEEXP;
 
         public override string ToString(string indent, bool last)
         {
@@ -275,17 +304,17 @@ namespace CCompiler.Parser
 
     public class MultExp : Node
     {
-        public OperatorToken Token { get; }
-        public Node Left { get; }
-        public Node Right { get; }
-        public override NodeType Type => NodeType.MULTEXP;
-
         public MultExp(OperatorToken token, Node left, Node right)
         {
             Token = token;
             Left = left;
             Right = right;
         }
+
+        public OperatorToken Token { get; }
+        public Node Left { get; }
+        public Node Right { get; }
+        public override NodeType Type => NodeType.MULTEXP;
 
         public override string ToString(string indent, bool last)
         {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CCompiler.Tokenizer
+﻿namespace CCompiler.Tokenizer
 {
     public struct Position
     {
@@ -37,17 +33,17 @@ namespace CCompiler.Tokenizer
 
     public class Token
     {
-        public Position Position { get; private set; }
-        public TokenType TokenType { get; private set; }
-        public string Source { get; private set; }
-        public object Value { get; private set; }
-
         public Token(TokenType tokenType, string source, object value)
         {
             TokenType = tokenType;
             Source = source;
             Value = value;
         }
+
+        public Position Position { get; private set; }
+        public TokenType TokenType { get; }
+        public string Source { get; }
+        public object Value { get; }
 
         public Token AddPosition(Position position)
         {

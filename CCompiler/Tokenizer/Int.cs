@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace CCompiler.Tokenizer
@@ -14,12 +13,12 @@ namespace CCompiler.Tokenizer
             UINT
         }
 
-        public IntType Type { get; private set; }
-
         public IntToken(TokenType tokenType, string source, object value, IntType type) : base(tokenType, source, value)
         {
             Type = type;
         }
+
+        public IntType Type { get; }
 
         #region Debug
 
@@ -33,32 +32,11 @@ namespace CCompiler.Tokenizer
 
     public class Int : FSM
     {
-        private enum State
-        {
-            START,
-            END,
-            ERROR,
-            ZERO,
-            OCTAL,
-            DECIMAL,
-            SIXTEEN,
-            X,
-            L,
-            U,
-            UL
-        }
-
-        private enum BitType
-        {
-            OCTAL,
-            DECIMAL,
-            SIXTEEN
-        }
-
-        private StringBuilder _value;
-        private State _state;
         private BitType _bitType;
         private IntToken.IntType _intType;
+        private State _state;
+
+        private readonly StringBuilder _value;
 
         public Int()
         {
@@ -157,64 +135,40 @@ namespace CCompiler.Tokenizer
                     break;
                 case State.DECIMAL:
                     if (char.IsDigit(ch))
-                    {
                         _state = State.DECIMAL;
-                    }
                     else if (ch == 'L' || ch == 'l')
-                    {
                         _state = State.L;
-                    }
                     else if (ch == 'U' || ch == 'u')
-                    {
                         _state = State.U;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
 
                     break;
                 case State.SIXTEEN:
                     if (Utils.IsHex(ch))
-                    {
                         _state = State.SIXTEEN;
-                    }
                     else if (ch == 'L' || ch == 'l')
-                    {
                         _state = State.L;
-                    }
                     else if (ch == 'U' || ch == 'u')
-                    {
                         _state = State.U;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
 
                     break;
                 case State.L:
                     _intType = IntToken.IntType.LONG;
                     if (ch == 'U' || ch == 'u')
-                    {
                         _state = State.UL;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
 
                     break;
                 case State.U:
                     _intType = IntToken.IntType.UINT;
                     if (ch == 'L' || ch == 'l')
-                    {
                         _state = State.UL;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
 
                     break;
                 case State.UL:
@@ -237,7 +191,6 @@ namespace CCompiler.Tokenizer
             }
 
             if (_state == State.DECIMAL || _state == State.OCTAL || _state == State.SIXTEEN)
-            {
                 try
                 {
                     Convert(_value.ToString(), _intType, _bitType);
@@ -248,7 +201,6 @@ namespace CCompiler.Tokenizer
                         "integer literal is too large to be represented in any integer type");
                     _state = State.ERROR;
                 }
-            }
         }
 
         public override void Reset()
@@ -287,6 +239,28 @@ namespace CCompiler.Tokenizer
             };
 
             return res;
+        }
+
+        private enum State
+        {
+            START,
+            END,
+            ERROR,
+            ZERO,
+            OCTAL,
+            DECIMAL,
+            SIXTEEN,
+            X,
+            L,
+            U,
+            UL
+        }
+
+        private enum BitType
+        {
+            OCTAL,
+            DECIMAL,
+            SIXTEEN
         }
     }
 }

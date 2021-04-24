@@ -6,15 +6,13 @@ using CCompiler.Tokenizer;
 
 namespace CCompiler
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             if (args.Length == 0)
-            {
                 // TODO Display help info.
                 return;
-            }
 
             try
             {
@@ -39,6 +37,10 @@ namespace CCompiler
                 Console.WriteLine($"error: file {e.FileName} not found");
             }
             catch (TokenizerException e)
+            {
+                Console.WriteLine(e);
+            }
+            catch (ParserException e)
             {
                 Console.WriteLine(e);
             }

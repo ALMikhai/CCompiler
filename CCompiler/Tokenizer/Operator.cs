@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 
@@ -53,27 +52,18 @@ namespace CCompiler.Tokenizer
         LFBRACKET,
         RFBRACKET
     }
-    
+
     public class OperatorToken : Token
     {
-        public OperatorType Type { get; private set; }
-
         public OperatorToken(TokenType tokenType, string source, object value, OperatorType operatorType) : base(
             tokenType, source, value)
         {
             Type = operatorType;
         }
 
-        #region Debug
+        public OperatorType Type { get; }
 
-        //public override string ToString()
-        //{
-        //    return base.ToString() + $"\t{Type}";
-        //}
-
-        #endregion
-
-        public static Dictionary<String, OperatorType> Operators { get; } = new Dictionary<String, OperatorType>
+        public static Dictionary<string, OperatorType> Operators { get; } = new Dictionary<string, OperatorType>
         {
             {"[", OperatorType.LSBRACKET},
             {"]", OperatorType.RSBRACKET},
@@ -121,36 +111,20 @@ namespace CCompiler.Tokenizer
             {"{", OperatorType.LFBRACKET},
             {"}", OperatorType.RFBRACKET}
         };
+
+        #region Debug
+
+        //public override string ToString()
+        //{
+        //    return base.ToString() + $"\t{Type}";
+        //}
+
+        #endregion
     }
 
-    class Operator : FSM
+    internal class Operator : FSM
     {
-        private enum State
-        {
-            START,
-            END,
-            ERROR,
-            FINISH,
-            SUB,
-            ADD,
-            AMP,
-            MULT,
-            LT,
-            LTLT,
-            GT,
-            GTGT,
-            EQ,
-            OR,
-            NOT,
-            DIV,
-            MOD,
-            XOR
-        };
-
-        private StringBuilder _value;
-        private State _state;
-
-        private static ImmutableHashSet<char> OperatorChars = ImmutableHashSet.Create(
+        private static readonly ImmutableHashSet<char> OperatorChars = ImmutableHashSet.Create(
             '[',
             ']',
             '(',
@@ -176,6 +150,10 @@ namespace CCompiler.Tokenizer
             '{',
             '}'
         );
+
+        private State _state;
+
+        private readonly StringBuilder _value;
 
         public Operator()
         {
@@ -252,157 +230,98 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("operator symbol not found");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.FINISH:
                     _state = State.END;
                     break;
                 case State.SUB:
                     if (ch == '>' || ch == '-' || ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.ADD:
                     if (ch == '+' || ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.AMP:
                     if (ch == '&' || ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.MULT:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.LT:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else if (ch == '<')
-                    {
                         _state = State.LTLT;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.LTLT:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.GT:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else if (ch == '>')
-                    {
                         _state = State.GTGT;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.GTGT:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.EQ:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.OR:
                     if (ch == '=' || ch == '|')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.NOT:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.DIV:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.MOD:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.XOR:
                     if (ch == '=')
-                    {
                         _state = State.FINISH;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
             }
         }
@@ -418,6 +337,28 @@ namespace CCompiler.Tokenizer
             var source = _value.ToString(0, _value.Length - 1);
             return new OperatorToken(TokenType.OPERATOR, source, OperatorToken.Operators[source],
                 OperatorToken.Operators[source]);
+        }
+
+        private enum State
+        {
+            START,
+            END,
+            ERROR,
+            FINISH,
+            SUB,
+            ADD,
+            AMP,
+            MULT,
+            LT,
+            LTLT,
+            GT,
+            GTGT,
+            EQ,
+            OR,
+            NOT,
+            DIV,
+            MOD,
+            XOR
         }
     }
 }

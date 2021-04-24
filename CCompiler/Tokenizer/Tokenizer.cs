@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace CCompiler.Tokenizer
 {
     public class Tokenizer
     {
         public static TokenizerException LastException = new TokenizerException(new Position(1, 1), "");
-
-        private StreamReader _reader;
         private readonly ImmutableList<FSM> _machines;
-        private Token _lastToken;
-        private string _lastString;
         private int _lastIndex;
+        private string _lastString;
         private int _lastStringNumber;
+        private Token _lastToken;
         private Position _lastTokenPosition;
+
+        private readonly StreamReader _reader;
 
         public Tokenizer(string filePath)
         {
@@ -47,10 +44,7 @@ namespace CCompiler.Tokenizer
 
         public Token Get()
         {
-            if (_lastToken?.TokenType == TokenType.EOF)
-            {
-                return _lastToken;
-            }
+            if (_lastToken?.TokenType == TokenType.EOF) return _lastToken;
 
             var runningMachines = _machines.Select(fsm => fsm).ToList();
             var tokenReceived = false;
@@ -62,10 +56,7 @@ namespace CCompiler.Tokenizer
                 if (runningMachines.Any(fsm => fsm.GetState() == FSMState.RUNNING) == false)
                 {
                     var index = runningMachines.FindIndex(fsm => fsm.GetState() == FSMState.END);
-                    if (index == -1)
-                    {
-                        throw LastException.AddPosition(_lastTokenPosition);
-                    }
+                    if (index == -1) throw LastException.AddPosition(_lastTokenPosition);
 
                     var token = runningMachines[index].GetToken();
                     if (token.TokenType != TokenType.NONE)

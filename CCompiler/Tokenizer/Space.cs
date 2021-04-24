@@ -1,19 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CCompiler.Tokenizer
+﻿namespace CCompiler.Tokenizer
 {
-    class Space : FSM
+    internal class Space : FSM
     {
-        private enum State
-        {
-            START,
-            IDL,
-            END,
-            ERROR
-        }
-
         private State _state;
 
         public Space()
@@ -46,16 +34,13 @@ namespace CCompiler.Tokenizer
                         _state = State.ERROR;
                         Tokenizer.LastException.AddMessage("space symbol not found");
                     }
+
                     break;
                 case State.IDL:
                     if (char.IsWhiteSpace(ch))
-                    {
                         _state = State.IDL;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
             }
         }
@@ -68,6 +53,14 @@ namespace CCompiler.Tokenizer
         public override Token GetToken()
         {
             return new Token(TokenType.NONE, "", "");
+        }
+
+        private enum State
+        {
+            START,
+            IDL,
+            END,
+            ERROR
         }
     }
 }

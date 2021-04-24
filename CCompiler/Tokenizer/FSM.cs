@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CCompiler.Tokenizer
+﻿namespace CCompiler.Tokenizer
 {
     public enum FSMState
     {

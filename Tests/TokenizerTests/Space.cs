@@ -1,7 +1,3 @@
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.TokenizerTests

@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CCompiler.Tokenizer
+﻿namespace CCompiler.Tokenizer
 {
-    class Eof : FSM
+    internal class Eof : FSM
     {
-        private enum State
-        {
-            START,
-            END,
-            ERROR
-        }
-
         private State _state;
 
         public Eof()
@@ -57,6 +46,13 @@ namespace CCompiler.Tokenizer
         public override Token GetToken()
         {
             return new Token(TokenType.EOF, "", "");
+        }
+
+        private enum State
+        {
+            START,
+            END,
+            ERROR
         }
     }
 }

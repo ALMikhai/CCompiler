@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace CCompiler.Tokenizer
 {
-    class Identifier : FSM
+    internal class Identifier : FSM
     {
-        private enum State
-        {
-            START,
-            IDL,
-            END,
-            ERROR
-        }
-
-        private StringBuilder _value;
         private State _state;
+
+        private readonly StringBuilder _value;
 
         public Identifier()
         {
@@ -54,13 +45,9 @@ namespace CCompiler.Tokenizer
                     break;
                 case State.IDL:
                     if (char.IsLetterOrDigit(ch) || ch == '_')
-                    {
                         _value.Append(ch);
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
 
                     break;
             }
@@ -80,8 +67,17 @@ namespace CCompiler.Tokenizer
                 var keywordType = KeywordToken.Keywords[source];
                 return new KeywordToken(TokenType.KEYWORD, source, keywordType, keywordType);
             }
+
             var token = new Token(TokenType.IDENTIFIER, source, source);
             return token;
+        }
+
+        private enum State
+        {
+            START,
+            IDL,
+            END,
+            ERROR
         }
     }
 }

@@ -5,7 +5,7 @@ namespace CCompiler.Parser
 {
     public class ParserException : Exception
     {
-        private Token _token;
+        private readonly Token _token;
 
         public ParserException(Token token, string message) : base(message)
         {

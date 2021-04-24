@@ -1,39 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data.SqlTypes;
 using System.Text;
 
 namespace CCompiler.Tokenizer
 {
-    class StringSymbol : FSM
+    internal class StringSymbol : FSM
     {
-        private enum State
-        {
-            START,
-            END,
-            ERROR,
-            SPECIAL,
-            CHAR,
-            O,
-            OI,
-            OII,
-            X,
-            XI,
-            XII,
-        }
-
-        private enum BitType
-        {
-            CHAR,
-            OCTAL,
-            SIXTEEN
-        }
-
-        private StringBuilder _value;
-        private char _quote;
-        private State _state;
         private BitType _bitType;
+        private readonly char _quote;
+        private State _state;
+
+        private readonly StringBuilder _value;
 
         public StringSymbol(char quote)
         {
@@ -75,6 +51,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("char is empty or contain invalid symbol");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.CHAR:
                     _state = State.END;
@@ -97,27 +74,20 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("invalid escape sequences");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.O:
                     _bitType = BitType.OCTAL;
                     if (Utils.IsOct(ch))
-                    {
                         _state = State.OI;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.OI:
                     if (Utils.IsOct(ch))
-                    {
                         _state = State.OII;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.OII:
                     _state = State.END;
@@ -132,17 +102,14 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("after \\x must be hexadecimal number");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.XI:
                     _bitType = BitType.SIXTEEN;
                     if (Utils.IsHex(ch))
-                    {
                         _state = State.XII;
-                    }
                     else
-                    {
                         _state = State.END;
-                    }
                     break;
                 case State.XII:
                     _state = State.END;
@@ -170,10 +137,10 @@ namespace CCompiler.Tokenizer
                 switch (_bitType)
                 {
                     case BitType.OCTAL:
-                        res = (char)Convert.ToInt64(_value.ToString(1, _value.Length - 2), 8);
+                        res = (char) Convert.ToInt64(_value.ToString(1, _value.Length - 2), 8);
                         break;
                     case BitType.SIXTEEN:
-                        res = (char)Convert.ToInt64(_value.ToString(2, _value.Length - 3), 16);
+                        res = (char) Convert.ToInt64(_value.ToString(2, _value.Length - 3), 16);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -183,7 +150,6 @@ namespace CCompiler.Tokenizer
             }
 
             if (_value.Length == 3)
-            {
                 switch (_value[1])
                 {
                     case 'a':
@@ -211,7 +177,7 @@ namespace CCompiler.Tokenizer
                     default:
                         return _value[1];
                 }
-            }
+
             return _value[0];
         }
 
@@ -228,6 +194,28 @@ namespace CCompiler.Tokenizer
         private bool IsSpecial(char ch)
         {
             return "abfnrtv\'\"\\?".Contains(ch);
+        }
+
+        private enum State
+        {
+            START,
+            END,
+            ERROR,
+            SPECIAL,
+            CHAR,
+            O,
+            OI,
+            OII,
+            X,
+            XI,
+            XII
+        }
+
+        private enum BitType
+        {
+            CHAR,
+            OCTAL,
+            SIXTEEN
         }
     }
 }

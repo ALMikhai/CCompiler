@@ -1,26 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace CCompiler.Tokenizer
 {
-    class ConstChar : FSM
+    internal class ConstChar : FSM
     {
-        private enum State
-        {
-            START,
-            END,
-            ERROR,
-            L,
-            QUOTE,
-            CHAR,
-            QUOTE2
-        }
-
-        private StringBuilder _value;
-        private State _state;
         private char _charValue;
-        private StringSymbol _stringSymbol;
+        private State _state;
+        private readonly StringSymbol _stringSymbol;
+
+        private readonly StringBuilder _value;
 
         public ConstChar()
         {
@@ -62,6 +50,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("opening quote is not found");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.L:
                     if (ch == '\'')
@@ -74,6 +63,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("after L, opening quote is not found");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.QUOTE:
                     _stringSymbol.ReadChar(ch);
@@ -89,6 +79,7 @@ namespace CCompiler.Tokenizer
                             _state = State.ERROR;
                             break;
                     }
+
                     break;
                 case State.CHAR:
                     if (ch == '\'')
@@ -100,6 +91,7 @@ namespace CCompiler.Tokenizer
                         Tokenizer.LastException.AddMessage("closing quote is not found");
                         _state = State.ERROR;
                     }
+
                     break;
                 case State.QUOTE2:
                     _state = State.END;
@@ -117,6 +109,17 @@ namespace CCompiler.Tokenizer
         public override Token GetToken()
         {
             return new Token(TokenType.CHAR, _value.ToString(0, _value.Length - 2), _charValue);
+        }
+
+        private enum State
+        {
+            START,
+            END,
+            ERROR,
+            L,
+            QUOTE,
+            CHAR,
+            QUOTE2
         }
     }
 }

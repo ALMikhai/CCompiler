@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CCompiler.Tokenizer
 {
     public class TokenizerException : Exception
     {
-        private Position _position;
         private string _message;
+        private Position _position;
 
         public TokenizerException(Position position, string message)
         {
