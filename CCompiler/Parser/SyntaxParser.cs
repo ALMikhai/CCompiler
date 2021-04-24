@@ -53,6 +53,28 @@ namespace CCompiler.Parser
                 $"expected operator {type}, received {(_currentToken as OperatorToken)?.Type}");
         }
 
+        private bool AcceptKeyword(KeywordType type)
+        {
+            if (_currentToken is KeywordToken token &&
+                token.Type == type)
+            {
+                _acceptedToken = _currentToken;
+                NextToken();
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool ExceptKeyword(KeywordType type)
+        {
+            if (AcceptKeyword(type))
+                return true;
+
+            throw new ParserException(_currentToken,
+                $"expected keyword {type}, received {(_currentToken as OperatorToken)?.Type}");
+        }
+
         private bool Accept(TokenType type)
         {
             if (_currentToken.TokenType == type)
@@ -114,26 +136,100 @@ namespace CCompiler.Parser
             return left;
         }
 
+        /*
+         * cast_exp	: unary_exp +
+			| '(' type_name ')' cast_exp +
+         */
+
         private IParseResult ParseCastExp()
         {
-            var unaryExp = ParseUnaryExp();
-            if (unaryExp.IsSuccess)
+            if (AcceptOp(OperatorType.LRBRACKET))
             {
-                return unaryExp;
+                var typename = ParseTypename();
+                if (typename.IsSuccess)
+                {
+                    ExceptOp(OperatorType.RRBRACKET);
+                    var castExp = ParseCastExp();
+                    if (castExp.IsSuccess)
+                    {
+                        return new SuccessParseResult(new CastExp((Typename) typename.ResultNode, castExp.ResultNode));
+                    }
+
+                    return castExp;
+                }
+
+                return typename;
             }
 
-            return new FailedParseResult("failed parse cast exp", _currentToken);
+            var unaryExp = ParseUnaryExp();
+            return unaryExp;
         }
+
+        private IParseResult ParseTypename()
+        {
+            var typenameParts = new List<KeywordType>();
+            Typename.TypenameTypes lastTypename = Typename.TypenameTypes.NONE;
+            while (Accept(TokenType.KEYWORD))
+            {
+                typenameParts.Add(((KeywordToken) _acceptedToken).Type);
+                foreach (var pair in Typename.Nodes2Type)
+                {
+                    if (typenameParts.Count == pair.Value.Count)
+                    {
+                        var isValid = true;
+                        for (int i = 0; i < typenameParts.Count; i++)
+                        {
+                            if (typenameParts[i] != pair.Value[i])
+                                isValid = false;
+                        }
+
+                        if (isValid)
+                            lastTypename = pair.Key;
+                    }
+                }
+            }
+
+            if (lastTypename == Typename.TypenameTypes.NONE)
+                return new FailedParseResult("failed parse typename", _currentToken);
+
+            return new SuccessParseResult(new Typename(lastTypename));
+        }
+
+        /*
+         * unary_exp : postfix_exp +
+			| '++' unary_exp +
+			| '--' unary_exp +
+			| unary_operator cast_exp +
+			| 'sizeof' unary_exp
+			| 'sizeof' '(' type_name ')'
+         */
 
         private IParseResult ParseUnaryExp()
         {
-            var postfixExp = ParsePostfixExp();
-            if (postfixExp.IsSuccess)
+            if (AcceptOp(OperatorType.INC) || AcceptOp(OperatorType.DEC))
             {
-                return postfixExp;
+                var op = _acceptedToken;
+                var postfixExp = ParsePostfixExp();
+                if (postfixExp.IsSuccess)
+                {
+                    return new SuccessParseResult(new UnaryExp(postfixExp.ResultNode, op as OperatorToken, null));
+                }
             }
 
-            return new FailedParseResult("failed parse unary exp", _currentToken);
+            var unaryOperator = ParseUnaryOperator();
+            if (unaryOperator.IsSuccess)
+            {
+                var castExp = ParseCastExp();
+                if (castExp.IsSuccess)
+                {
+                    return new SuccessParseResult(new UnaryExp(castExp.ResultNode, null,
+                        unaryOperator.ResultNode as UnaryOperator));
+                }
+            }
+
+            // TODO Sizeof exp parse.
+
+            return ParsePostfixExp();
         }
 
         private IParseResult ParseUnaryOperator()
@@ -154,12 +250,46 @@ namespace CCompiler.Parser
         private IParseResult ParsePostfixExp()
         {
             var primaryExp = ParsePrimaryExp();
-            if (primaryExp.IsSuccess)
-            {
+            if (!primaryExp.IsSuccess)
                 return primaryExp;
+
+            if (AcceptOp(OperatorType.LSBRACKET))
+            {
+                // var exp = ParseExp(); TODO ...
+                ExceptOp(OperatorType.RSBRACKET);
+                return new SuccessParseResult(new Const(new IntToken(TokenType.INT, "1", 1,
+                    IntToken.IntType.INT))); // TODO Remove.
             }
 
-            return new FailedParseResult("failed parse postfix exp", _currentToken);
+            if (AcceptOp(OperatorType.LRBRACKET))
+            {
+                if (AcceptOp(OperatorType.RRBRACKET))
+                {
+                    return new SuccessParseResult(new PostfixExp(primaryExp.ResultNode, _acceptedToken as OperatorToken,
+                        (Node) null));
+                }
+
+                // var args = ParseArgs(); TODO ...
+                ExceptOp(OperatorType.RRBRACKET);
+                return new SuccessParseResult(new Const(new IntToken(TokenType.INT, "1", 1,
+                    IntToken.IntType.INT))); // TODO Remove.
+            }
+
+            if (AcceptOp(OperatorType.DOT) || AcceptOp(OperatorType.RARROW))
+            {
+                var op = _acceptedToken;
+                Except(TokenType.IDENTIFIER);
+                return new SuccessParseResult(
+                    new PostfixExp(primaryExp.ResultNode, op as OperatorToken, _acceptedToken));
+            }
+
+            if (AcceptOp(OperatorType.INC) || AcceptOp(OperatorType.DEC))
+            {
+                return new SuccessParseResult(new PostfixExp(primaryExp.ResultNode, _acceptedToken as OperatorToken,
+                    (Node) null));
+            }
+
+            return primaryExp;
         }
 
         private IParseResult ParsePrimaryExp()
