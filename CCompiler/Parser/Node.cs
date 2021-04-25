@@ -53,7 +53,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{Token.Value}\n";
+            return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n";
         }
     }
 
@@ -69,7 +69,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{Token.Value}\n";
+            return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n";
         }
     }
 
@@ -101,7 +101,7 @@ namespace CCompiler.Parser
         {
             return
                 PostfixNode.ToString(indent, last) +
-                indent + ChildrenPrefix(last) + NodePrefix(SuffixNode == null && Identifier == null) + $"{Operator.Value}\n" +
+                indent + ChildrenPrefix(last) + NodePrefix(SuffixNode == null && Identifier == null) + $"{Operator.Value}" + "\r\n" +
                 (SuffixNode != null ? SuffixNode.ToString(indent + ChildrenPrefix(last), true) : "") +
                 (Identifier != null ? new PrimaryExp(Identifier).ToString(indent + ChildrenPrefix(last), true) : "");
         }
@@ -119,7 +119,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{Operator.Value}\n";
+            return indent + NodePrefix(last) + $"{Operator.Value}" + "\r\n";
         }
     }
 
@@ -147,7 +147,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return (OperatorOperator != null ? indent + NodePrefix(last) + $"{OperatorOperator.Value}\n" : "") +
+            return (OperatorOperator != null ? indent + NodePrefix(last) + $"{OperatorOperator.Value}" + "\r\n" : "") +
                    (UnaryOperator != null ? UnaryOperator.ToString(indent, last) : "") +
                    UnaryExpNode.ToString(indent + ChildrenPrefix(last), true);
         }
@@ -276,7 +276,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{TypenameType}\n";
+            return indent + NodePrefix(last) + $"{TypenameType}" + "\r\n";
         }
     }
 
@@ -296,7 +296,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{Token.Value}\n" +
+            return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n" +
                    Left.ToString(indent + ChildrenPrefix(last), false) +
                    Right.ToString(indent + ChildrenPrefix(last), true);
         }
@@ -318,7 +318,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{Token.Value}\n" +
+            return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n" +
                    Left.ToString(indent + ChildrenPrefix(last), false) +
                    Right.ToString(indent + ChildrenPrefix(last), true);
         }
