@@ -2,14 +2,13 @@
 
 namespace Tests.TokenizerTests
 {
-    [TestClass]
-    public class Keyword
+    public partial class TokenizerTests
     {
         [TestMethod]
         public void AllKeywords()
         {
             const string fileName = "AllKeywords";
-            Assert.IsTrue(Utils.CheckCorrect(fileName));
+            Assert.IsTrue(Utils.CheckCorrect(DirectoryPath, fileName, CompileKeys));
         }
     }
 }

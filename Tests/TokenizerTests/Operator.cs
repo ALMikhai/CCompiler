@@ -2,14 +2,13 @@
 
 namespace Tests.TokenizerTests
 {
-    [TestClass]
-    public class Operator
+    public partial class TokenizerTests
     {
         [TestMethod]
         public void AllOperators()
         {
             const string fileName = "AllOperators";
-            Assert.IsTrue(Utils.CheckCorrect(fileName));
+            Assert.IsTrue(Utils.CheckCorrect(DirectoryPath, fileName, CompileKeys));
         }
     }
 }
