@@ -38,5 +38,12 @@ namespace Tests.ParserTests
             const string fileName = "DecPostfixExp";
             Assert.IsTrue(Utils.CheckCorrect(DirectoryPath, fileName, CompileKeys));
         }
+        
+        [TestMethod]
+        public void BigPostfixExp()
+        {
+            const string fileName = "BigPostfixExp";
+            Assert.IsTrue(Utils.CheckCorrect(DirectoryPath, fileName, CompileKeys));
+        }
     }
 }

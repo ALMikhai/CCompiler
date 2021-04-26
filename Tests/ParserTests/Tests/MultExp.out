@@ -1,12 +1,12 @@
-\-MULT
-  |-a
-  \-DIV
-    |-b
-    | \-INC
-    \-MOD
-      |-INT
-      | \-c
-      \-n
-        |-DOT
-        \-m
+\-MOD
+  |-DIV
+  | |-MULT
+  | | |-a
+  | | \-INC
+  | |   \-b
+  | \-INT
+  |   \-c
+  \-DOT
+    |-n
+    \-m
 

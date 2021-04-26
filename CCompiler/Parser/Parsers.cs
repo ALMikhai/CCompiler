@@ -62,43 +62,63 @@ namespace CCompiler.Parser
 
         private IParseResult ParsePostfixExp()
         {
-            var primaryExp = ParsePrimaryExp();
-            if (!primaryExp.IsSuccess)
-                return primaryExp;
+            var result = ParsePrimaryExp();
+            if (!result.IsSuccess)
+                return result;
 
-            if (AcceptOp(OperatorType.LSBRACKET))
+            while (true)
             {
-                // var exp = ParseExp(); TODO ...
-                ExceptOp(OperatorType.RSBRACKET);
-                return new SuccessParseResult(new Const(new IntToken(TokenType.INT, "1", 1,
-                    IntToken.IntType.INT))); // TODO Remove.
-            }
+                if (AcceptOp(OperatorType.LSBRACKET))
+                {
+                    var op = _acceptedToken;
+                    var exp = ParseAdditiveExp(); // TODO Replace AdditiveExp to Exp.
+                    if (!exp.IsSuccess)
+                        return exp;
+                    ExceptOp(OperatorType.RSBRACKET);
+                    result = new SuccessParseResult(new PostfixExp(result.ResultNode, op as OperatorToken,
+                        exp.ResultNode));
+                    continue;
+                }
 
-            if (AcceptOp(OperatorType.LRBRACKET))
-            {
-                if (AcceptOp(OperatorType.RRBRACKET))
-                    return new SuccessParseResult(new PostfixExp(primaryExp.ResultNode, _acceptedToken as OperatorToken,
+                if (AcceptOp(OperatorType.LRBRACKET))
+                {
+                    var op = _acceptedToken;
+                    if (AcceptOp(OperatorType.RRBRACKET))
+                    {
+                        result = new SuccessParseResult(new PostfixExp(result.ResultNode, op as OperatorToken,
+                            (Node) null));
+                        continue;
+                    }
+
+                    var exp = ParseAdditiveExp(); // TODO Replace AdditiveExp to ArgumentExpList.
+                    if (!exp.IsSuccess)
+                        return exp;
+                    ExceptOp(OperatorType.RRBRACKET);
+                    result = new SuccessParseResult(new PostfixExp(result.ResultNode, op as OperatorToken,
+                        exp.ResultNode));
+                    continue;
+                }
+
+                if (AcceptOp(OperatorType.DOT) || AcceptOp(OperatorType.RARROW))
+                {
+                    var op = _acceptedToken;
+                    Except(TokenType.IDENTIFIER);
+                    result = new SuccessParseResult(
+                        new PostfixExp(result.ResultNode, op as OperatorToken, _acceptedToken));
+                    continue;
+                }
+
+                if (AcceptOp(OperatorType.INC) || AcceptOp(OperatorType.DEC))
+                {
+                    result = new SuccessParseResult(new PostfixExp(result.ResultNode, _acceptedToken as OperatorToken,
                         (Node) null));
-
-                // var args = ParseArgs(); TODO ...
-                ExceptOp(OperatorType.RRBRACKET);
-                return new SuccessParseResult(new Const(new IntToken(TokenType.INT, "1", 1,
-                    IntToken.IntType.INT))); // TODO Remove.
+                    continue;
+                }
+                
+                break;
             }
 
-            if (AcceptOp(OperatorType.DOT) || AcceptOp(OperatorType.RARROW))
-            {
-                var op = _acceptedToken;
-                Except(TokenType.IDENTIFIER);
-                return new SuccessParseResult(
-                    new PostfixExp(primaryExp.ResultNode, op as OperatorToken, _acceptedToken));
-            }
-
-            if (AcceptOp(OperatorType.INC) || AcceptOp(OperatorType.DEC))
-                return new SuccessParseResult(new PostfixExp(primaryExp.ResultNode, _acceptedToken as OperatorToken,
-                    (Node) null));
-
-            return primaryExp;
+            return result;
         }
 
         /*
@@ -212,12 +232,12 @@ namespace CCompiler.Parser
                     return castExp;
                 }
 
-                // TODO Replace AdditiveExp to Exp.
-                var additiveExp = ParseAdditiveExp(); // Part from PrimaryExp.
-                if (additiveExp.IsSuccess)
+                // Part from PrimaryExp.
+                var exp = ParseAdditiveExp(); // TODO Replace AdditiveExp to Exp.
+                if (exp.IsSuccess)
                 {
                     ExceptOp(OperatorType.RRBRACKET);
-                    return additiveExp;
+                    return exp;
                 }
 
                 return typename;
@@ -239,16 +259,16 @@ namespace CCompiler.Parser
             if (!left.IsSuccess)
                 return left;
 
-            if (AcceptOp(OperatorType.MULT) || AcceptOp(OperatorType.DIV) ||
+            while (AcceptOp(OperatorType.MULT) || AcceptOp(OperatorType.DIV) ||
                 AcceptOp(OperatorType.MOD))
             {
                 var operation = _acceptedToken;
-                var right = ParseMultExp();
+                var right = ParseCastExp();
                 if (!right.IsSuccess)
                     return right;
 
-                return new SuccessParseResult(
-                    new MultExp(operation as OperatorToken, left.ResultNode, right.ResultNode));
+                left = new SuccessParseResult(new MultExp(operation as OperatorToken, left.ResultNode,
+                    right.ResultNode));
             }
 
             return left;
@@ -266,14 +286,14 @@ namespace CCompiler.Parser
             if (!left.IsSuccess)
                 return left;
 
-            if (AcceptOp(OperatorType.ADD) || AcceptOp(OperatorType.SUB))
+            while (AcceptOp(OperatorType.ADD) || AcceptOp(OperatorType.SUB))
             {
                 var operation = _acceptedToken;
-                var right = ParseAdditiveExp();
+                var right = ParseMultExp();
                 if (!right.IsSuccess)
                     return right;
 
-                return new SuccessParseResult(new AdditiveExp(operation as OperatorToken, left.ResultNode,
+                left = new SuccessParseResult(new AdditiveExp(operation as OperatorToken, left.ResultNode,
                     right.ResultNode));
             }
 

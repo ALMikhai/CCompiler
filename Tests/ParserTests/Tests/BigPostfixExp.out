@@ -1,0 +1,13 @@
+\-DEC
+  \-LRBRACKET
+    \-RARROW
+      |-DOT
+      | |-LRBRACKET
+      | | \-LRBRACKET
+      | |   |-LSBRACKET
+      | |   | |-a
+      | |   | \-0
+      | |   \-null
+      | \-push_back
+      \-push_back
+

@@ -6,7 +6,7 @@
     |-INT
     | \-LONG
     |   \-c
-    \-g
-      |-RARROW
+    \-RARROW
+      |-g
       \-next
 
