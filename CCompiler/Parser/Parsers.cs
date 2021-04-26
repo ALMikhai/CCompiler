@@ -35,13 +35,16 @@ namespace CCompiler.Parser
             var @const = ParseConst();
             if (@const.IsSuccess) return @const;
 
-            if (AcceptOp(OperatorType.LRBRACKET))
-            {
-                // var exp = ParseExp(); TODO ...
-                ExceptOp(OperatorType.RRBRACKET);
-                return new SuccessParseResult(new Const(new IntToken(TokenType.INT, "1", 1,
-                    IntToken.IntType.INT))); // TODO Remove.
-            }
+            // This part go to CastExp.
+            // if (AcceptOp(OperatorType.LRBRACKET))
+            // {
+            //     var additiveExp = ParseAdditiveExp();
+            //     if (!additiveExp.IsSuccess)
+            //         return additiveExp;
+            //     
+            //     ExceptOp(OperatorType.RRBRACKET);
+            //     return additiveExp;
+            // }
 
             return new FailedParseResult("failed parse primary exp", _currentToken);
         }
@@ -190,6 +193,12 @@ namespace CCompiler.Parser
 
         private IParseResult ParseCastExp()
         {
+            var unaryExp = ParseUnaryExp();
+            if (unaryExp.IsSuccess)
+            {
+                return unaryExp;
+            }
+
             if (AcceptOp(OperatorType.LRBRACKET))
             {
                 var typename = ParseTypename();
@@ -203,10 +212,18 @@ namespace CCompiler.Parser
                     return castExp;
                 }
 
+                // TODO Replace AdditiveExp to Exp.
+                var additiveExp = ParseAdditiveExp(); // Part from PrimaryExp.
+                if (additiveExp.IsSuccess)
+                {
+                    ExceptOp(OperatorType.RRBRACKET);
+                    return additiveExp;
+                }
+
                 return typename;
             }
 
-            return ParseUnaryExp();
+            return unaryExp;
         }
 
         /*

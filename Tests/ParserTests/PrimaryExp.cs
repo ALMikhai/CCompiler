@@ -17,5 +17,12 @@ namespace Tests.ParserTests
             const string fileName = "StringPrimaryExp";
             Assert.IsTrue(Utils.CheckCorrect(DirectoryPath, fileName, CompileKeys));
         }
+        
+        [TestMethod]
+        public void GroupByBracketsPrimaryExp()
+        {
+            const string fileName = "GroupByBracketsPrimaryExp";
+            Assert.IsTrue(Utils.CheckCorrect(DirectoryPath, fileName, CompileKeys));
+        }
     }
 }
