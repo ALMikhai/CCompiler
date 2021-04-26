@@ -100,8 +100,8 @@ namespace CCompiler.Parser
         public override string ToString(string indent, bool last)
         {
             return
-                PostfixNode.ToString(indent, last) +
-                indent + ChildrenPrefix(last) + NodePrefix(SuffixNode == null && Identifier == null) + $"{Operator.Value}" + "\r\n" +
+                indent + NodePrefix(last) + $"{Operator.Value}" + "\r\n" +
+                PostfixNode.ToString(indent + ChildrenPrefix(last), SuffixNode == null && Identifier == null) +
                 (SuffixNode != null ? SuffixNode.ToString(indent + ChildrenPrefix(last), true) : "") +
                 (Identifier != null ? new PrimaryExp(Identifier).ToString(indent + ChildrenPrefix(last), true) : "");
         }
