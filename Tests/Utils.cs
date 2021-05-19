@@ -6,15 +6,15 @@ namespace Tests
 {
     public class Utils
     {
-        public static bool CheckCorrect(string directoryPath, string fileName, string compileKeys)
+        public static (string, string) RunAndGetOutputs(string path, string compileKeys)
         {
-            var inputPath = $"{directoryPath}{fileName}.in";
-            var outputPath = $"{directoryPath}{fileName}.out";
+            var inputPath = $"{path}.in";
+            var outputPath = $"{path}.out";
 
             var output = RunAndGetOutput(inputPath, compileKeys);
             var correctOutput = new StreamReader(outputPath).ReadToEnd();
 
-            return string.Equals(output, correctOutput);
+            return (output, correctOutput);
         }
 
         public static string RunAndGetOutput(string path, string compileKeys)
