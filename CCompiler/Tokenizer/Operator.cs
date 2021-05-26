@@ -6,6 +6,7 @@ namespace CCompiler.Tokenizer
 {
     public enum OperatorType
     {
+        NONE,
         LSBRACKET,
         RSBRACKET,
         LRBRACKET,

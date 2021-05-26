@@ -257,7 +257,7 @@ namespace CCompiler.Parser
             if (!left.IsSuccess)
                 return left;
 
-            while (availableOperators.Where(AcceptOp).ToList().Any())
+            while (availableOperators.FirstOrDefault(AcceptOp) != OperatorType.NONE)
             {
                 var operation = _acceptedToken;
                 var right = parser();
