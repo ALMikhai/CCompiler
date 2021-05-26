@@ -349,6 +349,48 @@ namespace CCompiler.Parser
             return ParseBinaryExp(ParseEqualityExp, AndExp.Instance, new List<OperatorType>() {OperatorType.BITAND});
         }
         
+        /*
+         * exclusive_or_exp	: and_exp
+            | exclusive_or_exp '^' and_exp
+            ;
+         */
         
+        private IParseResult ParseExclusiveOrExp()
+        {
+            return ParseBinaryExp(ParseAndExp, ExclusiveOrExp.Instance, new List<OperatorType>() {OperatorType.XOR});
+        }
+        
+        /*
+         * inclusive_or_exp	: exclusive_or_exp
+            | inclusive_or_exp '|' exclusive_or_exp
+            ;
+         */
+        
+        private IParseResult ParseInclusiveOrExp()
+        {
+            return ParseBinaryExp(ParseExclusiveOrExp, InclusiveOrExp.Instance, new List<OperatorType>() {OperatorType.BITOR});
+        }
+        
+        /*
+         * logical_and_exp : inclusive_or_exp
+            | logical_and_exp '&&' inclusive_or_exp
+            ;
+         */
+        
+        private IParseResult ParseLogicalAndExp()
+        {
+            return ParseBinaryExp(ParseInclusiveOrExp, LogicalAndExp.Instance, new List<OperatorType>() {OperatorType.AND});
+        }
+        
+        /*
+         * logical_or_exp : logical_and_exp
+            | logical_or_exp '||' logical_and_exp
+            ;
+         */
+        
+        private IParseResult ParseLogicalOrExp()
+        {
+            return ParseBinaryExp(ParseLogicalAndExp, LogicalOrExp.Instance, new List<OperatorType>() {OperatorType.OR});
+        }
     }
 }

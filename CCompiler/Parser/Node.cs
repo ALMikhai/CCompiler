@@ -18,7 +18,11 @@ namespace CCompiler.Parser
         SHIFTEXP,
         RELATIONALEXP,
         EQUALITYEXP,
-        ANDEXP
+        ANDEXP,
+        EXCLUSIVEOREXP,
+        INCLUSIVEOREXP,
+        LOGICALAND,
+        LOGICALOR
     }
 
     public class Node
@@ -285,7 +289,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class BinaryExp : Node
+    public abstract class BinaryExp : Node
     {
         public BinaryExp(OperatorToken token, Node left, Node right)
         {
@@ -387,6 +391,62 @@ namespace CCompiler.Parser
         public static AndExp Instance(OperatorToken token, Node left, Node right)
         {
             return new AndExp(token, left, right);
+        }
+    }
+
+    public class ExclusiveOrExp : BinaryExp
+    {
+        public ExclusiveOrExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.EXCLUSIVEOREXP;
+
+        public static ExclusiveOrExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new ExclusiveOrExp(token, left, right);
+        }
+    }
+
+    public class InclusiveOrExp : BinaryExp
+    {
+        public InclusiveOrExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.INCLUSIVEOREXP;
+
+        public static InclusiveOrExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new InclusiveOrExp(token, left, right);
+        }
+    }
+
+    public class LogicalAndExp : BinaryExp
+    {
+        public LogicalAndExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.LOGICALAND;
+
+        public static LogicalAndExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new LogicalAndExp(token, left, right);
+        }
+    }
+
+    public class LogicalOrExp : BinaryExp
+    {
+        public LogicalOrExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.LOGICALOR;
+
+        public static LogicalOrExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new LogicalOrExp(token, left, right);
         }
     }
 }
