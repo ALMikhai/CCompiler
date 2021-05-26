@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
@@ -13,7 +14,11 @@ namespace CCompiler.Parser
         MULTEXP,
         UNARYEXP,
         CASTEXP,
-        TYPENAME
+        TYPENAME,
+        SHIFTEXP,
+        RELATIONALEXP,
+        EQUALITYEXP,
+        ANDEXP
     }
 
     public class Node
@@ -280,9 +285,9 @@ namespace CCompiler.Parser
         }
     }
 
-    public class AdditiveExp : Node
+    public class BinaryExp : Node
     {
-        public AdditiveExp(OperatorToken token, Node left, Node right)
+        public BinaryExp(OperatorToken token, Node left, Node right)
         {
             Token = token;
             Left = left;
@@ -292,7 +297,6 @@ namespace CCompiler.Parser
         public OperatorToken Token { get; }
         public Node Left { get; }
         public Node Right { get; }
-        public override NodeType Type => NodeType.ADDITIVEEXP;
 
         public override string ToString(string indent, bool last)
         {
@@ -301,26 +305,88 @@ namespace CCompiler.Parser
                    Right.ToString(indent + ChildrenPrefix(last), true);
         }
     }
-
-    public class MultExp : Node
+    
+    public class AdditiveExp : BinaryExp
     {
-        public MultExp(OperatorToken token, Node left, Node right)
+        public AdditiveExp(OperatorToken token, Node left, Node right) : base(token, left, right)
         {
-            Token = token;
-            Left = left;
-            Right = right;
         }
+        
+        public override NodeType Type => NodeType.ADDITIVEEXP;
 
-        public OperatorToken Token { get; }
-        public Node Left { get; }
-        public Node Right { get; }
-        public override NodeType Type => NodeType.MULTEXP;
-
-        public override string ToString(string indent, bool last)
+        public static AdditiveExp Instance(OperatorToken token, Node left, Node right)
         {
-            return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n" +
-                   Left.ToString(indent + ChildrenPrefix(last), false) +
-                   Right.ToString(indent + ChildrenPrefix(last), true);
+            return new AdditiveExp(token, left, right);
+        }
+    }
+
+    public class MultExp : BinaryExp
+    {
+        public MultExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.MULTEXP;
+        
+        public static MultExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new MultExp(token, left, right);
+        }
+    }
+
+    public class ShiftExp : BinaryExp
+    {
+        public ShiftExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.SHIFTEXP;
+        
+        public static ShiftExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new ShiftExp(token, left, right);
+        }
+    }
+
+    public class RelationalExp : BinaryExp
+    {
+        public RelationalExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.RELATIONALEXP;
+
+        public static RelationalExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new RelationalExp(token, left, right);
+        }
+    }
+
+    public class EqualityExp : BinaryExp
+    {
+        public EqualityExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.EQUALITYEXP;
+
+        public static EqualityExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new EqualityExp(token, left, right);
+        }
+    }
+    
+    public class AndExp : BinaryExp
+    {
+        public AndExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.ANDEXP;
+
+        public static AndExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new AndExp(token, left, right);
         }
     }
 }

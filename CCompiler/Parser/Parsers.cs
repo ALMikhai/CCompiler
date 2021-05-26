@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
@@ -114,7 +115,7 @@ namespace CCompiler.Parser
                         (Node) null));
                     continue;
                 }
-                
+
                 break;
             }
 
@@ -246,6 +247,30 @@ namespace CCompiler.Parser
             return unaryExp;
         }
 
+        delegate IParseResult Parser();
+
+        delegate Node ExpCtor(OperatorToken token, Node left, Node right);
+
+        private IParseResult ParseBinaryExp(Parser parser, ExpCtor ctor, List<OperatorType> availableOperators)
+        {
+            var left = parser();
+            if (!left.IsSuccess)
+                return left;
+
+            while (availableOperators.Where(AcceptOp).ToList().Any())
+            {
+                var operation = _acceptedToken;
+                var right = parser();
+                if (!right.IsSuccess)
+                    return right;
+
+                left = new SuccessParseResult(ctor(operation as OperatorToken, left.ResultNode,
+                    right.ResultNode));
+            }
+
+            return left;
+        }
+        
         /*
          * mult_exp	: cast_exp +
 			| mult_exp '*' cast_exp +
@@ -255,23 +280,8 @@ namespace CCompiler.Parser
 
         private IParseResult ParseMultExp()
         {
-            var left = ParseCastExp();
-            if (!left.IsSuccess)
-                return left;
-
-            while (AcceptOp(OperatorType.MULT) || AcceptOp(OperatorType.DIV) ||
-                AcceptOp(OperatorType.MOD))
-            {
-                var operation = _acceptedToken;
-                var right = ParseCastExp();
-                if (!right.IsSuccess)
-                    return right;
-
-                left = new SuccessParseResult(new MultExp(operation as OperatorToken, left.ResultNode,
-                    right.ResultNode));
-            }
-
-            return left;
+            return ParseBinaryExp(ParseCastExp, MultExp.Instance,
+                new List<OperatorType>() {OperatorType.MULT, OperatorType.DIV, OperatorType.MOD});
         }
 
         /*
@@ -282,22 +292,63 @@ namespace CCompiler.Parser
 
         private IParseResult ParseAdditiveExp()
         {
-            var left = ParseMultExp();
-            if (!left.IsSuccess)
-                return left;
-
-            while (AcceptOp(OperatorType.ADD) || AcceptOp(OperatorType.SUB))
-            {
-                var operation = _acceptedToken;
-                var right = ParseMultExp();
-                if (!right.IsSuccess)
-                    return right;
-
-                left = new SuccessParseResult(new AdditiveExp(operation as OperatorToken, left.ResultNode,
-                    right.ResultNode));
-            }
-
-            return left;
+            return ParseBinaryExp(ParseMultExp, AdditiveExp.Instance,
+                new List<OperatorType>() {OperatorType.ADD, OperatorType.SUB});
         }
+
+        /*
+         * shift_expression	: additive_exp
+            | shift_expression '<<' additive_exp
+            | shift_expression '>>' additive_exp
+            ;
+         */
+
+        private IParseResult ParseShiftExp()
+        {
+            return ParseBinaryExp(ParseAdditiveExp, ShiftExp.Instance,
+                new List<OperatorType>() {OperatorType.LSHIFT, OperatorType.RSHIFT});
+        }
+
+        /*
+         * relational_exp : shift_expression
+            | relational_exp '<' shift_expression
+            | relational_exp '>' shift_expression
+            | relational_exp '<=' shift_expression
+            | relational_exp '>=' shift_expression
+            ;
+         */
+
+        private IParseResult ParseRelationalExp()
+        {
+            return ParseBinaryExp(ParseShiftExp, RelationalExp.Instance,
+                new List<OperatorType>()
+                    {OperatorType.MORE, OperatorType.MOREEQ, OperatorType.LESS, OperatorType.LESSEQ});
+        }
+
+        /*
+         * equality_exp	: relational_exp
+            | equality_exp '==' relational_exp
+            | equality_exp '!=' relational_exp
+            ;
+         */
+
+        private IParseResult ParseEqualityExp()
+        {
+            return ParseBinaryExp(ParseRelationalExp, EqualityExp.Instance,
+                new List<OperatorType>() {OperatorType.EQ, OperatorType.NEQ});
+        }
+        
+        /*
+         * and_exp : equality_exp
+            | and_exp '&' equality_exp
+            ;
+         */
+        
+        private IParseResult ParseAndExp()
+        {
+            return ParseBinaryExp(ParseEqualityExp, AndExp.Instance, new List<OperatorType>() {OperatorType.BITAND});
+        }
+        
+        
     }
 }
