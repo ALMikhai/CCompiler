@@ -22,7 +22,10 @@ namespace CCompiler.Parser
         EXCLUSIVEOREXP,
         INCLUSIVEOREXP,
         LOGICALAND,
-        LOGICALOR
+        LOGICALOR,
+        CONDITIONALEXP,
+        ASSIGNMENTEXP,
+        EXP
     }
 
     public class Node
@@ -447,6 +450,58 @@ namespace CCompiler.Parser
         public static LogicalOrExp Instance(OperatorToken token, Node left, Node right)
         {
             return new LogicalOrExp(token, left, right);
+        }
+    }
+
+    public class ConditionalExp : Node
+    {
+        public Node Condition { get; }
+        public Node Exp1 { get; }
+        public Node Exp2 { get; }
+
+        public ConditionalExp(Node condition, Node exp1, Node exp2)
+        {
+            Condition = condition;
+            Exp1 = exp1;
+            Exp2 = exp2;
+        }
+        
+        public override NodeType Type => NodeType.CONDITIONALEXP;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + $"CONDITIONAL_EXP" + "\r\n" +
+                   Condition.ToString(indent + ChildrenPrefix(last), false) +
+                   Exp1.ToString(indent + ChildrenPrefix(last), false) +
+                   Exp2.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class AssignmentExp : BinaryExp
+    {
+        public AssignmentExp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.ASSIGNMENTEXP;
+
+        public static AssignmentExp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new AssignmentExp(token, left, right);
+        }
+    }
+
+    public class Exp : BinaryExp
+    {
+        public Exp(OperatorToken token, Node left, Node right) : base(token, left, right)
+        {
+        }
+        
+        public override NodeType Type => NodeType.EXP;
+        
+        public static Exp Instance(OperatorToken token, Node left, Node right)
+        {
+            return new Exp(token, left, right);
         }
     }
 }

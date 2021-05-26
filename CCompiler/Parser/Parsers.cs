@@ -392,5 +392,87 @@ namespace CCompiler.Parser
         {
             return ParseBinaryExp(ParseLogicalAndExp, LogicalOrExp.Instance, new List<OperatorType>() {OperatorType.OR});
         }
+        
+        /*
+         * conditional_exp : logical_or_exp
+            | logical_or_exp '?' exp ':' conditional_exp
+            ;
+         */
+        
+        private IParseResult ParseConditionalExp()
+        {
+            var left = ParseLogicalOrExp();
+            if (!left.IsSuccess)
+                return left;
+
+            if (AcceptOp(OperatorType.QUESTION))
+            {
+                var exp = ParseLogicalOrExp(); // TODO Must be Exp.
+                if (!exp.IsSuccess)
+                    return exp;
+
+                if (ExceptOp(OperatorType.COLON))
+                {
+                    var conditionalExp = ParseConditionalExp();
+                    if (!conditionalExp.IsSuccess)
+                        return conditionalExp;
+
+                    return new SuccessParseResult(new ConditionalExp(left.ResultNode, exp.ResultNode, conditionalExp.ResultNode));
+                }
+            }
+
+            return left;
+        }
+        
+        /*
+         * assignment_exp : conditional_exp
+            | unary_exp assignment_operator assignment_exp
+            ;
+                assignment_operator	: '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<='
+                    | '>>=' | '&=' | '^=' | '|='
+                    ;
+         */
+        
+        private IParseResult ParseAssignmentExp()
+        {
+            var result = ParseConditionalExp();
+            if (!result.IsSuccess)
+                return result;
+
+            if (result.ResultNode.Type == NodeType.UNARYEXP || result.ResultNode.Type == NodeType.POSTFIXEXP ||
+                result.ResultNode.Type == NodeType.PRIMARYEXP || result.ResultNode.Type == NodeType.CONST)
+            {
+                var available = new List<OperatorType>()
+                {
+                    OperatorType.ASSIGN, OperatorType.MULTASSIGN, OperatorType.DIVASSIGN, OperatorType.MODASSIGN,
+                    OperatorType.ADDASSIGN, OperatorType.SUBASSIGN, OperatorType.LSHIFTASSIGN,
+                    OperatorType.RSHIFTASSIGN, OperatorType.ANDASSIGN, OperatorType.ORASSIGN, OperatorType.XORASSIGN
+                };
+                
+                if (available.FirstOrDefault(AcceptOp) != OperatorType.NONE)
+                {
+                    var opToken = _acceptedToken;
+                    var assignmentExp = ParseAssignmentExp();
+                    if (!assignmentExp.IsSuccess)
+                        return assignmentExp;
+
+                    return new SuccessParseResult(new AssignmentExp(opToken as OperatorToken, result.ResultNode,
+                        assignmentExp.ResultNode));
+                }
+            }
+
+            return result;
+        }
+        
+        /*
+         * exp : assignment_exp
+            | exp ',' assignment_exp
+            ;
+         */
+
+        private IParseResult ParseExp()
+        {
+            return ParseBinaryExp(ParseAssignmentExp, Exp.Instance, new List<OperatorType>() {OperatorType.COMMA});
+        }
     }
 }
