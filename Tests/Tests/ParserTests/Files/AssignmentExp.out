@@ -1,0 +1,8 @@
+\-ASSIGN
+  |-a
+  \-MULTASSIGN
+    |-b
+    \-LESS
+      |-a
+      \-3
+
