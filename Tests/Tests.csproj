@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Tests" />
+    <Folder Include="Tests\StatParserTests\Files" />
   </ItemGroup>
 
 </Project>
