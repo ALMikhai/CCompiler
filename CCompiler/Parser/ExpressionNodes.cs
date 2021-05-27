@@ -434,11 +434,6 @@ namespace CCompiler.Parser
         }
         
         public override NodeType Type => NodeType.ASSIGNMENTEXP;
-
-        public static AssignmentExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new AssignmentExp(token, left, right);
-        }
     }
 
     public class Exp : BinaryExp
