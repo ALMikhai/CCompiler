@@ -18,14 +18,14 @@ namespace CCompiler.Parser
             if (Accept(TokenType.INT) || Accept(TokenType.CHAR) || Accept(TokenType.FLOAT))
                 return new SuccessParseResult(new Const(_acceptedToken));
 
-            return new FailedParseResult("failed parse const token", _currentToken);
+            return new FailedParseResult("expected expression", _currentToken);
         }
 
         /*
          * primary_exp : id +
 			| const +
 			| string +
-			| '(' exp ')'
+			| '(' exp ')' - This part go to CastExp.
          */
 
         private IParseResult ParsePrimaryExp()
@@ -34,20 +34,7 @@ namespace CCompiler.Parser
                 return new SuccessParseResult(new PrimaryExp(_acceptedToken));
 
             var @const = ParseConst();
-            if (@const.IsSuccess) return @const;
-
-            // This part go to CastExp.
-            // if (AcceptOp(OperatorType.LRBRACKET))
-            // {
-            //     var additiveExp = ParseAdditiveExp();
-            //     if (!additiveExp.IsSuccess)
-            //         return additiveExp;
-            //     
-            //     ExceptOp(OperatorType.RRBRACKET);
-            //     return additiveExp;
-            // }
-
-            return new FailedParseResult("failed parse primary exp", _currentToken);
+            return @const;
         }
 
         /*
@@ -72,7 +59,7 @@ namespace CCompiler.Parser
                 if (AcceptOp(OperatorType.LSBRACKET))
                 {
                     var op = _acceptedToken;
-                    var exp = ParseAdditiveExp(); // TODO Replace AdditiveExp to Exp.
+                    var exp = ParseExp();
                     if (!exp.IsSuccess)
                         return exp;
                     ExceptOp(OperatorType.RSBRACKET);
@@ -91,7 +78,7 @@ namespace CCompiler.Parser
                         continue;
                     }
 
-                    var exp = ParseAdditiveExp(); // TODO Replace AdditiveExp to ArgumentExpList.
+                    var exp = ParseExp(); // TODO Replace Exp to ArgumentExpList.
                     if (!exp.IsSuccess)
                         return exp;
                     ExceptOp(OperatorType.RRBRACKET);
@@ -136,7 +123,7 @@ namespace CCompiler.Parser
                 AcceptOp(OperatorType.NOT))
                 return new SuccessParseResult(new UnaryOperator(_acceptedToken as OperatorToken));
 
-            return new FailedParseResult("failed parse unary operator", _currentToken);
+            return new FailedParseResult("expected unary operator", _currentToken);
         }
 
         /*
@@ -234,7 +221,7 @@ namespace CCompiler.Parser
                 }
 
                 // Part from PrimaryExp.
-                var exp = ParseAdditiveExp(); // TODO Replace AdditiveExp to Exp.
+                var exp = ParseExp();
                 if (exp.IsSuccess)
                 {
                     ExceptOp(OperatorType.RRBRACKET);
@@ -407,7 +394,7 @@ namespace CCompiler.Parser
 
             if (AcceptOp(OperatorType.QUESTION))
             {
-                var exp = ParseLogicalOrExp(); // TODO Must be Exp.
+                var exp = ParseExp();
                 if (!exp.IsSuccess)
                     return exp;
 
