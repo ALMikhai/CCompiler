@@ -28,7 +28,7 @@ namespace CCompiler.Parser
                     result = ParseExp();
                     break;
                 case SyntaxParserType.STAT:
-                    result = ParseJumpStat();
+                    result = ParseStat();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(parserType), parserType, null);

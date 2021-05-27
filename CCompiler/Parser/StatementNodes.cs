@@ -37,4 +37,49 @@ namespace CCompiler.Parser
                    Exp.ToString(indent + ChildrenPrefix(last), true);
         }
     }
+
+    public class IfStat : Node
+    {
+        public Node Exp { get; }
+        public Node Stat1 { get; }
+        public Node Stat2 { get; }
+
+        public IfStat(Node exp, Node stat1, Node stat2)
+        {
+            Exp = exp;
+            Stat1 = stat1;
+            Stat2 = stat2;
+        }
+        
+        public override NodeType Type => NodeType.IF;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + $"IF" + "\r\n" +
+                   Exp.ToString(indent + ChildrenPrefix(last), false) +
+                   Stat1.ToString(indent + ChildrenPrefix(last), false) +
+                   Stat2?.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+    
+    public class SwitchStat : Node
+    {
+        public Node Exp { get; }
+        public Node Stat { get; }
+
+        public SwitchStat(Node exp, Node stat)
+        {
+            Exp = exp;
+            Stat = stat;
+        }
+        
+        public override NodeType Type => NodeType.SWITCH;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + $"SWITCH" + "\r\n" +
+                   Exp.ToString(indent + ChildrenPrefix(last), false) +
+                   Stat.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
 }

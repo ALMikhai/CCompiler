@@ -27,7 +27,9 @@ namespace CCompiler.Parser
         ASSIGNMENTEXP,
         EXP,
         JUMP,
-        RETURN
+        RETURN,
+        IF,
+        SWITCH
     }
 
     public class Node
