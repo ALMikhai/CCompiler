@@ -14,7 +14,7 @@ namespace CCompiler.Parser
             _tokenizer = tokenizer;
 
             NextToken();
-            var additiveExp = ParseAndExp();
+            var additiveExp = ParseExp();
             Console.WriteLine(additiveExp.IsSuccess
                 ? additiveExp.ResultNode.ToString()
                 : throw new ParserException(_currentToken, additiveExp.ErrorMessage));
