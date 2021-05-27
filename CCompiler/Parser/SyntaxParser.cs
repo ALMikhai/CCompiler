@@ -1,26 +1,45 @@
 ﻿using System;
+using System.Data.SqlTypes;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
+    public enum SyntaxParserType
+    {
+        EXP,
+        STAT
+    }
+    
     public partial class SyntaxParser
     {
         private readonly Tokenizer.Tokenizer _tokenizer;
         private Token _acceptedToken;
         private Token _currentToken;
 
-        public SyntaxParser(Tokenizer.Tokenizer tokenizer)
+        public SyntaxParser(Tokenizer.Tokenizer tokenizer, SyntaxParserType parserType)
         {
             _tokenizer = tokenizer;
 
             NextToken();
-            var additiveExp = ParseExp();
-            Console.WriteLine(additiveExp.IsSuccess
-                ? additiveExp.ResultNode.ToString()
-                : throw new ParserException(_currentToken, additiveExp.ErrorMessage));
+            IParseResult result;
+            switch (parserType)
+            {
+                case SyntaxParserType.EXP:
+                    result = ParseExp();
+                    break;
+                case SyntaxParserType.STAT:
+                    result = ParseJumpStat();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(parserType), parserType, null);
+            }
+            
+            Console.WriteLine(result.IsSuccess
+                ? result.ResultNode.ToString()
+                : throw new ParserException(_currentToken, result.ErrorMessage));
         }
 
-        public SyntaxParser(string filePath) : this(new Tokenizer.Tokenizer(filePath))
+        public SyntaxParser(string filePath, SyntaxParserType parserType) : this(new Tokenizer.Tokenizer(filePath), parserType)
         {
         }
 

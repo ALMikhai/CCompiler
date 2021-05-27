@@ -29,7 +29,12 @@ namespace CCompiler
 
                 if (args.Contains("-p"))
                 {
-                    var parser = new SyntaxParser(tokenizer);
+                    var parser = new SyntaxParser(tokenizer, SyntaxParserType.EXP);
+                }
+                
+                if (args.Contains("-ps"))
+                {
+                    var parser = new SyntaxParser(tokenizer, SyntaxParserType.STAT);
                 }
             }
             catch (FileNotFoundException e)
