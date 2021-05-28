@@ -274,5 +274,240 @@ namespace CCompiler.Parser
             
             return new FailedParseResult("expected iteration statement", _currentToken);
         }
+        
+        /*
+         * compound_stat : '{' decl_list stat_list '}'
+            | '{'		stat_list '}'
+            | '{' decl_list		'}'
+            | '{'			'}'
+            ;
+         */
+
+        public IParseResult ParseCompoundStat()
+        {
+            throw new NotImplementedException();
+        }
+
+        /*
+         * decl_list : decl
+			| decl_list decl
+			;
+         */
+        
+        public IParseResult ParseDeclList()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * stat_list : stat
+			| stat_list stat
+			;
+         */
+        
+        public IParseResult ParseStatList()
+        {
+            throw new NotImplementedException();
+        }
+        
+        
+        /*
+         * decl	: decl_specs init_declarator_list ';'
+            | decl_specs			';'
+            ;
+         */
+        
+        public IParseResult ParseDecl()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * decl_specs : storage_class_spec decl_specs
+            | storage_class_spec
+            | type_spec decl_specs
+            | type_spec
+            | type_qualifier decl_specs
+            | type_qualifier
+            ;
+            
+           storage_class_spec : 'auto' | 'register' | 'static' | 'extern' | 'typedef'
+			;
+			
+		   type_spec : 'void' | 'char' | 'short' | 'int' | 'long' | 'float'
+			| 'double' | 'signed' | 'unsigned'
+			| struct_or_union_spec
+			| enum_spec
+			| typedef_name
+			;
+			
+		   type_qualifier : 'const' | 'volatile'
+            ;
+         */
+        
+        public IParseResult ParseDeclSpecs()
+        {
+            throw new NotImplementedException();
+        }
+
+        /*
+         * init_declarator_list	: init_declarator
+            | init_declarator_list ',' init_declarator
+            ;
+         */
+        
+        public IParseResult ParseInitDeclaratorList()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * init_declarator : declarator
+            | declarator '=' initializer
+            ;
+         */
+        
+        public IParseResult ParseInitDeclarator()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * declarator : pointer direct_declarator
+            |	direct_declarator
+            ;
+         */
+        
+        public IParseResult ParseDeclarator()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * pointer : '*' type_qualifier_list
+            | '*'
+            | '*' type_qualifier_list pointer
+            | '*'			pointer
+            ;
+         */
+        
+        public IParseResult ParsePointer()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * type_qualifier_list : type_qualifier
+            | type_qualifier_list type_qualifier
+            ;
+         */
+
+        public IParseResult ParseTypeQualifierList()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * direct_declarator : id
+            | '(' declarator ')'
+            | direct_declarator '[' const_exp ']'
+            | direct_declarator '['		']'
+            | direct_declarator '(' param_type_list ')'
+            | direct_declarator '(' id_list ')'
+            | direct_declarator '('		')'
+            ;
+         */
+        
+        public IParseResult ParseDirectDeclarator()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * param_type_list : param_list
+            | param_list ',' '...'
+            ;
+         */
+        
+        public IParseResult ParseParamTypeList()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * param_list : param_decl
+            | param_list ',' param_decl
+            ;
+         */
+        
+        public IParseResult ParseParamList()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * param_decl : decl_specs declarator
+            | decl_specs abstract_declarator
+            | decl_specs
+            ;
+         */
+        
+        public IParseResult ParseParamDecl()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * abstract_declarator : pointer
+            | pointer direct_abstract_declarator
+            |	direct_abstract_declarator
+            ;
+         */
+        
+        public IParseResult ParseAbstractDeclarator()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * direct_abstract_declarator : '(' abstract_declarator ')'
+            | direct_abstract_declarator '[' const_exp ']'
+            |				'[' const_exp ']'
+            | direct_abstract_declarator '['	']'
+            |				'['	']'
+            | direct_abstract_declarator '(' param_type_list ')'
+            |				'(' param_type_list ')'
+            | direct_abstract_declarator '('		')'
+            |				'('		')'
+            ;
+         */
+        
+        public IParseResult ParseDirectAbstractDeclarator()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * initializer : assignment_exp
+            | '{' initializer_list '}'
+            | '{' initializer_list ',' '}'
+            ;
+         */
+        
+        public IParseResult ParseInitializer()
+        {
+            throw new NotImplementedException();
+        }
+        
+        /*
+         * initializer_list	: initializer
+            | initializer_list ',' initializer
+            ;
+         */
+        
+        public IParseResult ParseInitializerList()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
