@@ -6,6 +6,7 @@ namespace CCompiler.Parser
 {
     public enum NodeType
     {
+        NULL,
         CONST,
         PRIMARYEXP,
         POSTFIXEXP,
@@ -29,7 +30,9 @@ namespace CCompiler.Parser
         JUMP,
         RETURN,
         IF,
-        SWITCH
+        SWITCH,
+        WHILE,
+        FOR
     }
 
     public class Node
