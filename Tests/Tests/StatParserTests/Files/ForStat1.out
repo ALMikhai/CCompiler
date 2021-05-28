@@ -1,0 +1,13 @@
+\-FOR
+  |-ASSIGN
+  | |-i
+  | \-0
+  |-MORE
+  | |-i
+  | \-0
+  |-DEC
+  | \-i
+  \-ASSIGN
+    |-a
+    \-1
+

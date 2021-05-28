@@ -1,0 +1,8 @@
+\-DOWHILE
+  |-MORE
+  | |-a
+  | \-1
+  \-ADDASSIGN
+    |-a
+    \-1
+
