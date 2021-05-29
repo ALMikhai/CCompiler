@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
@@ -15,12 +16,16 @@ namespace CCompiler.Parser
             ;
          */
 
-        public IParseResult ParseStat()
+        private IParseResult ParseStat()
         {
             var expStat = ParseExpStat();
             if (expStat.IsSuccess)
                 return expStat;
-            
+
+            var compoundStat = ParseCompoundStat();
+            if (compoundStat.IsSuccess)
+                return compoundStat;
+
             var selectionStat = ParseSelectionStat();
             if (selectionStat.IsSuccess)
                 return selectionStat;
@@ -45,7 +50,7 @@ namespace CCompiler.Parser
             ;
          */
 
-        public IParseResult ParseJumpStat()
+        private IParseResult ParseJumpStat()
         {
             if (AcceptKeyword(KeywordType.CONTINUE))
             {
@@ -90,7 +95,7 @@ namespace CCompiler.Parser
             ;
          */
 
-        public IParseResult ParseSelectionStat()
+        private IParseResult ParseSelectionStat()
         {
             if (AcceptKeyword(KeywordType.IF))
             {
@@ -159,7 +164,7 @@ namespace CCompiler.Parser
 			;
          */
 
-        public IParseResult ParseExpStat()
+        private IParseResult ParseExpStat()
         {
             if (AcceptOp(OperatorType.SEMICOLON))
             {
@@ -192,7 +197,7 @@ namespace CCompiler.Parser
             ;
          */
 
-        public IParseResult ParseIterationStat()
+        private IParseResult ParseIterationStat()
         {
             if (AcceptKeyword(KeywordType.WHILE))
             {
@@ -277,15 +282,42 @@ namespace CCompiler.Parser
         
         /*
          * compound_stat : '{' decl_list stat_list '}'
-            | '{'		stat_list '}'
-            | '{' decl_list		'}'
+            | '{'		stat_list '}t	'
+                                        | '{' decl_lis	'}'
             | '{'			'}'
             ;
          */
 
-        public IParseResult ParseCompoundStat()
+        private IParseResult ParseCompoundStat()
         {
-            throw new NotImplementedException();
+            if (AcceptOp(OperatorType.LFBRACKET))
+            {
+                var declList = ParseDeclList();
+                var statList = ParseStatList();
+
+                if (ExceptOp(OperatorType.RFBRACKET))
+                {
+                    if (declList.IsSuccess && statList.IsSuccess)
+                    {
+                        return new SuccessParseResult(new CompoundStat(declList.ResultNode,
+                            statList.ResultNode));
+                    }
+
+                    if (declList.IsSuccess)
+                    {
+                        return new SuccessParseResult(new CompoundStat(declList.ResultNode, new NullStat()));
+                    }
+
+                    if (statList.IsSuccess)
+                    {
+                        return new SuccessParseResult(new Pointer(new NullStat(), statList.ResultNode));
+                    }
+                    
+                    return new SuccessParseResult(new NullStat());
+                }
+            }
+            
+            return new FailedParseResult("expected compound statement", _currentToken);
         }
 
         /*
@@ -294,9 +326,9 @@ namespace CCompiler.Parser
 			;
          */
         
-        public IParseResult ParseDeclList()
+        private IParseResult ParseDeclList()
         {
-            throw new NotImplementedException();
+            return ParseList(ParseDecl, DeclList.Instance);
         }
         
         /*
@@ -305,9 +337,9 @@ namespace CCompiler.Parser
 			;
          */
         
-        public IParseResult ParseStatList()
+        private IParseResult ParseStatList()
         {
-            throw new NotImplementedException();
+            return ParseList(ParseStat, StatList.Instance);
         }
         
         
@@ -317,9 +349,21 @@ namespace CCompiler.Parser
             ;
          */
         
-        public IParseResult ParseDecl()
+        private IParseResult ParseDecl()
         {
-            throw new NotImplementedException();
+            var declSpecs = ParseDeclSpecs();
+            if (declSpecs.IsSuccess)
+            {
+                var initDeclaratorList = ParseInitDeclaratorList();
+                if (initDeclaratorList.IsSuccess)
+                    if (ExceptOp(OperatorType.SEMICOLON))
+                        return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclaratorList.ResultNode));
+                    else
+                        if (ExceptOp(OperatorType.SEMICOLON))
+                            return new SuccessParseResult(new Decl(declSpecs.ResultNode, new NullStat()));
+            }
+            
+            return new FailedParseResult("expected decl", _currentToken);
         }
         
         /*
@@ -330,24 +374,98 @@ namespace CCompiler.Parser
             | type_qualifier decl_specs
             | type_qualifier
             ;
+         */
+        
+        private IParseResult ParseDeclSpecs()
+        {
+            var storageClassSpec = ParseStorageClassSpec();
+            if (storageClassSpec.IsSuccess)
+            {
+                var declSpecs = ParseDeclSpecs();
+                if (declSpecs.IsSuccess)
+                    return new SuccessParseResult(new DeclSpecs(storageClassSpec.ResultNode, declSpecs.ResultNode));
+                else
+                    return new SuccessParseResult(new DeclSpecs(storageClassSpec.ResultNode, new NullStat()));
+            }
             
-           storage_class_spec : 'auto' | 'register' | 'static' | 'extern' | 'typedef'
+            var typeSpec = ParseTypeSpec();
+            if (typeSpec.IsSuccess)
+            {
+                var declSpecs = ParseDeclSpecs();
+                if (declSpecs.IsSuccess)
+                    return new SuccessParseResult(new DeclSpecs(typeSpec.ResultNode, declSpecs.ResultNode));
+                else
+                    return new SuccessParseResult(new DeclSpecs(typeSpec.ResultNode, new NullStat()));
+            }
+            
+            var typeQualifier = ParseTypeQualifier();
+            if (typeQualifier.IsSuccess)
+            {
+                var declSpecs = ParseDeclSpecs();
+                if (declSpecs.IsSuccess)
+                    return new SuccessParseResult(new DeclSpecs(typeQualifier.ResultNode, declSpecs.ResultNode));
+                else
+                    return new SuccessParseResult(new DeclSpecs(typeQualifier.ResultNode, new NullStat()));
+            }
+            
+            return new FailedParseResult("expected decl specs", _currentToken);
+        }
+        
+        /*
+         * storage_class_spec : 'auto' | 'register' | 'static' | 'extern' | 'typedef'
 			;
-			
-		   type_spec : 'void' | 'char' | 'short' | 'int' | 'long' | 'float'
+         */
+
+        public IParseResult ParseStorageClassSpec()
+        {
+            if (AcceptKeyword(KeywordType.AUTO) || AcceptKeyword(KeywordType.REGISTER) ||
+                AcceptKeyword(KeywordType.STATIC) || AcceptKeyword(KeywordType.EXTERN) ||
+                AcceptKeyword(KeywordType.TYPEDEF))
+            {
+                return new SuccessParseResult(new StorageClassSpec(_acceptedToken as KeywordToken));
+            }
+            
+            return new FailedParseResult("expected storage class spec", _currentToken);
+        }
+        
+        /*
+         * type_spec : 'void' | 'char' | 'short' | 'int' | 'long' | 'float'
 			| 'double' | 'signed' | 'unsigned'
 			| struct_or_union_spec
 			| enum_spec
 			| typedef_name
 			;
-			
-		   type_qualifier : 'const' | 'volatile'
+         */
+
+        private IParseResult ParseTypeSpec()
+        {
+            if (AcceptKeyword(KeywordType.VOID) || AcceptKeyword(KeywordType.CHAR)  || AcceptKeyword(KeywordType.UNSIGNED) ||
+                AcceptKeyword(KeywordType.SHORT) || AcceptKeyword(KeywordType.INT) || AcceptKeyword(KeywordType.LONG) ||
+                AcceptKeyword(KeywordType.FLOAT) || AcceptKeyword(KeywordType.DOUBLE) || AcceptKeyword(KeywordType.SIGNED))
+            {
+                return new SuccessParseResult(new TypeSpec(_acceptedToken as KeywordToken));
+            }
+            
+            // TODO struct_or_union_spec
+            // TODO enum_spec
+            // TODO typedef_name
+            
+            return new FailedParseResult("expected type spec", _currentToken);
+        }
+        
+        /*
+         * type_qualifier : 'const' | 'volatile'
             ;
          */
-        
-        public IParseResult ParseDeclSpecs()
+
+        private IParseResult ParseTypeQualifier()
         {
-            throw new NotImplementedException();
+            if (AcceptKeyword(KeywordType.CONST) || AcceptKeyword(KeywordType.VOLATILE))
+            {
+                return new SuccessParseResult(new TypeQualifier(_acceptedToken as KeywordToken));
+            }
+            
+            return new FailedParseResult("expected type qualifier", _currentToken);
         }
 
         /*
@@ -356,9 +474,9 @@ namespace CCompiler.Parser
             ;
          */
         
-        public IParseResult ParseInitDeclaratorList()
+        private IParseResult ParseInitDeclaratorList()
         {
-            throw new NotImplementedException();
+            return ParseList(ParseInitDeclarator, InitDeclaratorList.Instance, OperatorType.COMMA);
         }
         
         /*
@@ -367,9 +485,22 @@ namespace CCompiler.Parser
             ;
          */
         
-        public IParseResult ParseInitDeclarator()
+        private IParseResult ParseInitDeclarator()
         {
-            throw new NotImplementedException();
+            var declarator = ParseDeclarator();
+            if (!declarator.IsSuccess)
+                return declarator;
+
+            if (AcceptOp(OperatorType.ASSIGN))
+            {
+                var initializer = ParseInitializer();
+                if (!initializer.IsSuccess)
+                    return initializer;
+
+                return new SuccessParseResult(new InitDeclarator(declarator.ResultNode, initializer.ResultNode));
+            }
+
+            return declarator;
         }
         
         /*
@@ -378,9 +509,20 @@ namespace CCompiler.Parser
             ;
          */
         
-        public IParseResult ParseDeclarator()
+        private IParseResult ParseDeclarator()
         {
-            throw new NotImplementedException();
+            var pointer = ParsePointer();
+            var directDeclarator = ParseDirectDeclarator();
+
+            if (directDeclarator.IsSuccess)
+            {
+                if (pointer.IsSuccess)
+                    return new SuccessParseResult(new Declarator(pointer.ResultNode, directDeclarator.ResultNode));
+                else
+                    return new SuccessParseResult(new Declarator(new NullStat(), directDeclarator.ResultNode));
+            }
+            
+            return new FailedParseResult("expected declarator", _currentToken);
         }
         
         /*
@@ -391,9 +533,32 @@ namespace CCompiler.Parser
             ;
          */
         
-        public IParseResult ParsePointer()
+        private IParseResult ParsePointer()
         {
-            throw new NotImplementedException();
+            if (!AcceptOp(OperatorType.MULT))
+                return new FailedParseResult("expected pointer", _currentToken);
+
+            var typeQualifierList = ParseTypeQualifierList();
+            var pointer = ParsePointer();
+            
+            if (pointer.IsSuccess && typeQualifierList.IsSuccess)
+            {
+                return new SuccessParseResult(new Pointer(pointer.ResultNode,
+                    typeQualifierList.ResultNode));
+            }
+
+            if (pointer.IsSuccess)
+            {
+                return new SuccessParseResult(new Pointer(pointer.ResultNode, new NullStat()));
+            }
+
+            if (typeQualifierList.IsSuccess)
+            {
+                return new SuccessParseResult(new Pointer(new NullStat(),
+                    typeQualifierList.ResultNode));
+            }
+            
+            return new SuccessParseResult(new Pointer(new NullStat(), new NullStat()));
         }
         
         /*
@@ -402,36 +567,108 @@ namespace CCompiler.Parser
             ;
          */
 
-        public IParseResult ParseTypeQualifierList()
+        private IParseResult ParseTypeQualifierList()
         {
-            throw new NotImplementedException();
+            return ParseList(ParseTypeQualifier, TypeQualifierList.Instance);
         }
         
         /*
          * direct_declarator : id
             | '(' declarator ')'
-            | direct_declarator '[' const_exp ']'
+            | direct_declarator '[' conditional_exp ']'
             | direct_declarator '['		']'
-            | direct_declarator '(' param_type_list ')'
+            | direct_declarator '(' param_list ')'
             | direct_declarator '(' id_list ')'
             | direct_declarator '('		')'
             ;
          */
         
-        public IParseResult ParseDirectDeclarator()
+        private IParseResult ParseDirectDeclarator()
         {
-            throw new NotImplementedException();
-        }
-        
-        /*
-         * param_type_list : param_list
-            | param_list ',' '...'
-            ;
-         */
-        
-        public IParseResult ParseParamTypeList()
-        {
-            throw new NotImplementedException();
+            IParseResult left = null;
+            
+            var primaryExp = ParsePrimaryExp();
+            if (primaryExp.IsSuccess && ((PrimaryExp) primaryExp.ResultNode).Token.TokenType == TokenType.IDENTIFIER)
+            {
+                left = primaryExp;
+            }
+            else if (AcceptOp(OperatorType.LRBRACKET))
+            {
+                var declarator = ParseDeclarator();
+                if (!declarator.IsSuccess)
+                    return declarator;
+                if (ExceptOp(OperatorType.RRBRACKET))
+                {
+                    left = declarator;
+                }
+            }
+
+            if (left == null)
+            {
+                return new FailedParseResult("expected parse direct declarator", _currentToken);
+            }
+            
+            while (AcceptOp(OperatorType.LSBRACKET) || AcceptOp(OperatorType.LRBRACKET))
+            {
+                var op = _acceptedToken as OperatorToken;
+                
+                if (op.Type == OperatorType.LSBRACKET)
+                {
+                    if (AcceptOp(OperatorType.RSBRACKET))
+                    {
+                        left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
+                            new NullStat()));
+                        continue;
+                    }
+
+                    var conditionalExp = ParseConditionalExp();
+                    if (!conditionalExp.IsSuccess)
+                        return conditionalExp;
+
+                    if (ExceptOp(OperatorType.RSBRACKET))
+                    {
+                        left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
+                            conditionalExp.ResultNode));
+                        continue;
+                    }
+                }
+                
+                if (op.Type == OperatorType.LRBRACKET)
+                {
+                    if (AcceptOp(OperatorType.RSBRACKET))
+                    {
+                        left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
+                            new NullStat()));
+                        continue;
+                    }
+
+                    var paramList = ParseParamList();
+                    if (paramList.IsSuccess)
+                    {
+                        if (ExceptOp(OperatorType.RSBRACKET))
+                        {
+                            left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
+                                paramList.ResultNode));
+                            continue;
+                        }
+                    }
+
+                    var idList = ParseIdList();
+                    if (idList.IsSuccess)
+                    {
+                        if (ExceptOp(OperatorType.RSBRACKET))
+                        {
+                            left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
+                                idList.ResultNode));
+                            continue;
+                        }
+                    }
+                }
+                
+                break;
+            }
+
+            return left;
         }
         
         /*
@@ -440,9 +677,9 @@ namespace CCompiler.Parser
             ;
          */
         
-        public IParseResult ParseParamList()
+        private IParseResult ParseParamList()
         {
-            throw new NotImplementedException();
+            return ParseList(ParseParamDecl, ParamList.Instance, OperatorType.COMMA);
         }
         
         /*
@@ -452,9 +689,21 @@ namespace CCompiler.Parser
             ;
          */
         
-        public IParseResult ParseParamDecl()
+        private IParseResult ParseParamDecl()
         {
-            throw new NotImplementedException();
+            var declSpecs = ParseDeclSpecs();
+            if (!declSpecs.IsSuccess)
+                return declSpecs; // TODO return declSpecs or FailedParseResult?
+
+            var declarator = ParseDeclarator();
+            if (declarator.IsSuccess)
+                return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, declarator.ResultNode));
+
+            var abstractDeclarator = ParseAbstractDeclarator();
+            if (abstractDeclarator.IsSuccess)
+                return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, abstractDeclarator.ResultNode));
+            
+            return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, new NullStat()));
         }
         
         /*
@@ -464,9 +713,29 @@ namespace CCompiler.Parser
             ;
          */
         
-        public IParseResult ParseAbstractDeclarator()
+        private IParseResult ParseAbstractDeclarator()
         {
-            throw new NotImplementedException();
+            var pointer = ParsePointer();
+            var directAbstractDeclarator = ParseDirectAbstractDeclarator();
+
+            if (pointer.IsSuccess && directAbstractDeclarator.IsSuccess)
+            {
+                return new SuccessParseResult(new AbstractDeclarator(pointer.ResultNode,
+                    directAbstractDeclarator.ResultNode));
+            }
+
+            if (pointer.IsSuccess)
+            {
+                return new SuccessParseResult(new AbstractDeclarator(pointer.ResultNode, new NullStat()));
+            }
+
+            if (directAbstractDeclarator.IsSuccess)
+            {
+                return new SuccessParseResult(new AbstractDeclarator(new NullStat(),
+                    directAbstractDeclarator.ResultNode));
+            }
+            
+            return new FailedParseResult("expected abstract declarator", _currentToken);
         }
         
         /*
@@ -475,28 +744,105 @@ namespace CCompiler.Parser
             |				'[' const_exp ']'
             | direct_abstract_declarator '['	']'
             |				'['	']'
-            | direct_abstract_declarator '(' param_type_list ')'
-            |				'(' param_type_list ')'
+            | direct_abstract_declarator '(' param_list ')'
+            |				'(' param_list ')'
             | direct_abstract_declarator '('		')'
             |				'('		')'
             ;
          */
         
-        public IParseResult ParseDirectAbstractDeclarator()
+        private IParseResult ParseDirectAbstractDeclarator()
         {
-            throw new NotImplementedException();
+            IParseResult left = null;
+
+            while (true)
+            {
+                if (AcceptOp(OperatorType.LRBRACKET))
+                {
+                    var abstractDeclarator = ParseAbstractDeclarator();
+                    if (abstractDeclarator.IsSuccess)
+                    {
+                        if (ExceptOp(OperatorType.RRBRACKET))
+                        {
+                            left = new SuccessParseResult(new DirectAbstractDeclarator(
+                                left == null ? new NullStat() : left.ResultNode,
+                                OperatorType.LRBRACKET, abstractDeclarator.ResultNode));
+                            continue;
+                        }
+                    }
+
+                    var paramTypeList = ParseParamList();
+                    if (paramTypeList.IsSuccess)
+                    {
+                        if (ExceptOp(OperatorType.RRBRACKET))
+                        {
+                            left = new SuccessParseResult(new DirectAbstractDeclarator(
+                                left == null ? new NullStat() : left.ResultNode,
+                                OperatorType.LRBRACKET, paramTypeList.ResultNode));
+                            continue;
+                        }
+                    }
+
+                    if (ExceptOp(OperatorType.RRBRACKET))
+                    {
+                        left = new SuccessParseResult(new DirectAbstractDeclarator(
+                            left == null ? new NullStat() : left.ResultNode,
+                            OperatorType.LRBRACKET, new NullStat()));
+                        continue;
+                    }
+                }
+
+                if (AcceptOp(OperatorType.LSBRACKET))
+                {
+                    var @const = ParseConst();
+                    if (@const.IsSuccess)
+                    {
+                        if (ExceptOp(OperatorType.RSBRACKET))
+                        {
+                            left = new SuccessParseResult(new DirectAbstractDeclarator(
+                                left == null ? new NullStat() : left.ResultNode,
+                                OperatorType.LSBRACKET, @const.ResultNode));
+                            continue;
+                        }
+                    }
+                
+                    if (ExceptOp(OperatorType.RSBRACKET))
+                    {
+                        left = new SuccessParseResult(new DirectAbstractDeclarator(
+                            left == null ? new NullStat() : left.ResultNode,
+                            OperatorType.LSBRACKET, new NullStat()));
+                        continue;
+                    }
+                }
+                
+                break;
+            }
+
+            return left ?? new FailedParseResult("expected direct abstract declarator", _currentToken);
         }
         
         /*
          * initializer : assignment_exp
             | '{' initializer_list '}'
-            | '{' initializer_list ',' '}'
+            | '{' initializer_list ',' '}' TODO is not working now.
             ;
          */
         
-        public IParseResult ParseInitializer()
+        private IParseResult ParseInitializer()
         {
-            throw new NotImplementedException();
+            if (AcceptOp(OperatorType.LFBRACKET))
+            {
+                var initializerList = ParseInitializerList();
+                if (!initializerList.IsSuccess)
+                    return initializerList;
+
+                if (ExceptOp(OperatorType.RFBRACKET))
+                {
+                    return new SuccessParseResult(new Initializer(initializerList.ResultNode));
+                }
+            }
+
+            return ParseAssignmentExp();
         }
         
         /*
@@ -505,9 +851,67 @@ namespace CCompiler.Parser
             ;
          */
         
-        public IParseResult ParseInitializerList()
+        private IParseResult ParseInitializerList()
         {
-            throw new NotImplementedException();
+            return ParseList(ParseInitializer, InitializerList.Instance, OperatorType.COMMA);
+        }
+
+        delegate List ListCtor();
+
+        private IParseResult ParseList(Parser parser, ListCtor ctor, OperatorType separator)
+        {
+            var list = ctor();
+            
+            do
+            {
+                var parseResult = parser();
+                if (!parseResult.IsSuccess)
+                    return parseResult;
+
+                list.Add(parseResult.ResultNode);
+            } while (AcceptOp(separator));
+
+            if (list.Nodes.Count == 0)
+                return new FailedParseResult("expected list", _currentToken);
+
+            return new SuccessParseResult(list);
+        }
+        
+        private IParseResult ParseList(Parser parser, ListCtor ctor)
+        {
+            var list = ctor();
+            
+            do
+            {
+                var parseResult = parser();
+                if (!parseResult.IsSuccess)
+                    break;
+        
+                list.Add(parseResult.ResultNode);
+            } while (true);
+        
+            if (list.Nodes.Count == 0)
+                return new FailedParseResult("expected list", _currentToken);
+            
+            return new SuccessParseResult(list);
+        }
+        
+        /*
+         * id_list : id
+            | id_list ',' id
+         */
+        
+        private IParseResult ParseIdList()
+        {
+            return ParseList(ParseId, IdList.Instance, OperatorType.COMMA);
+        }
+
+        private IParseResult ParseId()
+        {
+            if (Accept(TokenType.IDENTIFIER))
+                return new SuccessParseResult(new Const(_acceptedToken));
+            
+            return new FailedParseResult("expected identifier", _currentToken);
         }
     }
 }

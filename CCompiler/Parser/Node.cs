@@ -32,7 +32,28 @@ namespace CCompiler.Parser
         IF,
         SWITCH,
         WHILE,
-        FOR
+        FOR,
+        INITIALIZER,
+        INITIALIZERLIST,
+        DIRECTABSTRACTDECLARATOR,
+        ABSTRACTDECLARATOR,
+        PARAMDECLARATOR,
+        PARAMLIST,
+        POINTER,
+        DIRECTDECLARATOR,
+        IDLIST,
+        TYPEQUALIFIER,
+        TYPEQUALIFIERLIST,
+        DECLARATOR,
+        INITDECLARATOR,
+        INITDECLARATORLIST,
+        TYPESPEC,
+        STORAGECLASSSPEC,
+        DECLSPEC,
+        DECL,
+        STATLIST,
+        DECLLIST,
+        COMPOUNDSTAT
     }
 
     public class Node

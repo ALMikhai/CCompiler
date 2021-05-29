@@ -41,7 +41,7 @@ namespace CCompiler.Tokenizer
         SIZEOF
     }
 
-    internal class KeywordToken : Token
+    public class KeywordToken : Token
     {
         public KeywordToken(TokenType tokenType, string source, object value, KeywordType type) : base(tokenType,
             source, value)

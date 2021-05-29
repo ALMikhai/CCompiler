@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
@@ -33,7 +34,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"RETURN" + "\r\n" +
+            return indent + NodePrefix(last) + Type + "\r\n" +
                    Exp.ToString(indent + ChildrenPrefix(last), true);
         }
     }
@@ -55,7 +56,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"IF" + "\r\n" +
+            return indent + NodePrefix(last) + Type + "\r\n" +
                    Exp.ToString(indent + ChildrenPrefix(last), false) +
                    Stat1.ToString(indent + ChildrenPrefix(last), false) +
                    Stat2.ToString(indent + ChildrenPrefix(last), true);
@@ -77,7 +78,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"SWITCH" + "\r\n" +
+            return indent + NodePrefix(last) + Type + "\r\n" +
                    Exp.ToString(indent + ChildrenPrefix(last), false) +
                    Stat.ToString(indent + ChildrenPrefix(last), true);
         }
@@ -120,7 +121,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{WhileType}" + "\r\n" +
+            return indent + NodePrefix(last) + WhileType + "\r\n" +
                    Exp.ToString(indent + ChildrenPrefix(last), false) +
                    Stat.ToString(indent + ChildrenPrefix(last), true);
         }
@@ -145,11 +146,380 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + "FOR" + "\r\n" +
+            return indent + NodePrefix(last) + Type + "\r\n" +
                    Exp1.ToString(indent + ChildrenPrefix(last), false) +
                    Exp2.ToString(indent + ChildrenPrefix(last), false) +
                    Exp3.ToString(indent + ChildrenPrefix(last), false) +
                    Stat.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class Initializer : Node
+    {
+        public Node InitializerList { get; }
+
+        public Initializer(Node initializerList)
+        {
+            InitializerList = initializerList;
+        }
+        
+        public override NodeType Type => NodeType.INITIALIZER;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   InitializerList.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public abstract class List : Node
+    {
+        public List<Node> Nodes { get; } = new List<Node>();
+
+        public void Add(Node node)
+        {
+            Nodes.Add(node);
+        }
+        
+        public override string ToString(string indent, bool last)
+        {
+            var result = indent + NodePrefix(last) + Type + "\r\n";
+            for (int i = 0; i < Nodes.Count - 1; i++)
+            {
+                result += Nodes[i].ToString(indent + ChildrenPrefix(last), false);
+            }
+
+            result += Nodes.LastOrDefault()?.ToString(indent + ChildrenPrefix(last), true);
+            
+            return result;
+        }
+    }
+
+    public class InitializerList : List
+    {
+        public override NodeType Type => NodeType.INITIALIZERLIST;
+        public static InitializerList Instance()
+        {
+            return new InitializerList();
+        }
+    }
+
+    public class DirectAbstractDeclarator : Node
+    {
+        public Node Left { get; }
+        public OperatorType OperatorType { get; }
+        public Node Exp { get; }
+
+        public DirectAbstractDeclarator(Node left, OperatorType operatorType, Node exp)
+        {
+            Left = left;
+            OperatorType = operatorType;
+            Exp = exp;
+        }
+        
+        public override NodeType Type => NodeType.DIRECTABSTRACTDECLARATOR;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + OperatorType + "\r\n" +
+                   Left.ToString(indent + ChildrenPrefix(last), false) +
+                   Exp.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class AbstractDeclarator : Node
+    {
+        public Node Pointer { get; }
+        public Node DirectAbstractDeclarator { get; }
+
+        public AbstractDeclarator(Node pointer, Node directAbstractDeclarator)
+        {
+            Pointer = pointer;
+            DirectAbstractDeclarator = directAbstractDeclarator;
+        }
+        
+        public override NodeType Type => NodeType.ABSTRACTDECLARATOR;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   Pointer.ToString(indent + ChildrenPrefix(last), false) +
+                   DirectAbstractDeclarator.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class ParamDecl : Node
+    {
+        public Node DeclSpecs { get; }
+        public Node Declarator { get; }
+
+        public ParamDecl(Node declSpecs, Node declarator)
+        {
+            DeclSpecs = declSpecs;
+            Declarator = declarator;
+        }
+        
+        public override NodeType Type => NodeType.PARAMDECLARATOR;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   DeclSpecs.ToString(indent + ChildrenPrefix(last), false) +
+                   Declarator.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class ParamList : List
+    {
+        public override NodeType Type => NodeType.PARAMLIST;
+        public static ParamList Instance()
+        {
+            return new ParamList();
+        }
+    }
+
+    public class Pointer : Node
+    {
+        public Node TypeQualifierList { get; }
+        public Node PointerNode { get; }
+
+        public Pointer(Node pointerNode, Node typeQualifierList)
+        {
+            TypeQualifierList = typeQualifierList;
+            PointerNode = pointerNode;
+        }
+        
+        public override NodeType Type => NodeType.POINTER;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   TypeQualifierList.ToString(indent + ChildrenPrefix(last), false) +
+                   PointerNode.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class DirectDeclarator : Node
+    {
+        public Node Left { get; }
+        public OperatorToken Token { get; }
+        public Node Exp { get; }
+
+        public DirectDeclarator(Node left, OperatorToken token ,Node exp)
+        {
+            Left = left;
+            Token = token;
+            Exp = exp;
+        }
+        
+        public override NodeType Type => NodeType.DIRECTDECLARATOR;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Token.Type + "\r\n" +
+                   Left.ToString(indent + ChildrenPrefix(last), false) +
+                   Exp.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+    
+    public class IdList : List
+    {
+        public override NodeType Type => NodeType.IDLIST;
+        public static IdList Instance()
+        {
+            return new IdList();
+        }
+    }
+
+    public class TypeQualifier : Node
+    {
+        public KeywordToken Token { get; }
+
+        public TypeQualifier(KeywordToken token)
+        {
+            Token = token;
+        }
+        
+        public override NodeType Type => NodeType.TYPEQUALIFIER;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Token.Type + "\r\n";
+        }
+    }
+
+    public class TypeQualifierList : List
+    {
+        public override NodeType Type => NodeType.TYPEQUALIFIERLIST;
+        public static TypeQualifierList Instance()
+        {
+            return new TypeQualifierList();
+        }
+    }
+
+    public class Declarator : Node
+    {
+        public Node Pointer { get; }
+        public Node DirectDeclarator { get; }
+
+        public Declarator(Node pointer, Node directDeclarator)
+        {
+            Pointer = pointer;
+            DirectDeclarator = directDeclarator;
+        }
+        
+        public override NodeType Type => NodeType.DECLARATOR;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   Pointer.ToString(indent + ChildrenPrefix(last), false) +
+                   DirectDeclarator.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+    
+    public class InitDeclarator : Node
+    {
+        public Node Declarator { get; }
+        public Node Initializer { get; }
+
+        public InitDeclarator(Node declarator, Node initializer)
+        {
+            Declarator = declarator;
+            Initializer = initializer;
+        }
+            
+        public override NodeType Type => NodeType.INITDECLARATOR;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   Declarator.ToString(indent + ChildrenPrefix(last), false) +
+                   Initializer.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+    
+    public class InitDeclaratorList : List
+    {
+        public override NodeType Type => NodeType.INITDECLARATORLIST;
+        public static InitDeclaratorList Instance()
+        {
+            return new InitDeclaratorList();
+        }
+    }
+
+    public class TypeSpec : Node
+    {
+        public KeywordToken TokenType { get; }
+
+        public TypeSpec(KeywordToken tokenType)
+        {
+            TokenType = tokenType;
+        }
+        
+        public override NodeType Type => NodeType.TYPESPEC;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + TokenType.Type + "\r\n";
+        }
+    }
+
+    public class StorageClassSpec : Node
+    {
+        public KeywordToken TokenType { get; }
+
+        public StorageClassSpec(KeywordToken tokenType)
+        {
+            TokenType = tokenType;
+        }
+        
+        public override NodeType Type => NodeType.STORAGECLASSSPEC;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + TokenType + "\r\n";
+        }
+    }
+
+    public class DeclSpecs : Node
+    {
+        public Node Spec { get; }
+        public Node DeclSpec { get; }
+
+        public DeclSpecs(Node spec, Node declSpecs)
+        {
+            Spec = spec;
+            DeclSpec = declSpecs;
+        }
+        
+        public override NodeType Type => NodeType.DECLSPEC;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   Spec.ToString(indent + ChildrenPrefix(last), false) +
+                   DeclSpec.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class Decl : Node
+    {
+        public Node DeclSpec { get; }
+        public Node InitDeclaratorList { get; }
+
+        public Decl(Node declSpec, Node initDeclaratorList)
+        {
+            DeclSpec = declSpec;
+            InitDeclaratorList = initDeclaratorList;
+        }
+        
+        public override NodeType Type => NodeType.DECL;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   DeclSpec.ToString(indent + ChildrenPrefix(last), false) +
+                   InitDeclaratorList.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class StatList : List
+    {
+        public override NodeType Type => NodeType.STATLIST;
+        public static StatList Instance()
+        {
+            return new StatList();
+        }
+    }
+    
+    public class DeclList : List
+    {
+        public override NodeType Type => NodeType.DECLLIST;
+        public static DeclList Instance()
+        {
+            return new DeclList();
+        }
+    }
+
+    public class CompoundStat : Node
+    {
+        public Node DeclList { get; }
+        public Node StatList { get; }
+
+        public CompoundStat(Node declList, Node statList)
+        {
+            DeclList = declList;
+            StatList = statList;
+        }
+        
+        public override NodeType Type => NodeType.COMPOUNDSTAT;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   DeclList.ToString(indent + ChildrenPrefix(last), false) +
+                   StatList.ToString(indent + ChildrenPrefix(last), true);
         }
     }
 }
