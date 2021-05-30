@@ -522,4 +522,14 @@ namespace CCompiler.Parser
                    StatList.ToString(indent + ChildrenPrefix(last), true);
         }
     }
+
+    public class EmptyExp : Node
+    {
+        public override NodeType Type => NodeType.EMPTY;
+
+        public override string ToString(string indent, bool last)
+        {
+            return "";
+        }
+    }
 }

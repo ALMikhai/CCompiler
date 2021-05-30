@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using CCompiler.Tokenizer;
 
@@ -23,22 +24,30 @@ namespace CCompiler.Parser
                 return expStat;
 
             var compoundStat = ParseCompoundStat();
-            if (compoundStat.IsSuccess)
+            if (!compoundStat.IsSuccess)
+                return compoundStat;
+            if (!(compoundStat.ResultNode is NullStat))
                 return compoundStat;
 
             var selectionStat = ParseSelectionStat();
-            if (selectionStat.IsSuccess)
+            if (!selectionStat.IsSuccess)
+                return selectionStat;
+            if (!(selectionStat.ResultNode is NullStat))
                 return selectionStat;
 
             var iterationStat = ParseIterationStat();
-            if (iterationStat.IsSuccess)
+            if (!iterationStat.IsSuccess)
+                return iterationStat;
+            if (!(iterationStat.ResultNode is NullStat))
                 return iterationStat;
 
             var jumpStat = ParseJumpStat();
-            if (jumpStat.IsSuccess)
+            if (!jumpStat.IsSuccess)
+                return jumpStat;
+            if (!(jumpStat.ResultNode is NullStat))
                 return jumpStat;
 
-            return new FailedParseResult("expected statement", _currentToken);
+            return new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -84,8 +93,8 @@ namespace CCompiler.Parser
                     return new SuccessParseResult(new ReturnStat(exp.ResultNode));
                 }
             }
-            
-            return new FailedParseResult("expected jump statement", _currentToken);
+
+            return new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -115,12 +124,22 @@ namespace CCompiler.Parser
                             return stat;
                         }
 
+                        if (stat.ResultNode is NullStat)
+                        {
+                            return new FailedParseResult("expected statement", _currentToken);
+                        }
+                            
                         if (AcceptKeyword(KeywordType.ELSE))
                         {
-                            var stat2 = ParseJumpStat();
+                            var stat2 = ParseStat();
                             if (!stat2.IsSuccess)
                             {
                                 return stat2;
+                            }
+                            
+                            if (stat2.ResultNode is NullStat)
+                            {
+                                return new FailedParseResult("expected statement", _currentToken);
                             }
 
                             return new SuccessParseResult(new IfStat(exp.ResultNode, stat.ResultNode,
@@ -149,13 +168,17 @@ namespace CCompiler.Parser
                         {
                             return stat;
                         }
+                        if (stat.ResultNode is NullStat)
+                        {
+                            return new FailedParseResult("expected statement", _currentToken);
+                        }
                         
                         return new SuccessParseResult(new SwitchStat(exp.ResultNode, stat.ResultNode));
                     }
                 }
             }
             
-            return new FailedParseResult("expected selection statement", _currentToken);
+            return new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -168,7 +191,7 @@ namespace CCompiler.Parser
         {
             if (AcceptOp(OperatorType.SEMICOLON))
             {
-                return new SuccessParseResult(new NullStat());
+                return new SuccessParseResult(new EmptyExp());
             }
 
             var exp = ParseExp();
@@ -180,7 +203,7 @@ namespace CCompiler.Parser
                 return exp;
             }
             
-            return new FailedParseResult("expected expression statement", _currentToken);
+            return new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -212,6 +235,11 @@ namespace CCompiler.Parser
                         var stat = ParseStat();
                         if (!stat.IsSuccess)
                             return stat;
+                        
+                        if (stat.ResultNode is NullStat)
+                        {
+                            return new FailedParseResult("expected statement", _currentToken);
+                        }
 
                         return new SuccessParseResult(new WhileStat(exp.ResultNode, stat.ResultNode, WhileType.WHILE));
                     }
@@ -223,6 +251,11 @@ namespace CCompiler.Parser
                 var stat = ParseStat();
                 if (!stat.IsSuccess)
                     return stat;
+                
+                if (stat.ResultNode is NullStat)
+                {
+                    return new FailedParseResult("expected statement", _currentToken);
+                }
                 
                 if (ExceptKeyword(KeywordType.WHILE))
                 {
@@ -256,7 +289,12 @@ namespace CCompiler.Parser
                         var stat = ParseStat();
                         if (!stat.IsSuccess)
                             return stat;
-
+                        
+                        if (stat.ResultNode is NullStat)
+                        {
+                            return new FailedParseResult("expected statement", _currentToken);
+                        }
+                        
                         return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, new NullStat(),
                             stat.ResultNode));
                     }
@@ -270,6 +308,11 @@ namespace CCompiler.Parser
                         var stat = ParseStat();
                         if (!stat.IsSuccess)
                             return stat;
+                        
+                        if (stat.ResultNode is NullStat)
+                        {
+                            return new FailedParseResult("expected statement", _currentToken);
+                        }
 
                         return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, exp3.ResultNode,
                             stat.ResultNode));
@@ -277,7 +320,7 @@ namespace CCompiler.Parser
                 }
             }
             
-            return new FailedParseResult("expected iteration statement", _currentToken);
+            return new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -293,31 +336,21 @@ namespace CCompiler.Parser
             if (AcceptOp(OperatorType.LFBRACKET))
             {
                 var declList = ParseDeclList();
+                if (!declList.IsSuccess)
+                    return declList;
+
                 var statList = ParseStatList();
+                if (!statList.IsSuccess)
+                    return statList;
 
                 if (ExceptOp(OperatorType.RFBRACKET))
                 {
-                    if (declList.IsSuccess && statList.IsSuccess)
-                    {
-                        return new SuccessParseResult(new CompoundStat(declList.ResultNode,
-                            statList.ResultNode));
-                    }
-
-                    if (declList.IsSuccess)
-                    {
-                        return new SuccessParseResult(new CompoundStat(declList.ResultNode, new NullStat()));
-                    }
-
-                    if (statList.IsSuccess)
-                    {
-                        return new SuccessParseResult(new Pointer(new NullStat(), statList.ResultNode));
-                    }
-                    
-                    return new SuccessParseResult(new NullStat());
+                    return new SuccessParseResult(new CompoundStat(declList.ResultNode,
+                        statList.ResultNode));
                 }
             }
-            
-            return new FailedParseResult("expected compound statement", _currentToken);
+
+            return new SuccessParseResult(new NullStat());
         }
 
         /*
@@ -352,22 +385,17 @@ namespace CCompiler.Parser
         private IParseResult ParseDecl()
         {
             var declSpecs = ParseDeclSpecs();
-            if (declSpecs.IsSuccess)
+            if (!(declSpecs.ResultNode is NullStat))
             {
                 var initDeclaratorList = ParseInitDeclaratorList();
-                if (initDeclaratorList.IsSuccess)
-                {
-                    if (ExceptOp(OperatorType.SEMICOLON))
-                        return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclaratorList.ResultNode));
-                }
-                else
-                {
-                    if (ExceptOp(OperatorType.SEMICOLON))
-                        return new SuccessParseResult(new Decl(declSpecs.ResultNode, new NullStat()));
-                }
+                if (!initDeclaratorList.IsSuccess)
+                    return initDeclaratorList;
+                
+                if (ExceptOp(OperatorType.SEMICOLON))
+                    return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclaratorList.ResultNode));
             }
-            
-            return new FailedParseResult("expected decl", _currentToken);
+
+            return declSpecs;
         }
         
         /*
@@ -383,36 +411,27 @@ namespace CCompiler.Parser
         private IParseResult ParseDeclSpecs()
         {
             var storageClassSpec = ParseStorageClassSpec();
-            if (storageClassSpec.IsSuccess)
+            if (!(storageClassSpec.ResultNode is NullStat))
             {
                 var declSpecs = ParseDeclSpecs();
-                if (declSpecs.IsSuccess)
-                    return new SuccessParseResult(new DeclSpecs(storageClassSpec.ResultNode, declSpecs.ResultNode));
-                else
-                    return new SuccessParseResult(new DeclSpecs(storageClassSpec.ResultNode, new NullStat()));
+                return new SuccessParseResult(new DeclSpecs(storageClassSpec.ResultNode, declSpecs.ResultNode));
             }
             
             var typeSpec = ParseTypeSpec();
-            if (typeSpec.IsSuccess)
+            if (!(typeSpec.ResultNode is NullStat))
             {
                 var declSpecs = ParseDeclSpecs();
-                if (declSpecs.IsSuccess)
-                    return new SuccessParseResult(new DeclSpecs(typeSpec.ResultNode, declSpecs.ResultNode));
-                else
-                    return new SuccessParseResult(new DeclSpecs(typeSpec.ResultNode, new NullStat()));
+                return new SuccessParseResult(new DeclSpecs(typeSpec.ResultNode, declSpecs.ResultNode));
             }
             
             var typeQualifier = ParseTypeQualifier();
-            if (typeQualifier.IsSuccess)
+            if (!(typeQualifier.ResultNode is NullStat))
             {
                 var declSpecs = ParseDeclSpecs();
-                if (declSpecs.IsSuccess)
-                    return new SuccessParseResult(new DeclSpecs(typeQualifier.ResultNode, declSpecs.ResultNode));
-                else
-                    return new SuccessParseResult(new DeclSpecs(typeQualifier.ResultNode, new NullStat()));
+                return new SuccessParseResult(new DeclSpecs(typeQualifier.ResultNode, declSpecs.ResultNode));
             }
             
-            return new FailedParseResult("expected decl specs", _currentToken);
+            return new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -429,7 +448,7 @@ namespace CCompiler.Parser
                 return new SuccessParseResult(new StorageClassSpec(_acceptedToken as KeywordToken));
             }
             
-            return new FailedParseResult("expected storage class spec", _currentToken);
+            return new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -454,7 +473,7 @@ namespace CCompiler.Parser
             // TODO enum_spec
             // TODO typedef_name
             
-            return new FailedParseResult("expected type spec", _currentToken);
+            return new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -469,7 +488,7 @@ namespace CCompiler.Parser
                 return new SuccessParseResult(new TypeQualifier(_acceptedToken as KeywordToken));
             }
             
-            return new FailedParseResult("expected type qualifier", _currentToken);
+            return new SuccessParseResult(new NullStat());
         }
 
         /*
@@ -516,17 +535,22 @@ namespace CCompiler.Parser
         private IParseResult ParseDeclarator()
         {
             var pointer = ParsePointer();
-            var directDeclarator = ParseDirectDeclarator();
-
-            if (directDeclarator.IsSuccess)
-            {
-                if (pointer.IsSuccess)
-                    return new SuccessParseResult(new Declarator(pointer.ResultNode, directDeclarator.ResultNode));
-                else
-                    return new SuccessParseResult(new Declarator(new NullStat(), directDeclarator.ResultNode));
-            }
+            if (!pointer.IsSuccess)
+                return pointer;
             
-            return new FailedParseResult("expected declarator", _currentToken);
+            var directDeclarator = ParseDirectDeclarator();
+            if (!directDeclarator.IsSuccess)
+                return directDeclarator;
+
+            if (!(directDeclarator.ResultNode is NullStat))
+                return new SuccessParseResult(new Declarator(pointer.ResultNode, directDeclarator.ResultNode));
+            
+            if (!(pointer.ResultNode is NullStat))
+            {
+                return new FailedParseResult("after pointer expected declarator", _currentToken);
+            }
+
+            return new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -540,29 +564,17 @@ namespace CCompiler.Parser
         private IParseResult ParsePointer()
         {
             if (!AcceptOp(OperatorType.MULT))
-                return new FailedParseResult("expected pointer", _currentToken);
+                return new SuccessParseResult(new NullStat());
 
             var typeQualifierList = ParseTypeQualifierList();
+            if (!typeQualifierList.IsSuccess)
+                return typeQualifierList;
+            
             var pointer = ParsePointer();
-            
-            if (pointer.IsSuccess && typeQualifierList.IsSuccess)
-            {
-                return new SuccessParseResult(new Pointer(pointer.ResultNode,
-                    typeQualifierList.ResultNode));
-            }
+            if (!pointer.IsSuccess)
+                return pointer;
 
-            if (pointer.IsSuccess)
-            {
-                return new SuccessParseResult(new Pointer(pointer.ResultNode, new NullStat()));
-            }
-
-            if (typeQualifierList.IsSuccess)
-            {
-                return new SuccessParseResult(new Pointer(new NullStat(),
-                    typeQualifierList.ResultNode));
-            }
-            
-            return new SuccessParseResult(new Pointer(new NullStat(), new NullStat()));
+            return new SuccessParseResult(new Pointer(pointer.ResultNode, typeQualifierList.ResultNode));
         }
         
         /*
@@ -590,11 +602,11 @@ namespace CCompiler.Parser
         private IParseResult ParseDirectDeclarator()
         {
             IParseResult left = null;
-            
-            var primaryExp = ParsePrimaryExp();
-            if (primaryExp.IsSuccess && ((PrimaryExp) primaryExp.ResultNode).Token.TokenType == TokenType.IDENTIFIER)
+
+            var id = ParseId();
+            if (!(id.ResultNode is NullStat))
             {
-                left = primaryExp;
+                left = id;
             }
             else if (AcceptOp(OperatorType.LRBRACKET))
             {
@@ -609,7 +621,7 @@ namespace CCompiler.Parser
 
             if (left == null)
             {
-                return new FailedParseResult("expected parse direct declarator", _currentToken);
+                return new SuccessParseResult(new NullStat());
             }
             
             while (AcceptOp(OperatorType.LSBRACKET) || AcceptOp(OperatorType.LRBRACKET))
@@ -647,7 +659,10 @@ namespace CCompiler.Parser
                     }
 
                     var paramList = ParseParamList();
-                    if (paramList.IsSuccess)
+                    if (!paramList.IsSuccess)
+                        return paramList;
+                    
+                    if (!(paramList.ResultNode is NullStat))
                     {
                         if (ExceptOp(OperatorType.RRBRACKET))
                         {
@@ -658,14 +673,14 @@ namespace CCompiler.Parser
                     }
 
                     var idList = ParseIdList();
-                    if (idList.IsSuccess)
+                    if (!idList.IsSuccess)
+                        return idList;
+                    
+                    if (ExceptOp(OperatorType.RRBRACKET))
                     {
-                        if (ExceptOp(OperatorType.RRBRACKET))
-                        {
-                            left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
-                                idList.ResultNode));
-                            continue;
-                        }
+                        left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
+                            idList.ResultNode));
+                        continue;
                     }
                 }
                 
@@ -697,14 +712,23 @@ namespace CCompiler.Parser
         {
             var declSpecs = ParseDeclSpecs();
             if (!declSpecs.IsSuccess)
-                return declSpecs; // TODO return declSpecs or FailedParseResult?
+                return declSpecs;
 
+            if (declSpecs.ResultNode is NullStat)
+            {
+                return new SuccessParseResult(new NullStat());
+            }
+            
             var declarator = ParseDeclarator();
-            if (declarator.IsSuccess)
+            if (!declarator.IsSuccess)
+                return declarator;
+            if (!(declarator.ResultNode is NullStat))
                 return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, declarator.ResultNode));
 
             var abstractDeclarator = ParseAbstractDeclarator();
-            if (abstractDeclarator.IsSuccess)
+            if (!abstractDeclarator.IsSuccess)
+                return abstractDeclarator;
+            if (!(abstractDeclarator.ResultNode is NullStat))
                 return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, abstractDeclarator.ResultNode));
             
             return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, new NullStat()));
@@ -720,26 +744,15 @@ namespace CCompiler.Parser
         private IParseResult ParseAbstractDeclarator()
         {
             var pointer = ParsePointer();
-            var directAbstractDeclarator = ParseDirectAbstractDeclarator();
-
-            if (pointer.IsSuccess && directAbstractDeclarator.IsSuccess)
-            {
-                return new SuccessParseResult(new AbstractDeclarator(pointer.ResultNode,
-                    directAbstractDeclarator.ResultNode));
-            }
-
-            if (pointer.IsSuccess)
-            {
-                return new SuccessParseResult(new AbstractDeclarator(pointer.ResultNode, new NullStat()));
-            }
-
-            if (directAbstractDeclarator.IsSuccess)
-            {
-                return new SuccessParseResult(new AbstractDeclarator(new NullStat(),
-                    directAbstractDeclarator.ResultNode));
-            }
+            if (!pointer.IsSuccess)
+                return pointer;
             
-            return new FailedParseResult("expected abstract declarator", _currentToken);
+            var directAbstractDeclarator = ParseDirectAbstractDeclarator();
+            if (!directAbstractDeclarator.IsSuccess)
+                return directAbstractDeclarator;
+            
+            return new SuccessParseResult(new AbstractDeclarator(pointer.ResultNode,
+                directAbstractDeclarator.ResultNode));
         }
         
         /*
@@ -764,7 +777,9 @@ namespace CCompiler.Parser
                 if (AcceptOp(OperatorType.LRBRACKET))
                 {
                     var abstractDeclarator = ParseAbstractDeclarator();
-                    if (abstractDeclarator.IsSuccess)
+                    if (!abstractDeclarator.IsSuccess)
+                        return abstractDeclarator;
+                    if (!(abstractDeclarator.ResultNode is NullStat))
                     {
                         if (ExceptOp(OperatorType.RRBRACKET))
                         {
@@ -776,7 +791,9 @@ namespace CCompiler.Parser
                     }
 
                     var paramTypeList = ParseParamList();
-                    if (paramTypeList.IsSuccess)
+                    if (!paramTypeList.IsSuccess)
+                        return paramTypeList;
+                    if (!(paramTypeList.ResultNode is NullStat))
                     {
                         if (ExceptOp(OperatorType.RRBRACKET))
                         {
@@ -799,7 +816,9 @@ namespace CCompiler.Parser
                 if (AcceptOp(OperatorType.LSBRACKET))
                 {
                     var @const = ParseConst();
-                    if (@const.IsSuccess)
+                    if (!@const.IsSuccess)
+                        return @const;
+                    if (!(@const.ResultNode is NullStat))
                     {
                         if (ExceptOp(OperatorType.RSBRACKET))
                         {
@@ -822,7 +841,7 @@ namespace CCompiler.Parser
                 break;
             }
 
-            return left ?? new FailedParseResult("expected direct abstract declarator", _currentToken);
+            return left ?? new SuccessParseResult(new NullStat());
         }
         
         /*
@@ -871,12 +890,14 @@ namespace CCompiler.Parser
                 var parseResult = parser();
                 if (!parseResult.IsSuccess)
                     return parseResult;
+                if (parseResult.ResultNode is NullStat) // TODO ??
+                    break;
 
                 list.Add(parseResult.ResultNode);
             } while (AcceptOp(separator));
 
             if (list.Nodes.Count == 0)
-                return new FailedParseResult("expected list", _currentToken);
+                return new SuccessParseResult(new NullStat());
 
             return new SuccessParseResult(list);
         }
@@ -888,14 +909,16 @@ namespace CCompiler.Parser
             do
             {
                 var parseResult = parser();
-                if (!parseResult.IsSuccess)
+                if (parseResult.IsSuccess && parseResult.ResultNode is NullStat)
                     break;
+                if (!parseResult.IsSuccess)
+                    return parseResult;
         
                 list.Add(parseResult.ResultNode);
             } while (true);
-        
+
             if (list.Nodes.Count == 0)
-                return new FailedParseResult("expected list", _currentToken);
+                return new SuccessParseResult(new NullStat());
             
             return new SuccessParseResult(list);
         }
@@ -915,7 +938,7 @@ namespace CCompiler.Parser
             if (Accept(TokenType.IDENTIFIER))
                 return new SuccessParseResult(new Const(_acceptedToken));
             
-            return new FailedParseResult("expected identifier", _currentToken);
+            return new SuccessParseResult(new NullStat());
         }
     }
 }
