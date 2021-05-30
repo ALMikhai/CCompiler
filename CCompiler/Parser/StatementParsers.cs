@@ -639,7 +639,7 @@ namespace CCompiler.Parser
                 
                 if (op.Type == OperatorType.LRBRACKET)
                 {
-                    if (AcceptOp(OperatorType.RSBRACKET))
+                    if (AcceptOp(OperatorType.RRBRACKET))
                     {
                         left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
                             new NullStat()));
@@ -649,7 +649,7 @@ namespace CCompiler.Parser
                     var paramList = ParseParamList();
                     if (paramList.IsSuccess)
                     {
-                        if (ExceptOp(OperatorType.RSBRACKET))
+                        if (ExceptOp(OperatorType.RRBRACKET))
                         {
                             left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
                                 paramList.ResultNode));
@@ -660,7 +660,7 @@ namespace CCompiler.Parser
                     var idList = ParseIdList();
                     if (idList.IsSuccess)
                     {
-                        if (ExceptOp(OperatorType.RSBRACKET))
+                        if (ExceptOp(OperatorType.RRBRACKET))
                         {
                             left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
                                 idList.ResultNode));
