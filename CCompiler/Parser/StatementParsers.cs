@@ -356,11 +356,15 @@ namespace CCompiler.Parser
             {
                 var initDeclaratorList = ParseInitDeclaratorList();
                 if (initDeclaratorList.IsSuccess)
+                {
                     if (ExceptOp(OperatorType.SEMICOLON))
                         return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclaratorList.ResultNode));
-                    else
-                        if (ExceptOp(OperatorType.SEMICOLON))
-                            return new SuccessParseResult(new Decl(declSpecs.ResultNode, new NullStat()));
+                }
+                else
+                {
+                    if (ExceptOp(OperatorType.SEMICOLON))
+                        return new SuccessParseResult(new Decl(declSpecs.ResultNode, new NullStat()));
+                }
             }
             
             return new FailedParseResult("expected decl", _currentToken);
