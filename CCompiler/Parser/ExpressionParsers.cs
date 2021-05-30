@@ -115,7 +115,7 @@ namespace CCompiler.Parser
 
         private IParseResult ParseUnaryOperator()
         {
-            if (AcceptOp(OperatorType.AND) ||
+            if (AcceptOp(OperatorType.BITAND) ||
                 AcceptOp(OperatorType.MULT) ||
                 AcceptOp(OperatorType.ADD) ||
                 AcceptOp(OperatorType.SUB) ||
