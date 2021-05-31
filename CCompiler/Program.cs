@@ -36,6 +36,11 @@ namespace CCompiler
                 {
                     var parser = new SyntaxParser(tokenizer, SyntaxParserType.STAT);
                 }
+
+                if (args.Contains("-pu"))
+                {
+                    var parser = new SyntaxParser(tokenizer, SyntaxParserType.UNIT);
+                }
             }
             catch (FileNotFoundException e)
             {

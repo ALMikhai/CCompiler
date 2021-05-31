@@ -532,4 +532,40 @@ namespace CCompiler.Parser
             return "";
         }
     }
+
+    public class FuncDef : Node
+    {
+        public Node DeclSpecs { get; }
+        public Node Declarator { get; }
+        public Node DeclList { get; }
+        public Node CompoundStat { get; }
+
+        public FuncDef(Node declSpecs, Node declarator, Node declList, Node compoundStat)
+        {
+            DeclSpecs = declSpecs;
+            Declarator = declarator;
+            DeclList = declList;
+            CompoundStat = compoundStat;
+        }
+        
+        public override NodeType Type => NodeType.FUNC;
+
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   DeclSpecs.ToString(indent + ChildrenPrefix(last), false) +
+                   Declarator.ToString(indent + ChildrenPrefix(last), false) +
+                   DeclList.ToString(indent + ChildrenPrefix(last), false) +
+                   CompoundStat.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class TranslationUnit : List
+    {
+        public override NodeType Type => NodeType.TRANSLATIONUNIT;
+        public static TranslationUnit Instance()
+        {
+            return new TranslationUnit();
+        }
+    }
 }

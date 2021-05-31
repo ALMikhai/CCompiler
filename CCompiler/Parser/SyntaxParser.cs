@@ -7,7 +7,8 @@ namespace CCompiler.Parser
     public enum SyntaxParserType
     {
         EXP,
-        STAT
+        STAT,
+        UNIT
     }
     
     public partial class SyntaxParser
@@ -29,6 +30,9 @@ namespace CCompiler.Parser
                     break;
                 case SyntaxParserType.STAT:
                     result = ParseStat();
+                    break;
+                case SyntaxParserType.UNIT:
+                    result = ParseTranslationUnit();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(parserType), parserType, null);

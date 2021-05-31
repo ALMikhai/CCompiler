@@ -815,7 +815,7 @@ namespace CCompiler.Parser
 
                 if (AcceptOp(OperatorType.LSBRACKET))
                 {
-                    var @const = ParseConst();
+                    var @const = ParseConst(); // TODO Replace to const_exp (conditional_exp)
                     if (!@const.IsSuccess)
                         return @const;
                     if (!(@const.ResultNode is NullStat))
@@ -939,6 +939,55 @@ namespace CCompiler.Parser
                 return new SuccessParseResult(new Const(_acceptedToken));
             
             return new SuccessParseResult(new NullStat());
+        }
+        
+        /*
+         * function_definition : decl_specs declarator decl_list compound_stat
+            |		declarator decl_list compound_stat
+            | decl_specs declarator		compound_stat
+            |		declarator 	compound_stat
+            ;
+         */
+        
+        private IParseResult ParseFuncDef()
+        {
+            var declSpecs = ParseDeclSpecs();
+            if (!declSpecs.IsSuccess)
+                return declSpecs;
+            
+            var declarator = ParseDeclarator();
+            if (!declarator.IsSuccess)
+                return declarator;
+            
+            var declList = ParseDeclList();
+            if (!declList.IsSuccess)
+                return declList;
+
+            var compoundStat = ParseCompoundStat();
+            if (!compoundStat.IsSuccess)
+                return compoundStat;
+
+            if (!(declarator.ResultNode is NullStat) && !(compoundStat.ResultNode is NullStat))
+            {
+                return new SuccessParseResult(new FuncDef(declSpecs.ResultNode, declarator.ResultNode,
+                    declList.ResultNode, compoundStat.ResultNode));
+            }
+
+            if (declSpecs.ResultNode is NullStat && declList.ResultNode is NullStat)
+                return new SuccessParseResult(new NullStat());
+            
+            return new FailedParseResult("the function is declared incorrectly", _currentToken);
+        }
+        
+        /*
+         * translation_unit	: external_decl
+            | translation_unit external_decl
+            ;
+         */
+
+        private IParseResult ParseTranslationUnit()
+        {
+            return ParseList(ParseFuncDef, TranslationUnit.Instance);
         }
     }
 }
