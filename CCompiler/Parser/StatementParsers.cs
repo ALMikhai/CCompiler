@@ -933,14 +933,6 @@ namespace CCompiler.Parser
             return ParseList(ParseId, IdList.Instance, OperatorType.COMMA);
         }
 
-        private IParseResult ParseId()
-        {
-            if (Accept(TokenType.IDENTIFIER))
-                return new SuccessParseResult(new Const(_acceptedToken));
-            
-            return new SuccessParseResult(new NullStat());
-        }
-        
         /*
          * function_definition : decl_specs declarator decl_list compound_stat
             |		declarator decl_list compound_stat

@@ -8,6 +8,7 @@ namespace CCompiler.Parser
         public bool IsSuccess { get; }
         public Node ResultNode { get; }
         public string ErrorMessage { get; }
+        public bool IsNullStat();
     }
 
     public class SuccessParseResult : IParseResult
@@ -22,6 +23,11 @@ namespace CCompiler.Parser
 
         public string ErrorMessage =>
             throw new NullReferenceException("Attempt to get ErrorMessage in success parse result");
+
+        public bool IsNullStat()
+        {
+            return ResultNode is NullStat;
+        }
     }
 
     public class FailedParseResult : IParseResult
@@ -34,5 +40,9 @@ namespace CCompiler.Parser
         public bool IsSuccess => false;
         public Node ResultNode => throw new NullReferenceException("Attempt to get Node in failed parse result");
         public string ErrorMessage { get; }
+        public bool IsNullStat()
+        {
+            throw new NullReferenceException("Attempt to check failed parse node");
+        }
     }
 }

@@ -22,7 +22,20 @@ namespace CCompiler.Parser
         }
 
         /*
-         * primary_exp : id +
+         *  identifier : id
+                ;
+         */
+        
+        private IParseResult ParseId()
+        {
+            if (Accept(TokenType.IDENTIFIER))
+                return new SuccessParseResult(new Id((string)_acceptedToken.Value));
+            
+            return new SuccessParseResult(new NullStat());
+        }
+        
+        /*
+         * primary_exp : identifier +
 			| const +
 			| string +
 			| '(' exp ')' - This part go to CastExp.
@@ -30,8 +43,12 @@ namespace CCompiler.Parser
 
         private IParseResult ParsePrimaryExp()
         {
-            if (Accept(TokenType.IDENTIFIER) || Accept(TokenType.STRING))
-                return new SuccessParseResult(new PrimaryExp(_acceptedToken));
+            var id = ParseId();
+            if (!id.IsNullStat())
+                return id;
+
+            if (Accept(TokenType.STRING))
+                return new SuccessParseResult(new String((string)_acceptedToken.Value));
 
             var @const = ParseConst();
             return @const;

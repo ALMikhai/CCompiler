@@ -1,9 +1,58 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
-    public class Const : Node
+    public class ValueType
+    {
+        public enum Type
+        {
+            INT,
+            FLOAT,
+            CHAR
+        }
+
+        public object Value { get; }
+        public Type CurrentType { get; }
+
+        private readonly Dictionary<TokenType, Type> _tokenTypeToValueType = new Dictionary<TokenType, Type>()
+        {
+            {TokenType.INT, Type.INT},
+            {TokenType.FLOAT, Type.FLOAT},
+            {TokenType.CHAR, Type.CHAR}
+        };
+        
+        public ValueType(Token token)
+        {
+            Value = token.Value;
+            CurrentType = _tokenTypeToValueType[token.TokenType];
+        }
+        
+        public long GetInt()
+        {
+            return (long) Value;
+        }
+
+        public double GetFloat()
+        {
+            return (double) Value;
+        }
+
+        public char GetChar()
+        {
+            return (char) Value;
+        }
+    }
+    
+    public abstract class ExpType : Node
+    {
+        public abstract ValueType GetValue();
+        public abstract bool IsLValue();
+    }
+
+    public class Const : ExpType
     {
         public Const(Token token)
         {
@@ -17,21 +66,70 @@ namespace CCompiler.Parser
         {
             return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n";
         }
-    }
 
-    public class PrimaryExp : Node
-    {
-        public PrimaryExp(Token token)
+        public override ValueType GetValue()
         {
-            Token = token;
+            return new ValueType(Token);
         }
 
-        public Token Token { get; }
-        public override NodeType Type => NodeType.PRIMARYEXP;
+        public override bool IsLValue()
+        {
+            return false;
+        }
+    }
 
+    public class Id : ExpType
+    {
+        public string IdName { get; }
+
+        public Id(string idName)
+        {
+            IdName = idName;
+        }
+
+        public override NodeType Type => NodeType.ID;
+        
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n";
+            return indent + NodePrefix(last) + IdName + "\r\n";
+        }
+        
+        public override ValueType GetValue()
+        {
+            // TODO Get by id from Symbol table.
+            throw new NotImplementedException();
+        }
+
+        public override bool IsLValue()
+        {
+            return true;
+        }
+    }
+
+    public class String : ExpType
+    {
+        public string Str { get; }
+        
+        public String(string str)
+        {
+            Str = str;
+        }
+        
+        public override NodeType Type => NodeType.STRING;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Str + "\r\n";
+        }
+        
+        public override ValueType GetValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool IsLValue()
+        {
+            return false;
         }
     }
 
@@ -65,7 +163,7 @@ namespace CCompiler.Parser
                 indent + NodePrefix(last) + $"{Operator.Value}" + "\r\n" +
                 PostfixNode.ToString(indent + ChildrenPrefix(last), SuffixNode == null && Identifier == null) +
                 (SuffixNode != null ? SuffixNode.ToString(indent + ChildrenPrefix(last), true) : "") +
-                (Identifier != null ? new PrimaryExp(Identifier).ToString(indent + ChildrenPrefix(last), true) : "");
+                (Identifier != null ? new Id((string)Identifier.Value).ToString(indent + ChildrenPrefix(last), true) : "");
         }
     }
 
