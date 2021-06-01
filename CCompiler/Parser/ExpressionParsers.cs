@@ -163,26 +163,25 @@ namespace CCompiler.Parser
         {
             if (AcceptOp(OperatorType.INC) || AcceptOp(OperatorType.DEC))
             {
-                var op = _acceptedToken;
-                var unaryExp = ParseUnaryExp();
-                if (unaryExp.IsSuccess)
-                    return new SuccessParseResult(new UnaryExp(unaryExp.ResultNode, op as OperatorToken));
-
-                return unaryExp;
+                var op = _acceptedToken as OperatorToken;
+                var postfixUnaryExp = ParseUnaryExp();
+                if (!postfixUnaryExp.IsSuccess)
+                    return postfixUnaryExp;
+                
+                return new SuccessParseResult(new PrefixIncDec(postfixUnaryExp.ResultNode,
+                    (op.Type == OperatorType.INC ? PrefixIncDec.OpType.INC : PrefixIncDec.OpType.DEC)));
             }
 
             var unaryOperator = ParseUnaryOperator();
-            if (unaryOperator.IsSuccess)
-            {
-                var unaryExp = ParseUnaryExp();
-                if (unaryExp.IsSuccess)
-                    return new SuccessParseResult(new UnaryExp(unaryExp.ResultNode,
-                        unaryOperator.ResultNode as UnaryOperator));
+            if (!unaryOperator.IsSuccess)
+                return ParsePostfixExp();
+            
+            var unaryExp = ParseUnaryExp();
+            if (unaryExp.IsSuccess)
+                return new SuccessParseResult(new UnaryExp(unaryExp.ResultNode,
+                    unaryOperator.ResultNode as UnaryOperator));
 
-                return unaryExp;
-            }
-
-            return ParsePostfixExp();
+            return unaryExp;
         }
         
         /*

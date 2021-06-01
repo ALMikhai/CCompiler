@@ -199,7 +199,7 @@ namespace CCompiler.Parser
         public override string ToString(string indent, bool last)
         {
             return
-                indent + NodePrefix(last) + $"{_opType}" + "\r\n" +
+                indent + NodePrefix(last) + $"POSTFIX {_opType}" + "\r\n" +
                 PostfixNode.ToString(indent + ChildrenPrefix(last), true);
         }
     }
@@ -220,33 +220,51 @@ namespace CCompiler.Parser
         }
     }
 
+    public class PrefixIncDec : Node
+    {
+        private readonly OpType _opType;
+
+        public enum OpType
+        {
+            INC,
+            DEC
+        }
+        public Node PostfixNode { get; }
+
+        public PrefixIncDec(Node postfixNode, OpType opType)
+        {
+            _opType = opType;
+            PostfixNode = postfixNode;
+        }
+        
+        public override NodeType Type => NodeType.UNARYEXP;
+
+        public override string ToString(string indent, bool last)
+        {
+            return
+                indent + NodePrefix(last) + $"PREFIX {_opType}" + "\r\n" +
+                PostfixNode.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+    
     public class UnaryExp : Node
     {
         public UnaryExp(Node unaryExpNode, UnaryOperator unaryOperator)
         {
             UnaryOperator = unaryOperator;
-            OperatorOperator = null;
-            UnaryExpNode = unaryExpNode;
-        }
-        
-        public UnaryExp(Node unaryExpNode, OperatorToken @operator)
-        {
-            UnaryOperator = null;
-            OperatorOperator = @operator;
             UnaryExpNode = unaryExpNode;
         }
 
         public Node UnaryExpNode { get; }
-        public OperatorToken OperatorOperator { get; }
         public UnaryOperator UnaryOperator { get; }
 
         public override NodeType Type => NodeType.UNARYEXP;
 
         public override string ToString(string indent, bool last)
         {
-            return (OperatorOperator != null ? indent + NodePrefix(last) + $"{OperatorOperator.Value}" + "\r\n" : "") +
-                   (UnaryOperator != null ? UnaryOperator.ToString(indent, last) : "") +
-                   UnaryExpNode.ToString(indent + ChildrenPrefix(last), true);
+            return
+                indent + NodePrefix(last) + $"{UnaryOperator.Operator.Type}" + "\r\n" +
+                UnaryExpNode.ToString(indent + ChildrenPrefix(last), true);
         }
     }
 
