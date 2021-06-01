@@ -56,9 +56,7 @@ namespace CCompiler.Parser
         COMPOUNDSTAT,
         EMPTY,
         FUNC,
-        TRANSLATIONUNIT,
-        ID,
-        STRING
+        TRANSLATIONUNIT
     }
 
     public class Node

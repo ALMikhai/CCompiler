@@ -878,50 +878,6 @@ namespace CCompiler.Parser
         {
             return ParseList(ParseInitializer, InitializerList.Instance, OperatorType.COMMA);
         }
-
-        delegate List ListCtor();
-
-        private IParseResult ParseList(Parser parser, ListCtor ctor, OperatorType separator)
-        {
-            var list = ctor();
-            
-            do
-            {
-                var parseResult = parser();
-                if (!parseResult.IsSuccess)
-                    return parseResult;
-                if (parseResult.ResultNode is NullStat) // TODO ??
-                    break;
-
-                list.Add(parseResult.ResultNode);
-            } while (AcceptOp(separator));
-
-            if (list.Nodes.Count == 0)
-                return new SuccessParseResult(new NullStat());
-
-            return new SuccessParseResult(list);
-        }
-        
-        private IParseResult ParseList(Parser parser, ListCtor ctor)
-        {
-            var list = ctor();
-            
-            do
-            {
-                var parseResult = parser();
-                if (parseResult.IsSuccess && parseResult.ResultNode is NullStat)
-                    break;
-                if (!parseResult.IsSuccess)
-                    return parseResult;
-        
-                list.Add(parseResult.ResultNode);
-            } while (true);
-
-            if (list.Nodes.Count == 0)
-                return new SuccessParseResult(new NullStat());
-            
-            return new SuccessParseResult(list);
-        }
         
         /*
          * id_list : id
