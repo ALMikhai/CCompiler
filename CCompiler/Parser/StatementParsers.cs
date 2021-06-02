@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
-using CCompiler.Tokenizer;
+﻿using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
@@ -294,9 +291,9 @@ namespace CCompiler.Parser
         
         /*
          * compound_stat : '{' decl_list stat_list '}'
-            | '{'		stat_list '}t	'
-                                        | '{' decl_lis	'}'
-            | '{'			'}'
+            | '{' stat_list '}t	'
+            | '{' decl_lis '}'
+            | '{' '}'
             ;
          */
 
@@ -312,11 +309,9 @@ namespace CCompiler.Parser
                 if (!statList.IsSuccess)
                     return statList;
 
-                if (ExceptOp(OperatorType.RFBRACKET))
-                {
-                    return new SuccessParseResult(new CompoundStat(declList.ResultNode,
+                ExceptOp(OperatorType.RFBRACKET);
+                return new SuccessParseResult(new CompoundStat(declList.ResultNode,
                         statList.ResultNode));
-                }
             }
 
             return new SuccessParseResult(new NullStat());
@@ -347,21 +342,21 @@ namespace CCompiler.Parser
         
         /*
          * decl	: decl_specs init_declarator_list ';'
-            | decl_specs			';'
+            | decl_specs ';'
             ;
          */
         
         private IParseResult ParseDecl()
         {
             var declSpecs = ParseDeclSpecs();
-            if (!(declSpecs.ResultNode is NullStat))
+            if (!declSpecs.IsNullStat())
             {
                 var initDeclaratorList = ParseInitDeclaratorList();
                 if (!initDeclaratorList.IsSuccess)
                     return initDeclaratorList;
                 
-                if (ExceptOp(OperatorType.SEMICOLON))
-                    return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclaratorList.ResultNode));
+                ExceptOp(OperatorType.SEMICOLON);
+                return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclaratorList.ResultNode));
             }
 
             return declSpecs;
@@ -380,21 +375,21 @@ namespace CCompiler.Parser
         private IParseResult ParseDeclSpecs()
         {
             var storageClassSpec = ParseStorageClassSpec();
-            if (!(storageClassSpec.ResultNode is NullStat))
+            if (!storageClassSpec.IsNullStat())
             {
                 var declSpecs = ParseDeclSpecs();
                 return new SuccessParseResult(new DeclSpecs(storageClassSpec.ResultNode, declSpecs.ResultNode));
             }
             
             var typeSpec = ParseTypeSpec();
-            if (!(typeSpec.ResultNode is NullStat))
+            if (!typeSpec.IsNullStat())
             {
                 var declSpecs = ParseDeclSpecs();
                 return new SuccessParseResult(new DeclSpecs(typeSpec.ResultNode, declSpecs.ResultNode));
             }
             
             var typeQualifier = ParseTypeQualifier();
-            if (!(typeQualifier.ResultNode is NullStat))
+            if (!typeQualifier.IsNullStat())
             {
                 var declSpecs = ParseDeclSpecs();
                 return new SuccessParseResult(new DeclSpecs(typeQualifier.ResultNode, declSpecs.ResultNode));
@@ -408,7 +403,7 @@ namespace CCompiler.Parser
 			;
          */
 
-        public IParseResult ParseStorageClassSpec()
+        private IParseResult ParseStorageClassSpec()
         {
             if (AcceptKeyword(KeywordType.AUTO) || AcceptKeyword(KeywordType.REGISTER) ||
                 AcceptKeyword(KeywordType.STATIC) || AcceptKeyword(KeywordType.EXTERN) ||
@@ -511,10 +506,10 @@ namespace CCompiler.Parser
             if (!directDeclarator.IsSuccess)
                 return directDeclarator;
 
-            if (!(directDeclarator.ResultNode is NullStat))
+            if (!directDeclarator.IsNullStat())
                 return new SuccessParseResult(new Declarator(pointer.ResultNode, directDeclarator.ResultNode));
             
-            if (!(pointer.ResultNode is NullStat))
+            if (!pointer.IsNullStat())
             {
                 return new FailedParseResult("after pointer expected declarator", _currentToken);
             }
@@ -573,7 +568,7 @@ namespace CCompiler.Parser
             IParseResult left = null;
 
             var id = ParseId();
-            if (!(id.ResultNode is NullStat))
+            if (!id.IsNullStat())
             {
                 left = id;
             }
@@ -582,10 +577,8 @@ namespace CCompiler.Parser
                 var declarator = ParseDeclarator();
                 if (!declarator.IsSuccess)
                     return declarator;
-                if (ExceptOp(OperatorType.RRBRACKET))
-                {
-                    left = declarator;
-                }
+                ExceptOp(OperatorType.RRBRACKET);
+                left = declarator;
             }
 
             if (left == null)
@@ -601,8 +594,7 @@ namespace CCompiler.Parser
                 {
                     if (AcceptOp(OperatorType.RSBRACKET))
                     {
-                        left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
-                            new NullStat()));
+                        left = new SuccessParseResult(new ArrayDecl(left.ResultNode, new EmptyExp()));
                         continue;
                     }
 
@@ -612,8 +604,7 @@ namespace CCompiler.Parser
 
                     if (ExceptOp(OperatorType.RSBRACKET))
                     {
-                        left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
-                            conditionalExp.ResultNode));
+                        left = new SuccessParseResult(new ArrayDecl(left.ResultNode, conditionalExp.ResultNode));
                         continue;
                     }
                 }
@@ -622,8 +613,7 @@ namespace CCompiler.Parser
                 {
                     if (AcceptOp(OperatorType.RRBRACKET))
                     {
-                        left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
-                            new NullStat()));
+                        left = new SuccessParseResult(new FuncDecl(left.ResultNode, new EmptyExp()));
                         continue;
                     }
 
@@ -631,31 +621,25 @@ namespace CCompiler.Parser
                     if (!paramList.IsSuccess)
                         return paramList;
                     
-                    if (!(paramList.ResultNode is NullStat))
+                    if (!paramList.IsNullStat())
                     {
-                        if (ExceptOp(OperatorType.RRBRACKET))
-                        {
-                            left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
-                                paramList.ResultNode));
-                            continue;
-                        }
+                        ExceptOp(OperatorType.RRBRACKET);
+                        left = new SuccessParseResult(new FuncDecl(left.ResultNode, paramList.ResultNode));
+                        continue;
                     }
 
                     var idList = ParseIdList();
                     if (!idList.IsSuccess)
                         return idList;
                     
-                    if (ExceptOp(OperatorType.RRBRACKET))
-                    {
-                        left = new SuccessParseResult(new DirectDeclarator(left.ResultNode, op,
-                            idList.ResultNode));
-                        continue;
-                    }
+                    ExceptOp(OperatorType.RRBRACKET);
+                    left = new SuccessParseResult(new FuncDecl(left.ResultNode, idList.ResultNode));
+                    continue;
                 }
                 
                 break;
             }
-
+            
             return left;
         }
         
@@ -672,7 +656,6 @@ namespace CCompiler.Parser
         
         /*
          * param_decl : decl_specs declarator
-            | decl_specs abstract_declarator
             | decl_specs
             ;
          */
@@ -683,7 +666,7 @@ namespace CCompiler.Parser
             if (!declSpecs.IsSuccess)
                 return declSpecs;
 
-            if (declSpecs.ResultNode is NullStat)
+            if (declSpecs.IsNullStat())
             {
                 return new SuccessParseResult(new NullStat());
             }
@@ -691,132 +674,16 @@ namespace CCompiler.Parser
             var declarator = ParseDeclarator();
             if (!declarator.IsSuccess)
                 return declarator;
-            if (!(declarator.ResultNode is NullStat))
+            if (!declarator.IsNullStat())
                 return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, declarator.ResultNode));
 
-            var abstractDeclarator = ParseAbstractDeclarator();
-            if (!abstractDeclarator.IsSuccess)
-                return abstractDeclarator;
-            if (!(abstractDeclarator.ResultNode is NullStat))
-                return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, abstractDeclarator.ResultNode));
-            
-            return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, new NullStat()));
-        }
-        
-        /*
-         * abstract_declarator : pointer
-            | pointer direct_abstract_declarator
-            |	direct_abstract_declarator
-            ;
-         */
-        
-        private IParseResult ParseAbstractDeclarator()
-        {
-            var pointer = ParsePointer();
-            if (!pointer.IsSuccess)
-                return pointer;
-            
-            var directAbstractDeclarator = ParseDirectAbstractDeclarator();
-            if (!directAbstractDeclarator.IsSuccess)
-                return directAbstractDeclarator;
-            
-            return new SuccessParseResult(new AbstractDeclarator(pointer.ResultNode,
-                directAbstractDeclarator.ResultNode));
-        }
-        
-        /*
-         * direct_abstract_declarator : '(' abstract_declarator ')'
-            | direct_abstract_declarator '[' const_exp ']'
-            |				'[' const_exp ']'
-            | direct_abstract_declarator '['	']'
-            |				'['	']'
-            | direct_abstract_declarator '(' param_list ')'
-            |				'(' param_list ')'
-            | direct_abstract_declarator '('		')'
-            |				'('		')'
-            ;
-         */
-        
-        private IParseResult ParseDirectAbstractDeclarator()
-        {
-            IParseResult left = null;
-
-            while (true)
-            {
-                if (AcceptOp(OperatorType.LRBRACKET))
-                {
-                    var abstractDeclarator = ParseAbstractDeclarator();
-                    if (!abstractDeclarator.IsSuccess)
-                        return abstractDeclarator;
-                    if (!(abstractDeclarator.ResultNode is NullStat))
-                    {
-                        if (ExceptOp(OperatorType.RRBRACKET))
-                        {
-                            left = new SuccessParseResult(new DirectAbstractDeclarator(
-                                left == null ? new NullStat() : left.ResultNode,
-                                OperatorType.LRBRACKET, abstractDeclarator.ResultNode));
-                            continue;
-                        }
-                    }
-
-                    var paramTypeList = ParseParamList();
-                    if (!paramTypeList.IsSuccess)
-                        return paramTypeList;
-                    if (!(paramTypeList.ResultNode is NullStat))
-                    {
-                        if (ExceptOp(OperatorType.RRBRACKET))
-                        {
-                            left = new SuccessParseResult(new DirectAbstractDeclarator(
-                                left == null ? new NullStat() : left.ResultNode,
-                                OperatorType.LRBRACKET, paramTypeList.ResultNode));
-                            continue;
-                        }
-                    }
-
-                    if (ExceptOp(OperatorType.RRBRACKET))
-                    {
-                        left = new SuccessParseResult(new DirectAbstractDeclarator(
-                            left == null ? new NullStat() : left.ResultNode,
-                            OperatorType.LRBRACKET, new NullStat()));
-                        continue;
-                    }
-                }
-
-                if (AcceptOp(OperatorType.LSBRACKET))
-                {
-                    var @const = ParseConst(); // TODO Replace to const_exp (conditional_exp)
-                    if (!@const.IsSuccess)
-                        return @const;
-                    if (!(@const.ResultNode is NullStat))
-                    {
-                        if (ExceptOp(OperatorType.RSBRACKET))
-                        {
-                            left = new SuccessParseResult(new DirectAbstractDeclarator(
-                                left == null ? new NullStat() : left.ResultNode,
-                                OperatorType.LSBRACKET, @const.ResultNode));
-                            continue;
-                        }
-                    }
-                
-                    if (ExceptOp(OperatorType.RSBRACKET))
-                    {
-                        left = new SuccessParseResult(new DirectAbstractDeclarator(
-                            left == null ? new NullStat() : left.ResultNode,
-                            OperatorType.LSBRACKET, new NullStat()));
-                        continue;
-                    }
-                }
-                
-                break;
-            }
-
-            return left ?? new SuccessParseResult(new NullStat());
+            return new FailedParseResult("after type specialization expected declarator", _currentToken);
         }
         
         /*
          * initializer : assignment_exp
             | '{' initializer_list '}'
-            | '{' initializer_list ',' '}' TODO is not working now.
+            | '{' initializer_list ',' '}'
             ;
          */
         
@@ -828,10 +695,8 @@ namespace CCompiler.Parser
                 if (!initializerList.IsSuccess)
                     return initializerList;
 
-                if (ExceptOp(OperatorType.RFBRACKET))
-                {
-                    return new SuccessParseResult(new Initializer(initializerList.ResultNode));
-                }
+                ExceptOp(OperatorType.RFBRACKET);
+                return new SuccessParseResult(new Initializer(initializerList.ResultNode));
             }
 
             return ParseAssignmentExp();
@@ -860,9 +725,9 @@ namespace CCompiler.Parser
 
         /*
          * function_definition : decl_specs declarator decl_list compound_stat
-            |		declarator decl_list compound_stat
-            | decl_specs declarator		compound_stat
-            |		declarator 	compound_stat
+            | declarator decl_list compound_stat
+            | decl_specs declarator	compound_stat
+            | declarator compound_stat
             ;
          */
         
@@ -902,7 +767,7 @@ namespace CCompiler.Parser
             ;
          */
 
-        private IParseResult ParseTranslationUnit()
+        private IParseResult ParseTranslationUnit() // TODO Add parse external_decl.
         {
             return ParseList(ParseFuncDef, TranslationUnit.Instance);
         }

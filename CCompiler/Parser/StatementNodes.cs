@@ -86,10 +86,6 @@ namespace CCompiler.Parser
 
     public class NullStat : Node
     {
-        public NullStat()
-        {
-        }
-        
         public override NodeType Type => NodeType.NULL;
 
         public override string ToString(string indent, bool last)
@@ -204,50 +200,6 @@ namespace CCompiler.Parser
         }
     }
 
-    public class DirectAbstractDeclarator : Node
-    {
-        public Node Left { get; }
-        public OperatorType OperatorType { get; }
-        public Node Exp { get; }
-
-        public DirectAbstractDeclarator(Node left, OperatorType operatorType, Node exp)
-        {
-            Left = left;
-            OperatorType = operatorType;
-            Exp = exp;
-        }
-        
-        public override NodeType Type => NodeType.DIRECTABSTRACTDECLARATOR;
-        
-        public override string ToString(string indent, bool last)
-        {
-            return indent + NodePrefix(last) + OperatorType + "\r\n" +
-                   Left.ToString(indent + ChildrenPrefix(last), false) +
-                   Exp.ToString(indent + ChildrenPrefix(last), true);
-        }
-    }
-
-    public class AbstractDeclarator : Node
-    {
-        public Node Pointer { get; }
-        public Node DirectAbstractDeclarator { get; }
-
-        public AbstractDeclarator(Node pointer, Node directAbstractDeclarator)
-        {
-            Pointer = pointer;
-            DirectAbstractDeclarator = directAbstractDeclarator;
-        }
-        
-        public override NodeType Type => NodeType.ABSTRACTDECLARATOR;
-        
-        public override string ToString(string indent, bool last)
-        {
-            return indent + NodePrefix(last) + Type + "\r\n" +
-                   Pointer.ToString(indent + ChildrenPrefix(last), false) +
-                   DirectAbstractDeclarator.ToString(indent + ChildrenPrefix(last), true);
-        }
-    }
-
     public class ParamDecl : Node
     {
         public Node DeclSpecs { get; }
@@ -298,30 +250,49 @@ namespace CCompiler.Parser
                    PointerNode.ToString(indent + ChildrenPrefix(last), true);
         }
     }
-
-    public class DirectDeclarator : Node
+    
+    public class ArrayDecl : Node
     {
         public Node Left { get; }
-        public OperatorToken Token { get; }
-        public Node Exp { get; }
+        public Node ConstExp { get; }
 
-        public DirectDeclarator(Node left, OperatorToken token ,Node exp)
+        public ArrayDecl(Node left, Node constExp)
         {
             Left = left;
-            Token = token;
-            Exp = exp;
+            ConstExp = constExp;
         }
         
         public override NodeType Type => NodeType.DIRECTDECLARATOR;
         
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + Token.Type + "\r\n" +
+            return indent + NodePrefix(last) + "ARRAY" + "\r\n" +
                    Left.ToString(indent + ChildrenPrefix(last), false) +
-                   Exp.ToString(indent + ChildrenPrefix(last), true);
+                   ConstExp.ToString(indent + ChildrenPrefix(last), true);
         }
     }
-    
+
+    public class FuncDecl : Node
+    {
+        public Node Left { get; }
+        public Node ParamList { get; }
+
+        public FuncDecl(Node left, Node paramList)
+        {
+            Left = left;
+            ParamList = paramList;
+        }
+        
+        public override NodeType Type => NodeType.DIRECTDECLARATOR;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + "FUNC" + "\r\n" +
+                   Left.ToString(indent + ChildrenPrefix(last), false) +
+                   ParamList.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
     public class IdList : List
     {
         public override NodeType Type => NodeType.IDLIST;
