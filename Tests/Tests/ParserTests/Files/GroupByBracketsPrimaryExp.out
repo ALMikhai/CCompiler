@@ -3,10 +3,8 @@
   | |-a
   | \-b
   \-ADD
-    |-INT
-    | \-LONG
-    |   \-c
-    \-RARROW
+    |-c
+    \-->
       |-g
       \-next
 

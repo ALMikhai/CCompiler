@@ -141,7 +141,7 @@ namespace CCompiler.Parser
         {
             return
                 indent + NodePrefix(last) + $"()" + "\r\n" +
-                PostfixNode.ToString(indent + ChildrenPrefix(last), false) +
+                PostfixNode.ToString(indent + ChildrenPrefix(last), Exp is NullStat) +
                 Exp.ToString(indent + ChildrenPrefix(last), true);
         }
     }

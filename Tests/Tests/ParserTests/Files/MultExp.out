@@ -2,11 +2,10 @@
   |-DIV
   | |-MULT
   | | |-a
-  | | \-INC
+  | | \-POSTFIX INC
   | |   \-b
-  | \-INT
-  |   \-c
-  \-DOT
+  | \-c
+  \-.
     |-n
     \-m
 

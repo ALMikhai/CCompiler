@@ -5,7 +5,7 @@
   |-MORE
   | |-i
   | \-0
-  |-DEC
+  |-PREFIX DEC
   | \-i
   \-ASSIGN
     |-a

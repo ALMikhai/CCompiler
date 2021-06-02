@@ -1,10 +1,10 @@
-\-DEC
-  \-LRBRACKET
-    \-RARROW
-      |-DOT
-      | |-LRBRACKET
-      | | \-LRBRACKET
-      | |   |-LSBRACKET
+\-POSTFIX DEC
+  \-()
+    \-->
+      |-.
+      | |-()
+      | | \-()
+      | |   |-[]
       | |   | |-a
       | |   | \-0
       | |   \-null

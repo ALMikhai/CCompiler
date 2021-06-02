@@ -1,1 +1,1 @@
-(a - b) * ((int)(long)c + g->next)
+(a - b) * (c + g->next)
