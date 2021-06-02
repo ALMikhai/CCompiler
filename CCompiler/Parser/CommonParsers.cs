@@ -39,8 +39,11 @@ namespace CCompiler.Parser
                 var parseResult = parser();
                 if (!parseResult.IsSuccess)
                     return parseResult;
-                if (parseResult.ResultNode is NullStat)
-                    break;
+                if (parseResult.IsNullStat())
+                    if (list.Nodes.Any())
+                        return new FailedParseResult("expected expression", _currentToken);
+                    else
+                        break;
 
                 list.Add(parseResult.ResultNode);
             } while (AcceptOp(separator));
@@ -58,10 +61,10 @@ namespace CCompiler.Parser
             do
             {
                 var parseResult = parser();
-                if (parseResult.IsSuccess && parseResult.ResultNode is NullStat)
-                    break;
                 if (!parseResult.IsSuccess)
                     return parseResult;
+                if (parseResult.IsNullStat())
+                    break;
         
                 list.Add(parseResult.ResultNode);
             } while (true);
