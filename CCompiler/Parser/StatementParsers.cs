@@ -51,8 +51,7 @@ namespace CCompiler.Parser
         }
         
         /*
-         *jump_stat	: 'goto' id ';'
-            | 'continue' ';'
+         *jump_stat	: 'continue' ';'
             | 'break' ';'
             | 'return' exp ';'
             | 'return'	';'
@@ -63,35 +62,29 @@ namespace CCompiler.Parser
         {
             if (AcceptKeyword(KeywordType.CONTINUE))
             {
-                if (ExceptOp(OperatorType.SEMICOLON))
-                {
-                    return new SuccessParseResult(new JumpStat(KeywordType.CONTINUE));
-                }
+                ExceptOp(OperatorType.SEMICOLON);
+                return new SuccessParseResult(new JumpStat(KeywordType.CONTINUE));
             }
 
             if (AcceptKeyword(KeywordType.BREAK))
             {
-                if (ExceptOp(OperatorType.SEMICOLON))
-                {
-                    return new SuccessParseResult(new JumpStat(KeywordType.BREAK));
-                }
+                ExceptOp(OperatorType.SEMICOLON);
+                return new SuccessParseResult(new JumpStat(KeywordType.BREAK));
             }
             
             if (AcceptKeyword(KeywordType.RETURN))
             {
                 if (AcceptOp(OperatorType.SEMICOLON))
                 {
-                    return new SuccessParseResult(new JumpStat(KeywordType.RETURN));
+                    return new SuccessParseResult(new ReturnStat(new NullStat()));
                 }
 
                 var exp = ParseExp();
                 if (!exp.IsSuccess)
                     return exp;
                 
-                if (ExceptOp(OperatorType.SEMICOLON))
-                {
-                    return new SuccessParseResult(new ReturnStat(exp.ResultNode));
-                }
+                ExceptOp(OperatorType.SEMICOLON);
+                return new SuccessParseResult(new ReturnStat(exp.ResultNode));
             }
 
             return new SuccessParseResult(new NullStat());
@@ -108,74 +101,66 @@ namespace CCompiler.Parser
         {
             if (AcceptKeyword(KeywordType.IF))
             {
-                if (ExceptOp(OperatorType.LRBRACKET))
+                ExceptOp(OperatorType.LRBRACKET);
+                var exp = ParseExp();
+                if (!exp.IsSuccess)
                 {
-                    var exp = ParseExp();
-                    if (!exp.IsSuccess)
-                    {
-                        return exp;
-                    }
-                    
-                    if (ExceptOp(OperatorType.RRBRACKET))
-                    {
-                        var stat = ParseStat();
-                        if (!stat.IsSuccess)
-                        {
-                            return stat;
-                        }
-
-                        if (stat.ResultNode is NullStat)
-                        {
-                            return new FailedParseResult("expected statement", _currentToken);
-                        }
-                            
-                        if (AcceptKeyword(KeywordType.ELSE))
-                        {
-                            var stat2 = ParseStat();
-                            if (!stat2.IsSuccess)
-                            {
-                                return stat2;
-                            }
-                            
-                            if (stat2.ResultNode is NullStat)
-                            {
-                                return new FailedParseResult("expected statement", _currentToken);
-                            }
-
-                            return new SuccessParseResult(new IfStat(exp.ResultNode, stat.ResultNode,
-                                stat2.ResultNode));
-                        }
-
-                        return new SuccessParseResult(new IfStat(exp.ResultNode, stat.ResultNode, new NullStat()));
-                    }
+                    return exp;
                 }
+
+                ExceptOp(OperatorType.RRBRACKET);
+                var stat = ParseStat();
+                if (!stat.IsSuccess)
+                {
+                    return stat;
+                }
+
+                if (stat.ResultNode is NullStat)
+                {
+                    return new FailedParseResult("expected statement", _currentToken);
+                }
+                    
+                if (AcceptKeyword(KeywordType.ELSE))
+                {
+                    var stat2 = ParseStat();
+                    if (!stat2.IsSuccess)
+                    {
+                        return stat2;
+                    }
+
+                    if (stat2.ResultNode is NullStat)
+                    {
+                        return new FailedParseResult("expected statement", _currentToken);
+                    }
+
+                    return new SuccessParseResult(new IfStat(exp.ResultNode, stat.ResultNode,
+                        stat2.ResultNode));
+                }
+
+                return new SuccessParseResult(new IfStat(exp.ResultNode, stat.ResultNode, new EmptyExp()));
             }
 
             if (AcceptKeyword(KeywordType.SWITCH))
             {
-                if (ExceptOp(OperatorType.LRBRACKET))
+                ExceptOp(OperatorType.LRBRACKET);
+                var exp = ParseExp();
+                if (!exp.IsSuccess)
                 {
-                    var exp = ParseExp();
-                    if (!exp.IsSuccess)
-                    {
-                        return exp;
-                    }
-
-                    if (ExceptOp(OperatorType.RRBRACKET))
-                    {
-                        var stat = ParseStat();
-                        if (!stat.IsSuccess)
-                        {
-                            return stat;
-                        }
-                        if (stat.ResultNode is NullStat)
-                        {
-                            return new FailedParseResult("expected statement", _currentToken);
-                        }
-                        
-                        return new SuccessParseResult(new SwitchStat(exp.ResultNode, stat.ResultNode));
-                    }
+                    return exp;
                 }
+
+                ExceptOp(OperatorType.RRBRACKET);
+                var stat = ParseStat();
+                if (!stat.IsSuccess)
+                {
+                    return stat;
+                }
+                if (stat.ResultNode is NullStat)
+                {
+                    return new FailedParseResult("expected statement", _currentToken);
+                }
+                
+                return new SuccessParseResult(new SwitchStat(exp.ResultNode, stat.ResultNode));
             }
             
             return new SuccessParseResult(new NullStat());
@@ -198,12 +183,8 @@ namespace CCompiler.Parser
             if (!exp.IsSuccess)
                 return exp;
 
-            if (ExceptOp(OperatorType.SEMICOLON))
-            {
-                return exp;
-            }
-            
-            return new SuccessParseResult(new NullStat());
+            ExceptOp(OperatorType.SEMICOLON); 
+            return exp;
         }
         
         /*
@@ -224,26 +205,22 @@ namespace CCompiler.Parser
         {
             if (AcceptKeyword(KeywordType.WHILE))
             {
-                if (ExceptOp(OperatorType.LRBRACKET))
-                {
-                    var exp = ParseExp();
+                ExceptOp(OperatorType.LRBRACKET);
+                var exp = ParseExp();
                     if (!exp.IsSuccess)
                         return exp;
 
-                    if (ExceptOp(OperatorType.RRBRACKET))
-                    {
-                        var stat = ParseStat();
-                        if (!stat.IsSuccess)
-                            return stat;
-                        
-                        if (stat.ResultNode is NullStat)
-                        {
-                            return new FailedParseResult("expected statement", _currentToken);
-                        }
-
-                        return new SuccessParseResult(new WhileStat(exp.ResultNode, stat.ResultNode, WhileType.WHILE));
-                    }
+                ExceptOp(OperatorType.RRBRACKET);
+                var stat = ParseStat();
+                if (!stat.IsSuccess)
+                    return stat;
+                
+                if (stat.ResultNode is NullStat)
+                {
+                    return new FailedParseResult("expected statement", _currentToken);
                 }
+
+                return new SuccessParseResult(new WhileStat(exp.ResultNode, stat.ResultNode, WhileType.WHILE));
             }
             
             if (AcceptKeyword(KeywordType.DO))
@@ -256,68 +233,60 @@ namespace CCompiler.Parser
                 {
                     return new FailedParseResult("expected statement", _currentToken);
                 }
-                
-                if (ExceptKeyword(KeywordType.WHILE))
-                {
-                    if (ExceptOp(OperatorType.LRBRACKET))
-                    {
-                        var exp = ParseExp();
-                        if (!exp.IsSuccess)
-                            return exp;
-                        
-                        if (ExceptOp(OperatorType.RRBRACKET))
-                            if (ExceptOp(OperatorType.SEMICOLON))
-                                return new SuccessParseResult(new WhileStat(exp.ResultNode, stat.ResultNode, WhileType.DOWHILE));
-                    }
-                }
+
+                ExceptKeyword(KeywordType.WHILE);
+                ExceptOp(OperatorType.LRBRACKET);
+                var exp = ParseExp();
+                if (!exp.IsSuccess)
+                    return exp;
+
+                ExceptOp(OperatorType.RRBRACKET);
+                ExceptOp(OperatorType.SEMICOLON);
+                return new SuccessParseResult(new WhileStat(exp.ResultNode, stat.ResultNode, WhileType.DOWHILE));
             }
 
             if (AcceptKeyword(KeywordType.FOR))
             {
-                if (ExceptOp(OperatorType.LRBRACKET))
+                ExceptOp(OperatorType.LRBRACKET);
+                var exp1 = ParseExpStat();
+                if (!exp1.IsSuccess)
+                    return exp1;
+
+                var exp2 = ParseExpStat();
+                if (!exp2.IsSuccess)
+                    return exp2;
+
+                if (AcceptOp(OperatorType.RRBRACKET))
                 {
-                    var exp1 = ParseExpStat();
-                    if (!exp1.IsSuccess)
-                        return exp1;
-
-                    var exp2 = ParseExpStat();
-                    if (!exp2.IsSuccess)
-                        return exp2;
-
-                    if (AcceptOp(OperatorType.RRBRACKET))
+                    var stat1 = ParseStat();
+                    if (!stat1.IsSuccess)
+                        return stat1;
+                    
+                    if (stat1.ResultNode is NullStat)
                     {
-                        var stat = ParseStat();
-                        if (!stat.IsSuccess)
-                            return stat;
-                        
-                        if (stat.ResultNode is NullStat)
-                        {
-                            return new FailedParseResult("expected statement", _currentToken);
-                        }
-                        
-                        return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, new NullStat(),
-                            stat.ResultNode));
+                        return new FailedParseResult("expected statement", _currentToken);
                     }
                     
-                    var exp3 = ParseExp();
-                    if (!exp3.IsSuccess)
-                        return exp3;
-
-                    if (ExceptOp(OperatorType.RRBRACKET))
-                    {
-                        var stat = ParseStat();
-                        if (!stat.IsSuccess)
-                            return stat;
-                        
-                        if (stat.ResultNode is NullStat)
-                        {
-                            return new FailedParseResult("expected statement", _currentToken);
-                        }
-
-                        return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, exp3.ResultNode,
-                            stat.ResultNode));
-                    }
+                    return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, new EmptyExp(),
+                        stat1.ResultNode));
                 }
+                
+                var exp3 = ParseExp();
+                if (!exp3.IsSuccess)
+                    return exp3;
+
+                ExceptOp(OperatorType.RRBRACKET);
+                var stat2 = ParseStat();
+                if (!stat2.IsSuccess)
+                    return stat2;
+                
+                if (stat2.ResultNode is NullStat)
+                {
+                    return new FailedParseResult("expected statement", _currentToken);
+                }
+
+                return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, exp3.ResultNode,
+                    stat2.ResultNode));
             }
             
             return new SuccessParseResult(new NullStat());

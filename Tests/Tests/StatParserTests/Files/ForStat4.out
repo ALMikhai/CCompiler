@@ -1,4 +1,7 @@
 \-FOR
+  |-EMPTY
+  |-EMPTY
+  |-EMPTY
   \-ASSIGN
     |-a
     \-1

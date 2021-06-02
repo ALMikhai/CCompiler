@@ -529,7 +529,7 @@ namespace CCompiler.Parser
 
         public override string ToString(string indent, bool last)
         {
-            return "";
+            return indent + NodePrefix(last) + Type + "\r\n";
         }
     }
 

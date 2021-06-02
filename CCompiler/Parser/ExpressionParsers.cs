@@ -324,14 +324,12 @@ namespace CCompiler.Parser
                 if (!exp.IsSuccess)
                     return exp;
 
-                if (ExceptOp(OperatorType.COLON))
-                {
-                    var conditionalExp = ParseConditionalExp();
-                    if (!conditionalExp.IsSuccess)
-                        return conditionalExp;
+                ExceptOp(OperatorType.COLON);
+                var conditionalExp = ParseConditionalExp();
+                if (!conditionalExp.IsSuccess)
+                    return conditionalExp;
 
-                    return new SuccessParseResult(new ConditionalExp(left.ResultNode, exp.ResultNode, conditionalExp.ResultNode));
-                }
+                return new SuccessParseResult(new ConditionalExp(left.ResultNode, exp.ResultNode, conditionalExp.ResultNode));
             }
 
             return left;

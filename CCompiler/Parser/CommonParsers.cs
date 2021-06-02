@@ -39,7 +39,7 @@ namespace CCompiler.Parser
                 var parseResult = parser();
                 if (!parseResult.IsSuccess)
                     return parseResult;
-                if (parseResult.ResultNode is NullStat) // TODO ??
+                if (parseResult.ResultNode is NullStat)
                     break;
 
                 list.Add(parseResult.ResultNode);
