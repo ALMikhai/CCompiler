@@ -7,9 +7,9 @@ namespace CCompiler.Parser
     public partial class SyntaxParser
     {
         /*
-         * const : int_const +
-			| char_const +
-			| float_const +
+         * const : int_const
+			| char_const
+			| float_const
 			| enumeration_const
          */
 
@@ -35,9 +35,9 @@ namespace CCompiler.Parser
         }
         
         /*
-         * primary_exp : identifier +
-			| const +
-			| string +
+         * primary_exp : identifier
+			| const
+			| string
 			| '(' exp ')'
          */
 
@@ -64,14 +64,14 @@ namespace CCompiler.Parser
         }
 
         /*
-         * postfix_exp : primary_exp +
+         * postfix_exp : primary_exp
         	| postfix_exp '[' exp ']'
         	| postfix_exp '(' argument_exp_list ')'
-        	| postfix_exp '(' ')' +
-        	| postfix_exp '.' id +
-        	| postfix_exp '->' id +
-        	| postfix_exp '++' +
-        	| postfix_exp '--' +
+        	| postfix_exp '(' ')'
+        	| postfix_exp '.' id
+        	| postfix_exp '->' id
+        	| postfix_exp '++'
+        	| postfix_exp '--'
          */
 
         private IParseResult ParsePostfixExp()
@@ -153,9 +153,9 @@ namespace CCompiler.Parser
         }
 
         /*
-         * unary_exp : postfix_exp +
-        	| '++' unary_exp +
-        	| '--' unary_exp +
+         * unary_exp : postfix_exp
+        	| '++' unary_exp
+        	| '--' unary_exp
         	| unary_operator unary_exp
          */
 
@@ -185,10 +185,10 @@ namespace CCompiler.Parser
         }
         
         /*
-         * mult_exp	: cast_exp +
-			| mult_exp '*' cast_exp +
-			| mult_exp '/' cast_exp +
-			| mult_exp '%' cast_exp +
+         * mult_exp	: cast_exp
+			| mult_exp '*' cast_exp
+			| mult_exp '/' cast_exp
+			| mult_exp '%' cast_exp
          */
 
         private IParseResult ParseMultExp()
@@ -339,9 +339,10 @@ namespace CCompiler.Parser
          * assignment_exp : conditional_exp
             | unary_exp assignment_operator assignment_exp
             ;
-                assignment_operator	: '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<='
-                    | '>>=' | '&=' | '^=' | '|='
-                    ;
+            
+           assignment_operator	: '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<='
+            | '>>=' | '&=' | '^=' | '|='
+            ;
          */
         
         private IParseResult ParseAssignmentExp()
