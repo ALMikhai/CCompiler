@@ -729,17 +729,30 @@ namespace CCompiler.Parser
             | decl_specs declarator	compound_stat
             | declarator compound_stat
             ;
+            
+           external_decl : function_definition
+            | decl
+            ;
          */
-        
+
         private IParseResult ParseFuncDef()
         {
             var declSpecs = ParseDeclSpecs();
             if (!declSpecs.IsSuccess)
                 return declSpecs;
+
+            if (!declSpecs.IsNullStat() && AcceptOp(OperatorType.SEMICOLON))
+                return new SuccessParseResult(new Decl(declSpecs.ResultNode, new EmptyExp()));
             
-            var declarator = ParseDeclarator();
-            if (!declarator.IsSuccess)
-                return declarator;
+            var initDeclarator = ParseInitDeclarator();
+            if (!initDeclarator.IsSuccess)
+                return initDeclarator;
+            
+            if (!initDeclarator.IsNullStat() && AcceptOp(OperatorType.SEMICOLON))
+                if (!declSpecs.IsNullStat())
+                    return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclarator.ResultNode));
+                else
+                    return new FailedParseResult("the function is declared incorrectly", _currentToken);
             
             var declList = ParseDeclList();
             if (!declList.IsSuccess)
@@ -749,25 +762,23 @@ namespace CCompiler.Parser
             if (!compoundStat.IsSuccess)
                 return compoundStat;
 
-            if (!(declarator.ResultNode is NullStat) && !(compoundStat.ResultNode is NullStat))
-            {
-                return new SuccessParseResult(new FuncDef(declSpecs.ResultNode, declarator.ResultNode,
+            if (initDeclarator.ResultNode is Declarator && !initDeclarator.IsNullStat() && !compoundStat.IsNullStat())
+                return new SuccessParseResult(new FuncDef(declSpecs.ResultNode, initDeclarator.ResultNode,
                     declList.ResultNode, compoundStat.ResultNode));
-            }
 
-            if (declSpecs.ResultNode is NullStat && declList.ResultNode is NullStat)
+            if (initDeclarator.IsNullStat() && declSpecs.IsNullStat() && declList.IsNullStat())
                 return new SuccessParseResult(new NullStat());
             
             return new FailedParseResult("the function is declared incorrectly", _currentToken);
         }
-        
+
         /*
          * translation_unit	: external_decl
             | translation_unit external_decl
             ;
          */
 
-        private IParseResult ParseTranslationUnit() // TODO Add parse external_decl.
+        private IParseResult ParseTranslationUnit()
         {
             return ParseList(ParseFuncDef, TranslationUnit.Instance);
         }
