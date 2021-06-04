@@ -1,0 +1,12 @@
+int;
+int a;
+int a = 1;
+
+int f();
+int f() { }
+
+int f (x, y) {}
+long long f (int x, int y) {}
+
+double b[];
+double b[] = { 1 };

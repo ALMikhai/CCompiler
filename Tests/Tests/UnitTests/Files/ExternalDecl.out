@@ -1,0 +1,81 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-EMPTY
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-DECLARATOR
+  |   \-a
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-INITDECLARATOR
+  |   |-DECLARATOR
+  |   | \-a
+  |   \-1
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-DECLARATOR
+  |   \-FUNC
+  |     |-f
+  |     \-EMPTY
+  |-FUNC
+  | |-DECLSPEC
+  | | |-INT
+  | |-DECLARATOR
+  | | \-FUNC
+  | |   |-f
+  | |   \-EMPTY
+  | \-COMPOUNDSTAT
+  |-FUNC
+  | |-DECLSPEC
+  | | |-INT
+  | |-DECLARATOR
+  | | \-FUNC
+  | |   |-f
+  | |   \-IDLIST
+  | |     |-x
+  | |     \-y
+  | \-COMPOUNDSTAT
+  |-FUNC
+  | |-DECLSPEC
+  | | |-LONG
+  | | \-DECLSPEC
+  | |   |-LONG
+  | |-DECLARATOR
+  | | \-FUNC
+  | |   |-f
+  | |   \-PARAMLIST
+  | |     |-PARAMDECLARATOR
+  | |     | |-DECLSPEC
+  | |     | | |-INT
+  | |     | \-DECLARATOR
+  | |     |   \-x
+  | |     \-PARAMDECLARATOR
+  | |       |-DECLSPEC
+  | |       | |-INT
+  | |       \-DECLARATOR
+  | |         \-y
+  | \-COMPOUNDSTAT
+  |-DECL
+  | |-DECLSPEC
+  | | |-DOUBLE
+  | \-DECLARATOR
+  |   \-ARRAY
+  |     |-b
+  |     \-EMPTY
+  \-DECL
+    |-DECLSPEC
+    | |-DOUBLE
+    \-INITDECLARATOR
+      |-DECLARATOR
+      | \-ARRAY
+      |   |-b
+      |   \-EMPTY
+      \-INITIALIZER
+        \-INITIALIZERLIST
+          \-1
+

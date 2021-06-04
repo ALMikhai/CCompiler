@@ -1,0 +1,65 @@
+\-COMPOUNDSTAT
+  |-DECLLIST
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-INITDECLARATOR
+  | |     |-DECLARATOR
+  | |     | \-a
+  | |     \-1
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-INITDECLARATOR
+  | |     |-DECLARATOR
+  | |     | \-b
+  | |     \-SUBASSIGN
+  | |       |-a
+  | |       \-2
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-INITDECLARATOR
+  | |     |-DECLARATOR
+  | |     | \-ARRAY
+  | |     |   |-c
+  | |     |   \-EMPTY
+  | |     \-INITIALIZER
+  | |       \-INITIALIZERLIST
+  | |         |-1
+  | |         |-2
+  | |         \-3
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-INITDECLARATOR
+  | |     |-DECLARATOR
+  | |     | \-ARRAY
+  | |     |   |-d
+  | |     |   \-EMPTY
+  | |     \-INITIALIZER
+  | |       \-INITIALIZERLIST
+  | |         |-ASSIGN
+  | |         | |-a
+  | |         | \-2
+  | |         \-MULTASSIGN
+  | |           |-b
+  | |           \-1
+  | \-DECL
+  |   |-DECLSPEC
+  |   | |-INT
+  |   \-INITDECLARATORLIST
+  |     \-INITDECLARATOR
+  |       |-DECLARATOR
+  |       | \-e
+  |       \-CONDITIONAL_EXP
+  |         |-EQ
+  |         | |-a
+  |         | \-0
+  |         |-1
+  |         \-2
+

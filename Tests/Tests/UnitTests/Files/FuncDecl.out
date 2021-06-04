@@ -1,0 +1,46 @@
+\-TRANSLATIONUNIT
+  |-FUNC
+  | |-DECLSPEC
+  | | |-INT
+  | |-DECLARATOR
+  | | \-FUNC
+  | |   |-main
+  | |   \-EMPTY
+  | \-COMPOUNDSTAT
+  |   \-STATLIST
+  |     \-RETURN
+  |       \-0
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-DECLARATOR
+  |   \-FUNC
+  |     |-main
+  |     \-EMPTY
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-DECLARATOR
+  |   \-FUNC
+  |     |-main
+  |     \-PARAMLIST
+  |       \-PARAMDECLARATOR
+  |         |-DECLSPEC
+  |         | |-INT
+  |         \-DECLARATOR
+  |           \-x
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-DECLARATOR
+  |   \-FUNC
+  |     |-main
+  |     \-IDLIST
+  |       \-x
+  \-FUNC
+    |-DECLARATOR
+    | \-FUNC
+    |   |-main
+    |   \-EMPTY
+    \-COMPOUNDSTAT
+

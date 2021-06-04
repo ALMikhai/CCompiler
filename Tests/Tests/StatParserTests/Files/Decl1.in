@@ -1,0 +1,14 @@
+{
+    int;
+    int a;
+    int *b;
+    int *(c);
+    int d[0];
+    int e[];
+    int f();
+    int g(int h);
+    int i(g, k);
+    double ** l;
+    float* const m;
+    char n()[];
+}

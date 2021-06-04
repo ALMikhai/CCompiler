@@ -1,0 +1,101 @@
+\-COMPOUNDSTAT
+  |-DECLLIST
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     \-a
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     |-POINTER
+  | |     \-b
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     |-POINTER
+  | |     \-DECLARATOR
+  | |       \-c
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     \-ARRAY
+  | |       |-d
+  | |       \-0
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     \-ARRAY
+  | |       |-e
+  | |       \-EMPTY
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     \-FUNC
+  | |       |-f
+  | |       \-EMPTY
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     \-FUNC
+  | |       |-g
+  | |       \-PARAMLIST
+  | |         \-PARAMDECLARATOR
+  | |           |-DECLSPEC
+  | |           | |-INT
+  | |           \-DECLARATOR
+  | |             \-h
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     \-FUNC
+  | |       |-i
+  | |       \-IDLIST
+  | |         |-g
+  | |         \-k
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-DOUBLE
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     |-POINTER
+  | |     | \-POINTER
+  | |     \-l
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-FLOAT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     |-POINTER
+  | |     | |-TYPEQUALIFIERLIST
+  | |     | | \-CONST
+  | |     \-m
+  | \-DECL
+  |   |-DECLSPEC
+  |   | |-CHAR
+  |   \-INITDECLARATORLIST
+  |     \-DECLARATOR
+  |       \-ARRAY
+  |         |-FUNC
+  |         | |-n
+  |         | \-EMPTY
+  |         \-EMPTY
+
