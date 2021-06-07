@@ -64,6 +64,11 @@ namespace CCompiler.Tokenizer
 
         public OperatorType Type { get; }
 
+        public override object GetSpecificType()
+        {
+            return Type;
+        }
+
         public static Dictionary<string, OperatorType> Operators { get; } = new Dictionary<string, OperatorType>
         {
             {"[", OperatorType.LSBRACKET},

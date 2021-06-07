@@ -51,6 +51,11 @@
             return this;
         }
 
+        public virtual object GetSpecificType()
+        {
+            return TokenType;
+        }
+
         public override string ToString()
         {
             return $"{Position}\t{TokenType}\t{Source}\t{Value}";

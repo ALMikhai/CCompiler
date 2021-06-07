@@ -51,6 +51,11 @@ namespace CCompiler.Tokenizer
 
         public KeywordType Type { get; }
 
+        public override object GetSpecificType()
+        {
+            return Type;
+        }
+        
         public static Dictionary<string, KeywordType> Keywords { get; } =
             new Dictionary<string, KeywordType>(StringComparer.InvariantCultureIgnoreCase)
             {
