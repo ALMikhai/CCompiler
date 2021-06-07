@@ -194,10 +194,6 @@ namespace CCompiler.Parser
     public class InitializerList : List
     {
         public override NodeType Type => NodeType.INITIALIZERLIST;
-        public static InitializerList Instance()
-        {
-            return new InitializerList();
-        }
     }
 
     public class ParamDecl : Node
@@ -224,10 +220,6 @@ namespace CCompiler.Parser
     public class ParamList : List
     {
         public override NodeType Type => NodeType.PARAMLIST;
-        public static ParamList Instance()
-        {
-            return new ParamList();
-        }
     }
 
     public class Pointer : Node
@@ -296,10 +288,6 @@ namespace CCompiler.Parser
     public class IdList : List
     {
         public override NodeType Type => NodeType.IDLIST;
-        public static IdList Instance()
-        {
-            return new IdList();
-        }
     }
 
     public class TypeQualifier : Node
@@ -322,10 +310,6 @@ namespace CCompiler.Parser
     public class TypeQualifierList : List
     {
         public override NodeType Type => NodeType.TYPEQUALIFIERLIST;
-        public static TypeQualifierList Instance()
-        {
-            return new TypeQualifierList();
-        }
     }
 
     public class Declarator : Node
@@ -373,10 +357,6 @@ namespace CCompiler.Parser
     public class InitDeclaratorList : List
     {
         public override NodeType Type => NodeType.INITDECLARATORLIST;
-        public static InitDeclaratorList Instance()
-        {
-            return new InitDeclaratorList();
-        }
     }
 
     public class TypeSpec : Node
@@ -458,19 +438,11 @@ namespace CCompiler.Parser
     public class StatList : List
     {
         public override NodeType Type => NodeType.STATLIST;
-        public static StatList Instance()
-        {
-            return new StatList();
-        }
     }
     
     public class DeclList : List
     {
         public override NodeType Type => NodeType.DECLLIST;
-        public static DeclList Instance()
-        {
-            return new DeclList();
-        }
     }
 
     public class CompoundStat : Node
@@ -534,9 +506,5 @@ namespace CCompiler.Parser
     public class TranslationUnit : List
     {
         public override NodeType Type => NodeType.TRANSLATIONUNIT;
-        public static TranslationUnit Instance()
-        {
-            return new TranslationUnit();
-        }
     }
 }

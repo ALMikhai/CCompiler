@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CCompiler.Tokenizer;
+using BindingFlags = System.Reflection.BindingFlags;
 
 namespace CCompiler.Parser
 {
@@ -10,7 +12,8 @@ namespace CCompiler.Parser
         delegate List ListCtor();
         delegate Node ExpCtor(OperatorToken token, Node left, Node right);
 
-        private IParseResult ParseBinaryExp(Parser parser, ExpCtor ctor, IEnumerable<OperatorType> availableOperators)
+        private IParseResult ParseBinaryExp<T>(Parser parser, IEnumerable<OperatorType> availableOperators)
+            where T : BinaryExp  
         {
             var left = parser();
             if (!left.IsSuccess || left.IsNullStat())
@@ -26,16 +29,26 @@ namespace CCompiler.Parser
                 if (right.IsNullStat())
                     return ExpectedExpressionFailure();
 
-                left = new SuccessParseResult(ctor(op, left.ResultNode,
-                    right.ResultNode));
+
+                var constructor = typeof(T).GetConstructor(new[] {typeof(OperatorToken), typeof(Node), typeof(Node)});
+                if (constructor == null)
+                    throw new ArgumentException($"{typeof(T)} not suitable for creating BinaryExp");
+                
+                var @object = constructor.Invoke(new object[] {op, left.ResultNode, right.ResultNode});
+                left = new SuccessParseResult(@object as Node);
             }
 
             return left;
         }
 
-        private IParseResult ParseList(Parser parser, ListCtor ctor, OperatorType separator)
+        private IParseResult ParseList<T>(Parser parser, OperatorType separator)
+            where T : List
         {
-            var list = ctor();
+            var constructor = typeof(T).GetConstructor(Type.EmptyTypes);
+            if (constructor == null)
+                throw new ArgumentException($"{typeof(T)} not suitable for creating List");
+            
+            var list = constructor.Invoke(new object[] {}) as List;
             
             do
             {
@@ -57,9 +70,14 @@ namespace CCompiler.Parser
             return new SuccessParseResult(list);
         }
         
-        private IParseResult ParseList(Parser parser, ListCtor ctor)
+        private IParseResult ParseList<T>(Parser parser)
+            where T : List
         {
-            var list = ctor();
+            var constructor = typeof(T).GetConstructor(Type.EmptyTypes);
+            if (constructor == null)
+                throw new ArgumentException($"{typeof(T)} not suitable for creating List");
+            
+            var list = constructor.Invoke(new object[] {}) as List;
             
             do
             {

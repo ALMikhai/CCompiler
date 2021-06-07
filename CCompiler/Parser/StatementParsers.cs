@@ -277,7 +277,7 @@ namespace CCompiler.Parser
 			;
          */
         
-        private IParseResult ParseDeclList() => ParseList(ParseDecl, DeclList.Instance);
+        private IParseResult ParseDeclList() => ParseList<DeclList>(ParseDecl);
         
         /*
          * stat_list : stat
@@ -285,7 +285,7 @@ namespace CCompiler.Parser
 			;
          */
         
-        private IParseResult ParseStatList() => ParseList(ParseStat, StatList.Instance);
+        private IParseResult ParseStatList() => ParseList<StatList>(ParseStat);
 
 
         /*
@@ -415,7 +415,7 @@ namespace CCompiler.Parser
          */
         
         private IParseResult ParseInitDeclaratorList() => 
-            ParseList(ParseInitDeclarator, InitDeclaratorList.Instance, OperatorType.COMMA);
+            ParseList<InitDeclaratorList>(ParseInitDeclarator, OperatorType.COMMA);
         
         /*
          * init_declarator : declarator
@@ -500,7 +500,7 @@ namespace CCompiler.Parser
             ;
          */
 
-        private IParseResult ParseTypeQualifierList() => ParseList(ParseTypeQualifier, TypeQualifierList.Instance);
+        private IParseResult ParseTypeQualifierList() => ParseList<TypeQualifierList>(ParseTypeQualifier);
 
         /*
          * direct_declarator : id
@@ -601,7 +601,7 @@ namespace CCompiler.Parser
             ;
          */
         
-        private IParseResult ParseParamList() => ParseList(ParseParamDecl, ParamList.Instance, OperatorType.COMMA);
+        private IParseResult ParseParamList() => ParseList<ParamList>(ParseParamDecl, OperatorType.COMMA);
 
         /*
          * param_decl : decl_specs declarator
@@ -653,14 +653,14 @@ namespace CCompiler.Parser
             ;
          */
         
-        private IParseResult ParseInitializerList() => ParseList(ParseInitializer, InitializerList.Instance, OperatorType.COMMA);
+        private IParseResult ParseInitializerList() => ParseList<InitializerList>(ParseInitializer, OperatorType.COMMA);
 
         /*
          * id_list : id
             | id_list ',' id
          */
         
-        private IParseResult ParseIdList() => ParseList(ParseId, IdList.Instance, OperatorType.COMMA);
+        private IParseResult ParseIdList() => ParseList<IdList>(ParseId, OperatorType.COMMA);
 
         /*
          * function_definition : decl_specs declarator decl_list compound_stat
@@ -717,6 +717,6 @@ namespace CCompiler.Parser
             ;
          */
 
-        private IParseResult ParseTranslationUnit() => ParseList(ParseFuncDef, TranslationUnit.Instance);
+        private IParseResult ParseTranslationUnit() => ParseList<TranslationUnit>(ParseFuncDef);
     }
 }

@@ -291,142 +291,72 @@ namespace CCompiler.Parser
     
     public class AdditiveExp : BinaryExp
     {
-        public AdditiveExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public AdditiveExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.ADDITIVEEXP;
-
-        public static AdditiveExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new AdditiveExp(token, left, right);
-        }
     }
 
     public class MultExp : BinaryExp
     {
-        public MultExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public MultExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.MULTEXP;
-        
-        public static MultExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new MultExp(token, left, right);
-        }
     }
 
     public class ShiftExp : BinaryExp
     {
-        public ShiftExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public ShiftExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.SHIFTEXP;
-        
-        public static ShiftExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new ShiftExp(token, left, right);
-        }
     }
 
     public class RelationalExp : BinaryExp
     {
-        public RelationalExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public RelationalExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.RELATIONALEXP;
-
-        public static RelationalExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new RelationalExp(token, left, right);
-        }
     }
 
     public class EqualityExp : BinaryExp
     {
-        public EqualityExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public EqualityExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.EQUALITYEXP;
-
-        public static EqualityExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new EqualityExp(token, left, right);
-        }
     }
     
     public class AndExp : BinaryExp
     {
-        public AndExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public AndExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.ANDEXP;
-
-        public static AndExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new AndExp(token, left, right);
-        }
     }
 
     public class ExclusiveOrExp : BinaryExp
     {
-        public ExclusiveOrExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public ExclusiveOrExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.EXCLUSIVEOREXP;
-
-        public static ExclusiveOrExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new ExclusiveOrExp(token, left, right);
-        }
     }
 
     public class InclusiveOrExp : BinaryExp
     {
-        public InclusiveOrExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public InclusiveOrExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.INCLUSIVEOREXP;
-
-        public static InclusiveOrExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new InclusiveOrExp(token, left, right);
-        }
     }
 
     public class LogicalAndExp : BinaryExp
     {
-        public LogicalAndExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public LogicalAndExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.LOGICALAND;
-
-        public static LogicalAndExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new LogicalAndExp(token, left, right);
-        }
     }
 
     public class LogicalOrExp : BinaryExp
     {
-        public LogicalOrExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public LogicalOrExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.LOGICALOR;
-
-        public static LogicalOrExp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new LogicalOrExp(token, left, right);
-        }
     }
 
     public class ConditionalExp : Node
@@ -455,24 +385,15 @@ namespace CCompiler.Parser
 
     public class AssignmentExp : BinaryExp
     {
-        public AssignmentExp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public AssignmentExp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.ASSIGNMENTEXP;
     }
 
     public class Exp : BinaryExp
     {
-        public Exp(OperatorToken token, Node left, Node right) : base(token, left, right)
-        {
-        }
+        public Exp(OperatorToken token, Node left, Node right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.EXP;
-        
-        public static Exp Instance(OperatorToken token, Node left, Node right)
-        {
-            return new Exp(token, left, right);
-        }
     }
 }

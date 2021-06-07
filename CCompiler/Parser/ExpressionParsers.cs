@@ -203,7 +203,7 @@ namespace CCompiler.Parser
 
         private IParseResult ParseMultExp()
         {
-            return ParseBinaryExp(ParseUnaryExp, MultExp.Instance,
+            return ParseBinaryExp<MultExp>(ParseUnaryExp,
                 new [] {OperatorType.MULT, OperatorType.DIV, OperatorType.MOD});
         }
 
@@ -215,8 +215,8 @@ namespace CCompiler.Parser
 
         private IParseResult ParseAdditiveExp()
         {
-            return ParseBinaryExp(ParseMultExp, AdditiveExp.Instance,
-                new [] {OperatorType.ADD, OperatorType.SUB});
+            return ParseBinaryExp<AdditiveExp>(ParseMultExp,
+                new[] {OperatorType.ADD, OperatorType.SUB});
         }
 
         /*
@@ -228,7 +228,7 @@ namespace CCompiler.Parser
 
         private IParseResult ParseShiftExp()
         {
-            return ParseBinaryExp(ParseAdditiveExp, ShiftExp.Instance,
+            return ParseBinaryExp<ShiftExp>(ParseAdditiveExp,
                 new [] {OperatorType.LSHIFT, OperatorType.RSHIFT});
         }
 
@@ -243,7 +243,7 @@ namespace CCompiler.Parser
 
         private IParseResult ParseRelationalExp()
         {
-            return ParseBinaryExp(ParseShiftExp, RelationalExp.Instance,
+            return ParseBinaryExp<RelationalExp>(ParseShiftExp,
                 new []
                     {OperatorType.MORE, OperatorType.MOREEQ, OperatorType.LESS, OperatorType.LESSEQ});
         }
@@ -257,7 +257,7 @@ namespace CCompiler.Parser
 
         private IParseResult ParseEqualityExp()
         {
-            return ParseBinaryExp(ParseRelationalExp, EqualityExp.Instance,
+            return ParseBinaryExp<EqualityExp>(ParseRelationalExp,
                 new [] {OperatorType.EQ, OperatorType.NEQ});
         }
         
@@ -269,7 +269,7 @@ namespace CCompiler.Parser
         
         private IParseResult ParseAndExp()
         {
-            return ParseBinaryExp(ParseEqualityExp, AndExp.Instance, new [] {OperatorType.BITAND});
+            return ParseBinaryExp<AndExp>(ParseEqualityExp,new [] {OperatorType.BITAND});
         }
         
         /*
@@ -280,7 +280,7 @@ namespace CCompiler.Parser
         
         private IParseResult ParseExclusiveOrExp()
         {
-            return ParseBinaryExp(ParseAndExp, ExclusiveOrExp.Instance, new [] {OperatorType.XOR});
+            return ParseBinaryExp<ExclusiveOrExp>(ParseAndExp, new [] {OperatorType.XOR});
         }
         
         /*
@@ -291,7 +291,7 @@ namespace CCompiler.Parser
         
         private IParseResult ParseInclusiveOrExp()
         {
-            return ParseBinaryExp(ParseExclusiveOrExp, InclusiveOrExp.Instance, new [] {OperatorType.BITOR});
+            return ParseBinaryExp<InclusiveOrExp>(ParseExclusiveOrExp, new [] {OperatorType.BITOR});
         }
         
         /*
@@ -302,7 +302,7 @@ namespace CCompiler.Parser
         
         private IParseResult ParseLogicalAndExp()
         {
-            return ParseBinaryExp(ParseInclusiveOrExp, LogicalAndExp.Instance, new [] {OperatorType.AND});
+            return ParseBinaryExp<LogicalAndExp>(ParseInclusiveOrExp, new [] {OperatorType.AND});
         }
         
         /*
@@ -313,7 +313,7 @@ namespace CCompiler.Parser
         
         private IParseResult ParseLogicalOrExp()
         {
-            return ParseBinaryExp(ParseLogicalAndExp, LogicalOrExp.Instance, new [] {OperatorType.OR});
+            return ParseBinaryExp<LogicalOrExp>(ParseLogicalAndExp, new [] {OperatorType.OR});
         }
         
         /*
@@ -400,7 +400,7 @@ namespace CCompiler.Parser
 
         private IParseResult ParseExp()
         {
-            return ParseBinaryExp(ParseAssignmentExp, Exp.Instance, new [] {OperatorType.COMMA});
+            return ParseBinaryExp<Exp>(ParseAssignmentExp, new [] {OperatorType.COMMA});
         }
     }
 }
