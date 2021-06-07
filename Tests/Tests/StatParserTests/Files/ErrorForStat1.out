@@ -1,1 +1,1 @@
-(2:10): syntax error: expected operator RRBRACKET, received SEMICOLON
+(2:10): syntax error: expected RRBRACKET, received SEMICOLON
