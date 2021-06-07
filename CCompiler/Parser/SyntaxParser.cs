@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data.SqlTypes;
+using System.Runtime.CompilerServices;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
@@ -14,7 +17,6 @@ namespace CCompiler.Parser
     public partial class SyntaxParser
     {
         private readonly Tokenizer.Tokenizer _tokenizer;
-        private Token _acceptedToken;
         private Token _currentToken;
 
         public SyntaxParser(Tokenizer.Tokenizer tokenizer, SyntaxParserType parserType)
@@ -52,12 +54,31 @@ namespace CCompiler.Parser
             _currentToken = _tokenizer.Get();
         }
 
-        private bool AcceptOp(OperatorType type)
+        private bool Accept<T>(T type)
+            where T : Enum
         {
-            if (_currentToken is OperatorToken token &&
-                token.Type == type)
+            Token token = null;
+            return Accept(type, ref token);
+        }
+
+        private bool Accept<T, T2>(T type, ref T2 result)
+            where T : Enum 
+            where T2 : Token
+        {
+            var table = new Dictionary<Type, TokenType>()
             {
-                _acceptedToken = _currentToken;
+                {typeof(OperatorType), TokenType.OPERATOR},
+                {typeof(KeywordType), TokenType.KEYWORD}
+            };
+
+            if (typeof(T) != typeof(TokenType) && !table.ContainsKey(typeof(T)))
+                throw new ArgumentException($"{typeof(T)} not provided for this method");
+
+            var tokenType = typeof(T) != typeof(TokenType) ? table[typeof(T)] : (TokenType)(object)type;
+
+            if (_currentToken.TokenType == tokenType && _currentToken.GetSpecificType().Equals(type))
+            {
+                result = _currentToken as T2;
                 NextToken();
                 return true;
             }
@@ -65,55 +86,30 @@ namespace CCompiler.Parser
             return false;
         }
 
-        private bool ExceptOp(OperatorType type)
+        private bool Accept<T, T2>(IEnumerable<T> types, ref T2 result)
+            where T : Enum
+            where T2 : Token
         {
-            if (AcceptOp(type))
+            foreach (var type in types)
+            {
+                if (Accept(type, ref result))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+        private bool Expect<T>(T type) 
+            where T : Enum
+        {
+            Token token = null;
+            if (Accept(type, ref token))
                 return true;
 
             throw new ParserException(_currentToken,
-                $"expected operator {type}, received {(_currentToken as OperatorToken)?.Type}");
-        }
-
-        private bool AcceptKeyword(KeywordType type)
-        {
-            if (_currentToken is KeywordToken token &&
-                token.Type == type)
-            {
-                _acceptedToken = _currentToken;
-                NextToken();
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool ExceptKeyword(KeywordType type)
-        {
-            if (AcceptKeyword(type))
-                return true;
-
-            throw new ParserException(_currentToken,
-                $"expected keyword {type}, received {(_currentToken as OperatorToken)?.Type}");
-        }
-
-        private bool Accept(TokenType type)
-        {
-            if (_currentToken.TokenType == type)
-            {
-                _acceptedToken = _currentToken;
-                NextToken();
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool Except(TokenType type)
-        {
-            if (Accept(type))
-                return true;
-
-            throw new ParserException(_currentToken, $"expected token {type}, received {_currentToken.TokenType}");
+                $"expected {type}, received {(_currentToken as OperatorToken)?.Type}");
         }
     }
 }

@@ -10,20 +10,21 @@ namespace CCompiler.Parser
         delegate List ListCtor();
         delegate Node ExpCtor(OperatorToken token, Node left, Node right);
 
-        private IParseResult ParseBinaryExp(Parser parser, ExpCtor ctor, List<OperatorType> availableOperators)
+        private IParseResult ParseBinaryExp(Parser parser, ExpCtor ctor, IEnumerable<OperatorType> availableOperators)
         {
             var left = parser();
             if (!left.IsSuccess)
                 return left;
 
-            while (availableOperators.FirstOrDefault(AcceptOp) != OperatorType.NONE)
+            OperatorToken op = null;
+            // ReSharper disable once PossibleMultipleEnumeration
+            while (Accept(availableOperators, ref op))
             {
-                var operation = _acceptedToken;
                 var right = parser();
                 if (!right.IsSuccess)
                     return right;
 
-                left = new SuccessParseResult(ctor(operation as OperatorToken, left.ResultNode,
+                left = new SuccessParseResult(ctor(op, left.ResultNode,
                     right.ResultNode));
             }
 
@@ -46,7 +47,7 @@ namespace CCompiler.Parser
                         break;
 
                 list.Add(parseResult.ResultNode);
-            } while (AcceptOp(separator));
+            } while (Accept(separator));
 
             if (list.Nodes.Count == 0)
                 return new SuccessParseResult(new NullStat());
