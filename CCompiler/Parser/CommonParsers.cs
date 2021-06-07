@@ -9,8 +9,6 @@ namespace CCompiler.Parser
     public partial class SyntaxParser
     {
         delegate IParseResult Parser();
-        delegate List ListCtor();
-        delegate Node ExpCtor(OperatorToken token, Node left, Node right);
 
         private IParseResult ParseBinaryExp<T>(Parser parser, IEnumerable<OperatorType> availableOperators)
             where T : BinaryExp  

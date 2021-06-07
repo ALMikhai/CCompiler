@@ -213,11 +213,6 @@ namespace CCompiler.Parser
 
         public OperatorToken Operator { get; }
         public override NodeType Type => NodeType.UNARYOPERATOR;
-
-        public override string ToString(string indent, bool last)
-        {
-            return indent + NodePrefix(last) + $"{Operator.Value}" + "\r\n";
-        }
     }
 
     public class PrefixIncDec : Node

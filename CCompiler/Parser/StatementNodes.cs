@@ -378,18 +378,18 @@ namespace CCompiler.Parser
 
     public class StorageClassSpec : Node
     {
-        public KeywordToken TokenType { get; }
+        public KeywordToken Token { get; }
 
-        public StorageClassSpec(KeywordToken tokenType)
+        public StorageClassSpec(KeywordToken token)
         {
-            TokenType = tokenType;
+            Token = token;
         }
         
         public override NodeType Type => NodeType.STORAGECLASSSPEC;
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + TokenType + "\r\n";
+            return indent + NodePrefix(last) + Token.Value + "\r\n";
         }
     }
 

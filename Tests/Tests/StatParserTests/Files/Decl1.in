@@ -1,6 +1,8 @@
 {
     int;
     int a;
+    const int b;
+    auto c = "123s";
     int *b;
     int *(c);
     int d[0];

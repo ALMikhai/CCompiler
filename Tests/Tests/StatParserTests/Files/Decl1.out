@@ -11,6 +11,22 @@
   | |     \-a
   | |-DECL
   | | |-DECLSPEC
+  | | | |-CONST
+  | | | \-DECLSPEC
+  | | |   |-INT
+  | | \-INITDECLARATORLIST
+  | |   \-DECLARATOR
+  | |     \-b
+  | |-DECL
+  | | |-DECLSPEC
+  | | | |-AUTO
+  | | \-INITDECLARATORLIST
+  | |   \-INITDECLARATOR
+  | |     |-DECLARATOR
+  | |     | \-c
+  | |     \-123s
+  | |-DECL
+  | | |-DECLSPEC
   | | | |-INT
   | | \-INITDECLARATORLIST
   | |   \-DECLARATOR
