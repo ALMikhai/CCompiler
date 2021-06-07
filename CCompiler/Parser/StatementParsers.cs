@@ -14,35 +14,18 @@ namespace CCompiler.Parser
             ;
          */
 
-        private IParseResult ParseStat() // TODO Remake this block.
+        private IParseResult ParseStat()
         {
-            var expStat = ParseExpStat();
-            if (expStat.IsSuccess)
-                return expStat;
-
-            var compoundStat = ParseCompoundStat();
-            if (!compoundStat.IsSuccess)
-                return compoundStat;
-            if (!(compoundStat.ResultNode is NullStat))
-                return compoundStat;
-
-            var selectionStat = ParseSelectionStat();
-            if (!selectionStat.IsSuccess)
-                return selectionStat;
-            if (!(selectionStat.ResultNode is NullStat))
-                return selectionStat;
-
-            var iterationStat = ParseIterationStat();
-            if (!iterationStat.IsSuccess)
-                return iterationStat;
-            if (!(iterationStat.ResultNode is NullStat))
-                return iterationStat;
-
-            var jumpStat = ParseJumpStat();
-            if (!jumpStat.IsSuccess)
-                return jumpStat;
-            if (!(jumpStat.ResultNode is NullStat))
-                return jumpStat;
+            var parsers = new Parser[]
+                {ParseExpStat, ParseCompoundStat, ParseSelectionStat, ParseIterationStat, ParseJumpStat};
+            foreach (var parser in parsers)
+            {
+                var stat = parser();
+                if (!stat.IsSuccess)
+                    return stat;
+                if (!stat.IsNullStat())
+                    return stat;
+            }
 
             return new SuccessParseResult(new NullStat());
         }
@@ -71,9 +54,6 @@ namespace CCompiler.Parser
             
             if (Accept(KeywordType.RETURN))
             {
-                if (Accept(OperatorType.SEMICOLON))
-                    return new SuccessParseResult(new ReturnStat(new NullStat()));
-
                 var exp = ParseExp();
                 if (!exp.IsSuccess)
                     return exp;
@@ -100,23 +80,23 @@ namespace CCompiler.Parser
                 var exp = ParseExp();
                 if (!exp.IsSuccess)
                     return exp;
+                if (exp.IsNullStat())
+                    return ExpectedExpressionFailure();
 
                 Expect(OperatorType.RRBRACKET);
                 var stat = ParseStat();
                 if (!stat.IsSuccess)
                     return stat;
-
-                if (stat.ResultNode is NullStat)
-                    return new FailedParseResult("expected statement", _currentToken);
+                if (stat.IsNullStat())
+                    return ExpectedExpressionFailure();
                     
                 if (Accept(KeywordType.ELSE))
                 {
                     var stat2 = ParseStat();
                     if (!stat2.IsSuccess)
                         return stat2;
-
-                    if (stat2.ResultNode is NullStat)
-                        return new FailedParseResult("expected statement", _currentToken);
+                    if (stat2.IsNullStat())
+                        return ExpectedStatFailure();
 
                     return new SuccessParseResult(new IfStat(exp.ResultNode, stat.ResultNode,
                         stat2.ResultNode));
@@ -131,21 +111,22 @@ namespace CCompiler.Parser
                 var exp = ParseExp();
                 if (!exp.IsSuccess)
                     return exp;
+                if (exp.IsNullStat())
+                    return ExpectedExpressionFailure();
 
                 Expect(OperatorType.RRBRACKET);
                 var stat = ParseStat();
                 if (!stat.IsSuccess)
                     return stat;
-
-                if (stat.ResultNode is NullStat)
-                    return new FailedParseResult("expected statement", _currentToken);
+                if (stat.IsNullStat())
+                    return ExpectedStatFailure();
                 
                 return new SuccessParseResult(new SwitchStat(exp.ResultNode, stat.ResultNode));
             }
             
             return new SuccessParseResult(new NullStat());
         }
-        
+
         /*
          * exp_stat	: exp ';'
 			|	';'
@@ -156,9 +137,9 @@ namespace CCompiler.Parser
         {
             if (Accept(OperatorType.SEMICOLON))
                 return new SuccessParseResult(new EmptyExp());
-
+            
             var exp = ParseExp();
-            if (!exp.IsSuccess)
+            if (!exp.IsSuccess || exp.IsNullStat())
                 return exp;
 
             Expect(OperatorType.SEMICOLON); 
@@ -187,14 +168,15 @@ namespace CCompiler.Parser
                 var exp = ParseExp();
                 if (!exp.IsSuccess)
                     return exp;
+                if (exp.IsNullStat())
+                    return ExpectedExpressionFailure();
 
                 Expect(OperatorType.RRBRACKET);
                 var stat = ParseStat();
                 if (!stat.IsSuccess)
                     return stat;
-                
-                if (stat.ResultNode is NullStat)
-                    return new FailedParseResult("expected statement", _currentToken);
+                if (stat.IsNullStat())
+                    return ExpectedStatFailure();
 
                 return new SuccessParseResult(new WhileStat(exp.ResultNode, stat.ResultNode, WhileType.WHILE));
             }
@@ -204,15 +186,16 @@ namespace CCompiler.Parser
                 var stat = ParseStat();
                 if (!stat.IsSuccess)
                     return stat;
-                
-                if (stat.ResultNode is NullStat)
-                    return new FailedParseResult("expected statement", _currentToken);
+                if (stat.IsNullStat())
+                    return ExpectedStatFailure();
 
                 Expect(KeywordType.WHILE);
                 Expect(OperatorType.LRBRACKET);
                 var exp = ParseExp();
                 if (!exp.IsSuccess)
                     return exp;
+                if (exp.IsNullStat())
+                    return ExpectedExpressionFailure();
 
                 Expect(OperatorType.RRBRACKET);
                 Expect(OperatorType.SEMICOLON);
@@ -235,9 +218,8 @@ namespace CCompiler.Parser
                     var stat1 = ParseStat();
                     if (!stat1.IsSuccess)
                         return stat1;
-                    
-                    if (stat1.ResultNode is NullStat)
-                        return new FailedParseResult("expected statement", _currentToken);
+                    if (stat1.IsNullStat())
+                        return ExpectedStatFailure();
                     
                     return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, new EmptyExp(),
                         stat1.ResultNode));
@@ -251,9 +233,8 @@ namespace CCompiler.Parser
                 var stat2 = ParseStat();
                 if (!stat2.IsSuccess)
                     return stat2;
-                
-                if (stat2.ResultNode is NullStat)
-                    return new FailedParseResult("expected statement", _currentToken);
+                if (stat2.IsNullStat())
+                    return ExpectedStatFailure();
 
                 return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, exp3.ResultNode,
                     stat2.ResultNode));
@@ -447,12 +428,16 @@ namespace CCompiler.Parser
             var declarator = ParseDeclarator();
             if (!declarator.IsSuccess)
                 return declarator;
+            if (declarator.IsNullStat())
+                return declarator;
 
             if (Accept(OperatorType.ASSIGN))
             {
                 var initializer = ParseInitializer();
                 if (!initializer.IsSuccess)
                     return initializer;
+                if (initializer.IsNullStat())
+                    return new FailedParseResult("expected initializer", _currentToken);
 
                 return new SuccessParseResult(new InitDeclarator(declarator.ResultNode, initializer.ResultNode));
             }
@@ -542,6 +527,8 @@ namespace CCompiler.Parser
                 var declarator = ParseDeclarator();
                 if (!declarator.IsSuccess)
                     return declarator;
+                if (declarator.IsNullStat())
+                    return new FailedParseResult("expected declarator", _currentToken);
                 Expect(OperatorType.RRBRACKET);
                 left = declarator;
             }
@@ -564,12 +551,12 @@ namespace CCompiler.Parser
                     var conditionalExp = ParseConditionalExp();
                     if (!conditionalExp.IsSuccess)
                         return conditionalExp;
+                    if (conditionalExp.IsNullStat())
+                        return ExpectedExpressionFailure();
 
-                    if (Expect(OperatorType.RSBRACKET))
-                    {
-                        left = new SuccessParseResult(new ArrayDecl(left.ResultNode, conditionalExp.ResultNode));
-                        continue;
-                    }
+                    Expect(OperatorType.RSBRACKET);
+                    left = new SuccessParseResult(new ArrayDecl(left.ResultNode, conditionalExp.ResultNode));
+                    continue;
                 }
                 
                 if (op.Type == OperatorType.LRBRACKET)
@@ -594,6 +581,8 @@ namespace CCompiler.Parser
                     var idList = ParseIdList();
                     if (!idList.IsSuccess)
                         return idList;
+                    if (idList.IsNullStat())
+                        return new FailedParseResult("expected parameter list", _currentToken);
                     
                     Expect(OperatorType.RRBRACKET);
                     left = new SuccessParseResult(new FuncDecl(left.ResultNode, idList.ResultNode));
@@ -616,27 +605,22 @@ namespace CCompiler.Parser
 
         /*
          * param_decl : decl_specs declarator
-            | decl_specs
             ;
          */
         
         private IParseResult ParseParamDecl()
         {
             var declSpecs = ParseDeclSpecs();
-            if (!declSpecs.IsSuccess)
+            if (!declSpecs.IsSuccess || declSpecs.IsNullStat())
                 return declSpecs;
-
-            if (declSpecs.IsNullStat())
-                return new SuccessParseResult(new NullStat());
             
             var declarator = ParseDeclarator();
             if (!declarator.IsSuccess)
                 return declarator;
-
-            if (!declarator.IsNullStat())
-                return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, declarator.ResultNode));
-
-            return new FailedParseResult("after type specialization expected declarator", _currentToken);
+            if (declarator.IsNullStat())
+                return new FailedParseResult("after type specialization expected declarator", _currentToken);
+            
+            return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, declarator.ResultNode));
         }
         
         /*
@@ -653,6 +637,8 @@ namespace CCompiler.Parser
                 var initializerList = ParseInitializerList();
                 if (!initializerList.IsSuccess)
                     return initializerList;
+                if (initializerList.IsNullStat())
+                    return new FailedParseResult("expected initializer list", _currentToken);
 
                 Expect(OperatorType.RFBRACKET);
                 return new SuccessParseResult(new Initializer(initializerList.ResultNode));

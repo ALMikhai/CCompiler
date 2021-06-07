@@ -111,5 +111,8 @@ namespace CCompiler.Parser
             throw new ParserException(_currentToken,
                 $"expected {type}, received {(_currentToken as OperatorToken)?.Type}");
         }
+        
+        private FailedParseResult ExpectedExpressionFailure() => new FailedParseResult("expected expression", _currentToken);
+        private FailedParseResult ExpectedStatFailure() => new FailedParseResult("expected statement", _currentToken);
     }
 }

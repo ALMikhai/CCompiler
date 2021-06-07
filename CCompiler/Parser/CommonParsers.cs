@@ -13,7 +13,7 @@ namespace CCompiler.Parser
         private IParseResult ParseBinaryExp(Parser parser, ExpCtor ctor, IEnumerable<OperatorType> availableOperators)
         {
             var left = parser();
-            if (!left.IsSuccess)
+            if (!left.IsSuccess || left.IsNullStat())
                 return left;
 
             OperatorToken op = null;
@@ -23,6 +23,8 @@ namespace CCompiler.Parser
                 var right = parser();
                 if (!right.IsSuccess)
                     return right;
+                if (right.IsNullStat())
+                    return ExpectedExpressionFailure();
 
                 left = new SuccessParseResult(ctor(op, left.ResultNode,
                     right.ResultNode));
@@ -30,7 +32,7 @@ namespace CCompiler.Parser
 
             return left;
         }
-        
+
         private IParseResult ParseList(Parser parser, ListCtor ctor, OperatorType separator)
         {
             var list = ctor();
@@ -42,7 +44,7 @@ namespace CCompiler.Parser
                     return parseResult;
                 if (parseResult.IsNullStat())
                     if (list.Nodes.Any())
-                        return new FailedParseResult("expected expression", _currentToken);
+                        return ExpectedExpressionFailure();
                     else
                         break;
 
