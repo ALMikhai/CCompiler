@@ -507,4 +507,56 @@ namespace CCompiler.Parser
     {
         public override NodeType Type => NodeType.TRANSLATIONUNIT;
     }
+
+    public class StructDeclaratorList : List
+    {
+        public override NodeType Type => NodeType.STRUCTDECLARATORLIST;
+    }
+
+    public class StructDecl : Node
+    {
+        public Node DeclSpec { get; }
+        public Node DeclaratorList { get; }
+
+        public StructDecl(Node declSpec, Node declaratorList)
+        {
+            DeclSpec = declSpec;
+            DeclaratorList = declaratorList;
+        }
+        
+        public override NodeType Type => NodeType.STRUCTDECL;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   DeclSpec.ToString(indent + ChildrenPrefix(last), false) +
+                   DeclaratorList.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+
+    public class StructDeclList : List
+    {
+        public override NodeType Type => NodeType.STRUCTDECLLIST;
+    }
+
+    public class StructSpec : Node
+    {
+        public Node Id { get; }
+        public Node StructDeclList { get; }
+
+        public StructSpec(Node id, Node structDeclList)
+        {
+            Id = id;
+            StructDeclList = structDeclList;
+        }
+        
+        public override NodeType Type => NodeType.STRUCTSPEC;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   Id.ToString(indent + ChildrenPrefix(last), false) +
+                   StructDeclList.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
 }

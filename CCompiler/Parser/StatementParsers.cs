@@ -1,4 +1,6 @@
-﻿using CCompiler.Tokenizer;
+﻿using System;
+using System.Text;
+using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
@@ -297,6 +299,9 @@ namespace CCompiler.Parser
         private IParseResult ParseDecl()
         {
             var declSpecs = ParseDeclSpecs();
+            if (!declSpecs.IsSuccess)
+                return declSpecs;
+            
             if (!declSpecs.IsNullStat())
             {
                 var initDeclaratorList = ParseInitDeclaratorList();
@@ -326,13 +331,20 @@ namespace CCompiler.Parser
             if (!storageClassSpec.IsNullStat())
             {
                 var declSpecs = ParseDeclSpecs();
+                if (!declSpecs.IsSuccess)
+                    return declSpecs;
                 return new SuccessParseResult(new DeclSpecs(storageClassSpec.ResultNode, declSpecs.ResultNode));
             }
             
             var typeSpec = ParseTypeSpec();
+            if (!typeSpec.IsSuccess)
+                return typeSpec;
+            
             if (!typeSpec.IsNullStat())
             {
                 var declSpecs = ParseDeclSpecs();
+                if (!declSpecs.IsSuccess)
+                    return declSpecs;
                 return new SuccessParseResult(new DeclSpecs(typeSpec.ResultNode, declSpecs.ResultNode));
             }
             
@@ -340,6 +352,8 @@ namespace CCompiler.Parser
             if (!typeQualifier.IsNullStat())
             {
                 var declSpecs = ParseDeclSpecs();
+                if (!declSpecs.IsSuccess)
+                    return declSpecs;
                 return new SuccessParseResult(new DeclSpecs(typeQualifier.ResultNode, declSpecs.ResultNode));
             }
             
@@ -386,8 +400,11 @@ namespace CCompiler.Parser
             {
                 return new SuccessParseResult(new TypeSpec(token));
             }
-            
-            // TODO struct_or_union_spec
+
+            var structSpec = ParseStructSpec();
+            if (!structSpec.IsSuccess || !structSpec.IsNullStat())
+                return structSpec;
+
             // TODO enum_spec
             // TODO typedef_name
             
@@ -674,7 +691,7 @@ namespace CCompiler.Parser
             ;
          */
 
-        private IParseResult ParseFuncDef()
+        private IParseResult ParseExternalDecl()
         {
             var declSpecs = ParseDeclSpecs();
             if (!declSpecs.IsSuccess)
@@ -686,13 +703,10 @@ namespace CCompiler.Parser
             var initDeclarator = ParseInitDeclarator();
             if (!initDeclarator.IsSuccess)
                 return initDeclarator;
-            
-            if (!initDeclarator.IsNullStat() && Accept(OperatorType.SEMICOLON))
-                if (!declSpecs.IsNullStat())
-                    return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclarator.ResultNode));
-                else
-                    return new FailedParseResult("the function is declared incorrectly", _currentToken);
-            
+
+            if (!declSpecs.IsNullStat() && Accept(OperatorType.SEMICOLON))
+                return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclarator.ResultNode));
+
             var declList = ParseDeclList();
             if (!declList.IsSuccess)
                 return declList;
@@ -701,14 +715,14 @@ namespace CCompiler.Parser
             if (!compoundStat.IsSuccess)
                 return compoundStat;
 
-            if (initDeclarator.ResultNode is Declarator && !initDeclarator.IsNullStat() && !compoundStat.IsNullStat())
+            if (initDeclarator.ResultNode is Declarator && !compoundStat.IsNullStat())
                 return new SuccessParseResult(new FuncDef(declSpecs.ResultNode, initDeclarator.ResultNode,
                     declList.ResultNode, compoundStat.ResultNode));
 
             if (initDeclarator.IsNullStat() && declSpecs.IsNullStat() && declList.IsNullStat())
                 return new SuccessParseResult(new NullStat());
             
-            return new FailedParseResult("the function is declared incorrectly", _currentToken);
+            return new FailedParseResult("the external declaration is incorrectly", _currentToken);
         }
 
         /*
@@ -717,6 +731,107 @@ namespace CCompiler.Parser
             ;
          */
 
-        private IParseResult ParseTranslationUnit() => ParseList<TranslationUnit>(ParseFuncDef);
+        private IParseResult ParseTranslationUnit() => ParseList<TranslationUnit>(ParseExternalDecl);
+
+        /*
+         * struct_spec	: 'struct' identifier '{' struct_decl_list '}'
+            | 'struct' '{' struct_decl_list '}'
+            | 'struct' identifier
+            ;
+         */
+        
+        private IParseResult ParseStructSpec()
+        {
+            if (Accept(KeywordType.STRUCT))
+            {
+                var id = ParseId();
+
+                if (Accept(OperatorType.LFBRACKET))
+                {
+                    var structDeclList = ParseStructDeclList();
+                    if (!structDeclList.IsSuccess)
+                        return structDeclList;
+                    Expect(OperatorType.RFBRACKET);
+
+                    return new SuccessParseResult(new StructSpec(id.ResultNode, structDeclList.ResultNode));
+                }
+
+                if (!id.IsNullStat())
+                    return new SuccessParseResult(new StructSpec(id.ResultNode, new EmptyExp()));
+
+                return new FailedParseResult("expected struct declaration", _currentToken);
+            }
+
+            return new SuccessParseResult(new NullStat());
+        }
+        
+        /*
+         * struct_decl_list : struct_decl
+            | struct_decl_list struct_decl
+            ;
+         */
+
+        private IParseResult ParseStructDeclList() => ParseList<StructDeclList>(ParseStructDecl);
+
+        /*
+         * struct_decl : spec_qualifier_list struct_declarator_list ';'
+            ;
+         */
+
+        private IParseResult ParseStructDecl()
+        {
+            var specQualifierList = ParseSpecQualifierList();
+            if (!specQualifierList.IsSuccess)
+                return specQualifierList;
+            if (!specQualifierList.IsNullStat())
+            {
+                var structDeclaratorList = ParseStructDeclaratorList();
+                if (!structDeclaratorList.IsSuccess)
+                    return structDeclaratorList;
+                Expect(OperatorType.SEMICOLON);
+                return new SuccessParseResult(new StructDecl(specQualifierList.ResultNode,
+                    structDeclaratorList.ResultNode));
+            }
+
+            return new SuccessParseResult(new NullStat());
+        }
+        
+        /*
+         * spec_qualifier_list : type_spec spec_qualifier_list
+            | type_spec
+            | type_qualifier spec_qualifier_list
+            | type_qualifier
+            ;
+         */
+
+        private IParseResult ParseSpecQualifierList()
+        {
+            var typeSpec = ParseTypeSpec();
+            if (!typeSpec.IsSuccess)
+                return typeSpec;
+            if (!typeSpec.IsNullStat())
+            {
+                var specQualifierList = ParseSpecQualifierList();
+                return new SuccessParseResult(new DeclSpecs(typeSpec.ResultNode, specQualifierList.ResultNode));
+            }
+            
+            var typeQualifier = ParseTypeQualifier();
+            if (!typeQualifier.IsNullStat())
+            {
+                var specQualifierList = ParseSpecQualifierList();
+                return new SuccessParseResult(new DeclSpecs(typeSpec.ResultNode, specQualifierList.ResultNode));   
+            }
+
+            return new SuccessParseResult(new NullStat());
+        }
+        
+        /*
+         * struct_declarator_list : declarator
+            | struct_declarator_list ',' declarator
+            ;
+         */
+
+        private IParseResult ParseStructDeclaratorList() =>
+            ParseList<StructDeclaratorList>(ParseDeclarator, OperatorType.COMMA);
     }
 }
