@@ -39,10 +39,14 @@ namespace CCompiler.Parser
                 default:
                     throw new ArgumentOutOfRangeException(nameof(parserType), parserType, null);
             }
+
+            if (result.IsSuccess)
+            {
+                Expect(TokenType.EOF);
+                Console.WriteLine(result.ResultNode);
+            }
             
-            Console.WriteLine(result.IsSuccess
-                ? result.ResultNode.ToString()
-                : throw new ParserException(_currentToken, result.ErrorMessage));
+            throw new ParserException(_currentToken, result.ErrorMessage);
         }
 
         public SyntaxParser(string filePath, SyntaxParserType parserType) : this(new Tokenizer.Tokenizer(filePath), parserType)
