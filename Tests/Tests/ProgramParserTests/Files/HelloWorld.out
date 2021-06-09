@@ -1,0 +1,16 @@
+\-TRANSLATIONUNIT
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-DECLARATOR
+    | \-FUNC
+    |   |-main
+    |   \-EMPTY
+    \-COMPOUNDSTAT
+      \-STATLIST
+        |-()
+        | |-printf
+        | \-Hello, World!
+        \-RETURN
+          \-0
+

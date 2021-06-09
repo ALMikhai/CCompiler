@@ -1,0 +1,48 @@
+\-TRANSLATIONUNIT
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-DECLARATOR
+    | \-FUNC
+    |   |-main
+    |   \-EMPTY
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-DOUBLE
+      |   \-INITDECLARATORLIST
+      |     \-DECLARATOR
+      |       \-num
+      \-STATLIST
+        |-()
+        | |-printf
+        | \-Enter a number:
+        |-()
+        | |-scanf
+        | \-COMMA
+        |   |-%lf
+        |   \-BITAND
+        |     \-num
+        |-IF
+        | |-LESSEQ
+        | | |-num
+        | | \-0
+        | |-COMPOUNDSTAT
+        | | \-STATLIST
+        | |   \-IF
+        | |     |-EQ
+        | |     | |-num
+        | |     | \-0
+        | |     |-()
+        | |     | |-printf
+        | |     | \-You entered 0.
+        | |     \-()
+        | |       |-printf
+        | |       \-You entered a negative number.
+        | \-()
+        |   |-printf
+        |   \-You entered a positive number.
+        \-RETURN
+          \-0
+

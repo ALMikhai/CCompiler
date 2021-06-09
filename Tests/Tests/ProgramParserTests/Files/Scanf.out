@@ -1,0 +1,34 @@
+\-TRANSLATIONUNIT
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-DECLARATOR
+    | \-FUNC
+    |   |-main
+    |   \-EMPTY
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-INT
+      |   \-INITDECLARATORLIST
+      |     \-DECLARATOR
+      |       \-number
+      \-STATLIST
+        |-()
+        | |-printf
+        | \-Enter an integer:
+        |-()
+        | |-scanf
+        | \-COMMA
+        |   |-%d
+        |   \-BITAND
+        |     \-number
+        |-()
+        | |-printf
+        | \-COMMA
+        |   |-You entered: %d
+        |   \-number
+        \-RETURN
+          \-0
+

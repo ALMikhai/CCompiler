@@ -1,0 +1,242 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-DECLARATOR
+  |   \-FUNC
+  |     |-checkPrimeNumber
+  |     \-PARAMLIST
+  |       \-PARAMDECLARATOR
+  |         |-DECLSPEC
+  |         | |-INT
+  |         \-DECLARATOR
+  |           \-n
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-DECLARATOR
+  |   \-FUNC
+  |     |-checkArmstrongNumber
+  |     \-PARAMLIST
+  |       \-PARAMDECLARATOR
+  |         |-DECLSPEC
+  |         | |-INT
+  |         \-DECLARATOR
+  |           \-n
+  |-FUNC
+  | |-DECLSPEC
+  | | |-INT
+  | |-DECLARATOR
+  | | \-FUNC
+  | |   |-main
+  | |   \-EMPTY
+  | \-COMPOUNDSTAT
+  |   |-DECLLIST
+  |   | \-DECL
+  |   |   |-DECLSPEC
+  |   |   | |-INT
+  |   |   \-INITDECLARATORLIST
+  |   |     |-DECLARATOR
+  |   |     | \-n
+  |   |     \-DECLARATOR
+  |   |       \-flag
+  |   \-STATLIST
+  |     |-()
+  |     | |-printf
+  |     | \-Enter a positive integer:
+  |     |-()
+  |     | |-scanf
+  |     | \-COMMA
+  |     |   |-%d
+  |     |   \-BITAND
+  |     |     \-n
+  |     |-ASSIGN
+  |     | |-flag
+  |     | \-()
+  |     |   |-checkPrimeNumber
+  |     |   \-n
+  |     |-IF
+  |     | |-EQ
+  |     | | |-flag
+  |     | | \-1
+  |     | |-()
+  |     | | |-printf
+  |     | | \-COMMA
+  |     | |   |-%d is a prime number.
+
+  |     | |   \-n
+  |     | \-()
+  |     |   |-printf
+  |     |   \-COMMA
+  |     |     |-%d is not a prime number.
+
+  |     |     \-n
+  |     |-ASSIGN
+  |     | |-flag
+  |     | \-()
+  |     |   |-checkArmstrongNumber
+  |     |   \-n
+  |     |-IF
+  |     | |-EQ
+  |     | | |-flag
+  |     | | \-1
+  |     | |-()
+  |     | | |-printf
+  |     | | \-COMMA
+  |     | |   |-%d is an Armstrong number.
+  |     | |   \-n
+  |     | \-()
+  |     |   |-printf
+  |     |   \-COMMA
+  |     |     |-%d is not an Armstrong number.
+  |     |     \-n
+  |     \-RETURN
+  |       \-0
+  |-FUNC
+  | |-DECLSPEC
+  | | |-INT
+  | |-DECLARATOR
+  | | \-FUNC
+  | |   |-checkPrimeNumber
+  | |   \-PARAMLIST
+  | |     \-PARAMDECLARATOR
+  | |       |-DECLSPEC
+  | |       | |-INT
+  | |       \-DECLARATOR
+  | |         \-n
+  | \-COMPOUNDSTAT
+  |   |-DECLLIST
+  |   | \-DECL
+  |   |   |-DECLSPEC
+  |   |   | |-INT
+  |   |   \-INITDECLARATORLIST
+  |   |     |-DECLARATOR
+  |   |     | \-i
+  |   |     |-INITDECLARATOR
+  |   |     | |-DECLARATOR
+  |   |     | | \-flag
+  |   |     | \-1
+  |   |     \-DECLARATOR
+  |   |       \-squareRoot
+  |   \-STATLIST
+  |     |-ASSIGN
+  |     | |-squareRoot
+  |     | \-()
+  |     |   |-sqrt
+  |     |   \-n
+  |     |-FOR
+  |     | |-ASSIGN
+  |     | | |-i
+  |     | | \-2
+  |     | |-LESSEQ
+  |     | | |-i
+  |     | | \-squareRoot
+  |     | |-PREFIX INC
+  |     | | \-i
+  |     | \-COMPOUNDSTAT
+  |     |   \-STATLIST
+  |     |     \-IF
+  |     |       |-EQ
+  |     |       | |-MOD
+  |     |       | | |-n
+  |     |       | | \-i
+  |     |       | \-0
+  |     |       |-COMPOUNDSTAT
+  |     |       | \-STATLIST
+  |     |       |   |-ASSIGN
+  |     |       |   | |-flag
+  |     |       |   | \-0
+  |     |       |   \-BREAK
+  |     |       \-EMPTY
+  |     \-RETURN
+  |       \-flag
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-DECLARATOR
+    | \-FUNC
+    |   |-checkArmstrongNumber
+    |   \-PARAMLIST
+    |     \-PARAMDECLARATOR
+    |       |-DECLSPEC
+    |       | |-INT
+    |       \-DECLARATOR
+    |         \-num
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   |-DECLARATOR
+      | |   | \-originalNum
+      | |   |-DECLARATOR
+      | |   | \-remainder
+      | |   |-INITDECLARATOR
+      | |   | |-DECLARATOR
+      | |   | | \-n
+      | |   | \-0
+      | |   \-DECLARATOR
+      | |     \-flag
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-DOUBLE
+      |   \-INITDECLARATORLIST
+      |     \-INITDECLARATOR
+      |       |-DECLARATOR
+      |       | \-result
+      |       \-0
+      \-STATLIST
+        |-FOR
+        | |-ASSIGN
+        | | |-originalNum
+        | | \-num
+        | |-NEQ
+        | | |-originalNum
+        | | \-0
+        | |-PREFIX INC
+        | | \-n
+        | \-COMPOUNDSTAT
+        |   \-STATLIST
+        |     \-DIVASSIGN
+        |       |-originalNum
+        |       \-10
+        |-FOR
+        | |-ASSIGN
+        | | |-originalNum
+        | | \-num
+        | |-NEQ
+        | | |-originalNum
+        | | \-0
+        | |-DIVASSIGN
+        | | |-originalNum
+        | | \-10
+        | \-COMPOUNDSTAT
+        |   \-STATLIST
+        |     |-ASSIGN
+        |     | |-remainder
+        |     | \-MOD
+        |     |   |-originalNum
+        |     |   \-10
+        |     \-ADDASSIGN
+        |       |-result
+        |       \-()
+        |         |-pow
+        |         \-COMMA
+        |           |-remainder
+        |           \-n
+        |-IF
+        | |-EQ
+        | | |-()
+        | | | |-round
+        | | | \-result
+        | | \-num
+        | |-ASSIGN
+        | | |-flag
+        | | \-1
+        | \-ASSIGN
+        |   |-flag
+        |   \-0
+        \-RETURN
+          \-flag
+
