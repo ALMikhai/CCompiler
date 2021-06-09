@@ -1,0 +1,13 @@
+struct a1 {
+    struct a2 { 
+        int a, b[], *c; 
+    } b2;
+    int a, b[], *c; 
+} b1;
+
+f() {}
+
+struct a3 { 
+    double d;
+    struct a1 a;
+};

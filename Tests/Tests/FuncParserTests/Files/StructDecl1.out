@@ -1,0 +1,41 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-STRUCTSPEC
+  | | | |-a
+  | | | \-STRUCTDECLLIST
+  | | |   \-STRUCTDECL
+  | | |     |-DECLSPEC
+  | | |     | |-INT
+  | | |     \-STRUCTDECLARATORLIST
+  | | |       |-DECLARATOR
+  | | |       | \-a
+  | | |       |-DECLARATOR
+  | | |       | \-ARRAY
+  | | |       |   |-b
+  | | |       |   \-EMPTY
+  | | |       \-DECLARATOR
+  | | |         |-POINTER
+  | | |         \-c
+  | \-EMPTY
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-DECLARATOR
+    | \-FUNC
+    |   |-main
+    |   \-EMPTY
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-STRUCTSPEC
+      |   | | |-a
+      |   | | \-EMPTY
+      |   \-INITDECLARATORLIST
+      |     \-DECLARATOR
+      |       \-a1
+      \-STATLIST
+        \-RETURN
+          \-0
+

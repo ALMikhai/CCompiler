@@ -1,0 +1,8 @@
+struct a { 
+    int a, b[], *c;
+};
+
+int main() {
+    struct a a1;
+    return 0;
+}

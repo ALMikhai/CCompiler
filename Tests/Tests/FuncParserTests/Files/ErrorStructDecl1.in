@@ -1,0 +1,3 @@
+struct {
+    static int a;
+} a1;

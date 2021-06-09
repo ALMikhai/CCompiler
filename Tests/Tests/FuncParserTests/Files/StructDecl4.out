@@ -1,0 +1,13 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-STRUCTSPEC
+  | | | |-b
+  | \-EMPTY
+  \-DECL
+    |-DECLSPEC
+    | |-STRUCTSPEC
+    | | |-a
+    | | \-EMPTY
+    \-EMPTY
+

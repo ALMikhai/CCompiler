@@ -1,0 +1,6 @@
+struct a1 {
+    struct a2 { 
+        int a, b[], *c; 
+    } b2;
+    int a, b[], *c; 
+} b1;

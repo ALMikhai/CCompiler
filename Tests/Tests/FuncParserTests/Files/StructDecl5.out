@@ -1,0 +1,14 @@
+\-TRANSLATIONUNIT
+  \-DECL
+    |-DECLSPEC
+    | |-STRUCTSPEC
+    | | \-STRUCTDECLLIST
+    | |   \-STRUCTDECL
+    | |     |-DECLSPEC
+    | |     | |-INT
+    | |     \-STRUCTDECLARATORLIST
+    | |       \-DECLARATOR
+    | |         \-a
+    \-DECLARATOR
+      \-a1
+

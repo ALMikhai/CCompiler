@@ -1,0 +1,43 @@
+\-TRANSLATIONUNIT
+  \-DECL
+    |-DECLSPEC
+    | |-STRUCTSPEC
+    | | |-a1
+    | | \-STRUCTDECLLIST
+    | |   |-STRUCTDECL
+    | |   | |-DECLSPEC
+    | |   | | |-STRUCTSPEC
+    | |   | | | |-a2
+    | |   | | | \-STRUCTDECLLIST
+    | |   | | |   \-STRUCTDECL
+    | |   | | |     |-DECLSPEC
+    | |   | | |     | |-INT
+    | |   | | |     \-STRUCTDECLARATORLIST
+    | |   | | |       |-DECLARATOR
+    | |   | | |       | \-a
+    | |   | | |       |-DECLARATOR
+    | |   | | |       | \-ARRAY
+    | |   | | |       |   |-b
+    | |   | | |       |   \-EMPTY
+    | |   | | |       \-DECLARATOR
+    | |   | | |         |-POINTER
+    | |   | | |         \-c
+    | |   | \-STRUCTDECLARATORLIST
+    | |   |   \-DECLARATOR
+    | |   |     \-b2
+    | |   \-STRUCTDECL
+    | |     |-DECLSPEC
+    | |     | |-INT
+    | |     \-STRUCTDECLARATORLIST
+    | |       |-DECLARATOR
+    | |       | \-a
+    | |       |-DECLARATOR
+    | |       | \-ARRAY
+    | |       |   |-b
+    | |       |   \-EMPTY
+    | |       \-DECLARATOR
+    | |         |-POINTER
+    | |         \-c
+    \-DECLARATOR
+      \-b1
+
