@@ -33,7 +33,7 @@ storage_class_spec	    : 'auto' | 'register' | 'static' | 'extern' | 'typedef'
 
 type_spec	    : 'void' | 'char' | 'short' | 'int' | 'long' | 'float'
                 | 'double' | 'signed' | 'unsigned'
-                | struct_or_union_spec
+                | struct_spec
                 | enum_spec
                 | typedef_name
                 ;
@@ -41,13 +41,10 @@ type_spec	    : 'void' | 'char' | 'short' | 'int' | 'long' | 'float'
 type_qualifier	: 'const' | 'volatile'
                 ;
 
-struct_or_union_spec	: struct_or_union identifier '{' struct_decl_list '}'
-                        | struct_or_union	     '{' struct_decl_list '}'
-                        | struct_or_union identifier
-                        ;
-
-struct_or_union		    : 'struct' | 'union'
-                        ;
+struct_spec	: 'struct' identifier '{' struct_decl_list '}'
+            | 'struct'	     '{' struct_decl_list '}'
+            | 'struct' identifier
+            ;
 
 struct_decl_list	    : struct_decl
                         | struct_decl_list struct_decl
@@ -70,14 +67,9 @@ spec_qualifier_list	    : type_spec spec_qualifier_list
                         | type_qualifier
                         ;
                         
-struct_declarator_list	    : struct_declarator
-                            | struct_declarator_list ',' struct_declarator
+struct_declarator_list	    : declarator
+                            | struct_declarator_list ',' declarator
                             ;
-
-struct_declarator	    : declarator
-                        | declarator ':' const_exp
-                        |            ':' const_exp
-                        ;
 
 enum_spec	    : 'enum' identifier '{' enumerator_list '}'
                 | 'enum'	    '{' enumerator_list '}'
