@@ -16,33 +16,41 @@ namespace CCompiler.Parser
     
     public partial class SyntaxParser
     {
+        public SyntaxParserType ParserType { get; }
         private readonly Tokenizer.Tokenizer _tokenizer;
         private Token _currentToken;
 
+        public Node SyntaxTree
+        {
+            get
+            {
+                IParseResult result;
+                switch (ParserType)
+                {
+                    case SyntaxParserType.EXP:
+                        result = ParseExp();
+                        break;
+                    case SyntaxParserType.STAT:
+                        result = ParseStat();
+                        break;
+                    case SyntaxParserType.UNIT:
+                        result = ParseTranslationUnit();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(ParserType), ParserType, null);
+                }
+
+                if (!result.IsSuccess) throw new ParserException(_currentToken, result.ErrorMessage);
+                Expect(TokenType.EOF);
+                return result.ResultNode;
+            }
+        }
+
         public SyntaxParser(Tokenizer.Tokenizer tokenizer, SyntaxParserType parserType)
         {
+            ParserType = parserType;
             _tokenizer = tokenizer;
-
             NextToken();
-            IParseResult result;
-            switch (parserType)
-            {
-                case SyntaxParserType.EXP:
-                    result = ParseExp();
-                    break;
-                case SyntaxParserType.STAT:
-                    result = ParseStat();
-                    break;
-                case SyntaxParserType.UNIT:
-                    result = ParseTranslationUnit();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(parserType), parserType, null);
-            }
-
-            if (!result.IsSuccess) throw new ParserException(_currentToken, result.ErrorMessage);
-            Expect(TokenType.EOF);
-            Console.WriteLine(result.ResultNode);
         }
 
         public SyntaxParser(string filePath, SyntaxParserType parserType) : this(new Tokenizer.Tokenizer(filePath), parserType)
