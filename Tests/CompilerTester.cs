@@ -12,7 +12,7 @@ namespace Tests
     {
         public const string TestsDirectory = @"..\..\..\Tests";
 
-        private static IEnumerable<object[]> TestMethodInput
+        public static IEnumerable<object[]> TestMethodInput
         {
             get
             {
