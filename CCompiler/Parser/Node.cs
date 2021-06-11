@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
+using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
@@ -77,6 +79,8 @@ namespace CCompiler.Parser
             return "";
         }
 
+        public virtual bool CheckSemantic(ref SymbolTable symbolTable) => false;
+
         public static string NodePrefix(bool last)
         {
             return last ? "\\-" : "|-";
@@ -86,5 +90,12 @@ namespace CCompiler.Parser
         {
             return last ? "  " : "| ";
         }
+    }
+
+    public class ExpNode : Node
+    {
+        public virtual bool IsLValue() => throw new NotImplementedException();
+        public new virtual SymbolType GetType(SymbolTable symbolTable) => throw new NotImplementedException();
+        public virtual object GetValue() => throw new NotImplementedException(); // TODO for interpretation.
     }
 }
