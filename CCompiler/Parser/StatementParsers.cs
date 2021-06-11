@@ -1,14 +1,11 @@
-﻿using System;
-using System.Text;
-using CCompiler.Tokenizer;
+﻿using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
     public partial class SyntaxParser
     {
         /*
-         * stat	: labeled_stat
-            | exp_stat
+         * stat	: exp_stat
             | compound_stat
             | selection_stat
             | iteration_stat
@@ -199,7 +196,7 @@ namespace CCompiler.Parser
                 if (exp.IsNullStat())
                     return ExpectedExpressionFailure();
 
-                Expect(OperatorType.RRBRACKET);
+                Expect(OperatorType.RRBRACKET); 
                 Expect(OperatorType.SEMICOLON);
                 return new SuccessParseResult(new WhileStat(exp.ResultNode, stat.ResultNode, WhileType.DOWHILE));
             }

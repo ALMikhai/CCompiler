@@ -396,12 +396,12 @@ namespace CCompiler.Parser
     public class DeclSpecs : Node
     {
         public Node Spec { get; }
-        public Node DeclSpec { get; }
+        public Node NextSpec { get; }
 
-        public DeclSpecs(Node spec, Node declSpecs)
+        public DeclSpecs(Node spec, Node nextSpec)
         {
             Spec = spec;
-            DeclSpec = declSpecs;
+            NextSpec = nextSpec;
         }
         
         public override NodeType Type => NodeType.DECLSPEC;
@@ -410,7 +410,7 @@ namespace CCompiler.Parser
         {
             return indent + NodePrefix(last) + Type + "\r\n" +
                    Spec.ToString(indent + ChildrenPrefix(last), false) +
-                   DeclSpec.ToString(indent + ChildrenPrefix(last), true);
+                   NextSpec.ToString(indent + ChildrenPrefix(last), true);
         }
     }
 
