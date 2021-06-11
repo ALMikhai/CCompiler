@@ -17,11 +17,11 @@
       \-STATLIST
         |-()
         | |-printf
-        | \-Enter a number:
+        | \-"Enter a number: "
         |-()
         | |-scanf
         | \-COMMA
-        |   |-%lf
+        |   |-"%lf"
         |   \-BITAND
         |     \-num
         |-IF
@@ -36,13 +36,13 @@
         | |     | \-0
         | |     |-()
         | |     | |-printf
-        | |     | \-You entered 0.
+        | |     | \-"You entered 0."
         | |     \-()
         | |       |-printf
-        | |       \-You entered a negative number.
+        | |       \-"You entered a negative number."
         | \-()
         |   |-printf
-        |   \-You entered a positive number.
+        |   \-"You entered a positive number."
         \-RETURN
           \-0
 

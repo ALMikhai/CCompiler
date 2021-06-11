@@ -43,11 +43,11 @@
   |   \-STATLIST
   |     |-()
   |     | |-printf
-  |     | \-Enter a positive integer:
+  |     | \-"Enter a positive integer: "
   |     |-()
   |     | |-scanf
   |     | \-COMMA
-  |     |   |-%d
+  |     |   |-"%d"
   |     |   \-BITAND
   |     |     \-n
   |     |-ASSIGN
@@ -62,14 +62,12 @@
   |     | |-()
   |     | | |-printf
   |     | | \-COMMA
-  |     | |   |-%d is a prime number.
-
+  |     | |   |-"%d is a prime number.\n"
   |     | |   \-n
   |     | \-()
   |     |   |-printf
   |     |   \-COMMA
-  |     |     |-%d is not a prime number.
-
+  |     |     |-"%d is not a prime number.\n"
   |     |     \-n
   |     |-ASSIGN
   |     | |-flag
@@ -83,12 +81,12 @@
   |     | |-()
   |     | | |-printf
   |     | | \-COMMA
-  |     | |   |-%d is an Armstrong number.
+  |     | |   |-"%d is an Armstrong number."
   |     | |   \-n
   |     | \-()
   |     |   |-printf
   |     |   \-COMMA
-  |     |     |-%d is not an Armstrong number.
+  |     |     |-"%d is not an Armstrong number."
   |     |     \-n
   |     \-RETURN
   |       \-0

@@ -7,7 +7,7 @@
       | |   |-[]
       | |   | |-a
       | |   | \-0
-      | |   \-null
+      | |   \-"null"
       | \-push_back
       \-push_back
 

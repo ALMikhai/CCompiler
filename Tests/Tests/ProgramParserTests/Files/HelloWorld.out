@@ -10,7 +10,7 @@
       \-STATLIST
         |-()
         | |-printf
-        | \-Hello, World!
+        | \-"Hello, World!"
         \-RETURN
           \-0
 

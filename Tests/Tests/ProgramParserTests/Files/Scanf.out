@@ -17,17 +17,17 @@
       \-STATLIST
         |-()
         | |-printf
-        | \-Enter an integer:
+        | \-"Enter an integer: "
         |-()
         | |-scanf
         | \-COMMA
-        |   |-%d
+        |   |-"%d"
         |   \-BITAND
         |     \-number
         |-()
         | |-printf
         | \-COMMA
-        |   |-You entered: %d
+        |   |-"You entered: %d"
         |   \-number
         \-RETURN
           \-0
