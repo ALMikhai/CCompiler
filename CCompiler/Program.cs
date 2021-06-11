@@ -47,6 +47,12 @@ namespace CCompiler
                     Console.WriteLine(parser.SyntaxTree);
                 }
 
+                if (args.Contains("-s"))
+                {
+                    var parser = new SyntaxParser(tokenizer, SyntaxParserType.UNIT);
+                    var syntaxTree = parser.SyntaxTree;
+                    var symbolTable = new SymbolTable();
+                    syntaxTree.CheckSemantic(ref symbolTable);
                 }
             }
             catch (FileNotFoundException e)
