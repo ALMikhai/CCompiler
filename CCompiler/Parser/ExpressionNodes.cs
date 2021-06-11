@@ -1,58 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
-    public class ValueType
-    {
-        public enum Type
-        {
-            INT,
-            FLOAT,
-            CHAR
-        }
-
-        public object Value { get; }
-        public Type CurrentType { get; }
-
-        private readonly Dictionary<TokenType, Type> _tokenTypeToValueType = new Dictionary<TokenType, Type>()
-        {
-            {TokenType.INT, Type.INT},
-            {TokenType.FLOAT, Type.FLOAT},
-            {TokenType.CHAR, Type.CHAR}
-        };
-        
-        public ValueType(Token token)
-        {
-            Value = token.Value;
-            CurrentType = _tokenTypeToValueType[token.TokenType];
-        }
-        
-        public long GetInt()
-        {
-            return (long) Value;
-        }
-
-        public double GetFloat()
-        {
-            return (double) Value;
-        }
-
-        public char GetChar()
-        {
-            return (char) Value;
-        }
-    }
-    
-    public abstract class ExpType : Node
-    {
-        public abstract ValueType GetValue();
-        public abstract bool IsLValue();
-    }
-
-    public class Const : Node
+    public class Const : ExpNode
     {
         public Const(Token token)
         {
@@ -68,7 +22,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class Id : Node
+    public class Id : ExpNode
     {
         public string IdName { get; }
 
@@ -85,7 +39,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class String : Node
+    public class String : ExpNode
     {
         public string Str { get; }
         
