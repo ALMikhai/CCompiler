@@ -54,7 +54,7 @@ namespace CCompiler
                     Console.WriteLine(syntaxTree);
                     var environment = new SemanticEnvironment();
                     syntaxTree.CheckSemantic(ref environment);
-                    Console.WriteLine(environment.SymbolTable);
+                    Console.WriteLine(environment.PopSnapshot().SymbolTable);
                 }
             }
             catch (FileNotFoundException e)

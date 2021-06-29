@@ -196,14 +196,14 @@ namespace CCompiler.Parser
         public override NodeType Type => NodeType.INITIALIZERLIST;
     }
 
-    public class ParamDecl : Node
+    public partial class ParamDecl : Node
     {
-        public Node DeclSpecs { get; }
-        public Node Declarator { get; }
+        public DeclSpecs DeclSpec { get; }
+        public Declarator Declarator { get; }
 
-        public ParamDecl(Node declSpecs, Node declarator)
+        public ParamDecl(DeclSpecs declSpecs, Declarator declarator)
         {
-            DeclSpecs = declSpecs;
+            DeclSpec = declSpecs;
             Declarator = declarator;
         }
         
@@ -212,7 +212,7 @@ namespace CCompiler.Parser
         public override string ToString(string indent, bool last)
         {
             return indent + NodePrefix(last) + Type + "\r\n" +
-                   DeclSpecs.ToString(indent + ChildrenPrefix(last), false) +
+                   DeclSpec.ToString(indent + ChildrenPrefix(last), false) +
                    Declarator.ToString(indent + ChildrenPrefix(last), true);
         }
     }
@@ -222,7 +222,7 @@ namespace CCompiler.Parser
         public override NodeType Type => NodeType.PARAMLIST;
     }
 
-    public class Pointer : Node
+    public partial class Pointer : Node
     {
         public Node TypeQualifierList { get; }
         public Node PointerNode { get; }
@@ -243,7 +243,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public abstract class GenericDeclaration : Node
+    public abstract partial class GenericDeclaration : Node
     {
         public Node Left { get; }
         
@@ -257,7 +257,7 @@ namespace CCompiler.Parser
     
     public partial class ArrayDecl : GenericDeclaration
     {
-        public Node ConstExp { get; }
+        public Node ConstExp { get; } // TODO Replace on expType
 
         public ArrayDecl(Node left, Node constExp) : base(left)
         {
@@ -550,10 +550,10 @@ namespace CCompiler.Parser
 
     public class StructDecl : Node
     {
-        public Node DeclSpec { get; }
-        public Node DeclaratorList { get; }
+        public DeclSpecs DeclSpec { get; }
+        public StructDeclaratorList DeclaratorList { get; }
 
-        public StructDecl(Node declSpec, Node declaratorList)
+        public StructDecl(DeclSpecs declSpec, StructDeclaratorList declaratorList)
         {
             DeclSpec = declSpec;
             DeclaratorList = declaratorList;
@@ -574,12 +574,12 @@ namespace CCompiler.Parser
         public override NodeType Type => NodeType.STRUCTDECLLIST;
     }
 
-    public class StructSpec : Node
+    public partial class StructSpec : Node
     {
-        public Node Id { get; }
+        public Id Id { get; }
         public Node StructDeclList { get; }
 
-        public StructSpec(Node id, Node structDeclList)
+        public StructSpec(Id id, Node structDeclList)
         {
             Id = id;
             StructDeclList = structDeclList;

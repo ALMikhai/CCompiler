@@ -641,8 +641,9 @@ namespace CCompiler.Parser
                 return declarator;
             if (declarator.IsNullStat())
                 return new FailedParseResult("after type specialization expected declarator", _currentToken);
-            
-            return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode, declarator.ResultNode));
+
+            return new SuccessParseResult(new ParamDecl(declSpecs.ResultNode as DeclSpecs,
+                declarator.ResultNode as Declarator));
         }
         
         /*
@@ -751,6 +752,8 @@ namespace CCompiler.Parser
             if (Accept(KeywordType.STRUCT))
             {
                 var id = ParseId();
+                if (id.IsNullStat())
+                    return new FailedParseResult("expected struct identifier", _currentToken);
 
                 if (Accept(OperatorType.LFBRACKET))
                 {
@@ -759,13 +762,10 @@ namespace CCompiler.Parser
                         return structDeclList;
                     Expect(OperatorType.RFBRACKET);
 
-                    return new SuccessParseResult(new StructSpec(id.ResultNode, structDeclList.ResultNode));
+                    return new SuccessParseResult(new StructSpec(id.ResultNode as Id, structDeclList.ResultNode));
                 }
 
-                if (!id.IsNullStat())
-                    return new SuccessParseResult(new StructSpec(id.ResultNode, new EmptyExp()));
-
-                return new FailedParseResult("expected struct declaration", _currentToken);
+                return new SuccessParseResult(new StructSpec(id.ResultNode as Id, new EmptyExp()));
             }
 
             return new SuccessParseResult(new NullStat());
@@ -795,8 +795,8 @@ namespace CCompiler.Parser
                 if (!structDeclaratorList.IsSuccess)
                     return structDeclaratorList;
                 Expect(OperatorType.SEMICOLON);
-                return new SuccessParseResult(new StructDecl(specQualifierList.ResultNode,
-                    structDeclaratorList.ResultNode));
+                return new SuccessParseResult(new StructDecl(specQualifierList.ResultNode as DeclSpecs,
+                    structDeclaratorList.ResultNode as StructDeclaratorList));
             }
 
             return new SuccessParseResult(new NullStat());

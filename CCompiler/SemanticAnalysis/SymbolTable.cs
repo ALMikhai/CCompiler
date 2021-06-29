@@ -12,23 +12,9 @@ namespace CCompiler.SemanticAnalysis
             _symbols = new Dictionary<string, Symbol>();
         }
 
-        public void PushSymbol(Symbol symbol)
-        {
-            if (SymbolExist(symbol.Id))
-                throw new SemanticException($"redeclaration of '{symbol.Id}'");
-
-            _symbols.Add(symbol.Id, symbol);
-        }
-        public bool SymbolExist(string id) => _symbols.ContainsKey(id);
+        public void PushSymbol(Symbol symbol) => _symbols.Add(symbol.Id, symbol);
         
-        public T GetSymbol<T>(string id)
-            where T : Symbol
-        {
-            if (!SymbolExist(id))
-                return null;
-
-            return _symbols[id] as T;
-        }
+        public bool SymbolExist(string id) => _symbols.ContainsKey(id);
 
         public override string ToString()
         {
@@ -38,7 +24,7 @@ namespace CCompiler.SemanticAnalysis
                 symbols.Append(symbol.Value + "\n");
             }
 
-            return $"Symbol table\n" + symbols.ToString();
+            return "Symbol table {\n" + symbols.ToString() + "}";
         }
     }
 }

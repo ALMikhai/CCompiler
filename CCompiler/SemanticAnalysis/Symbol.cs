@@ -10,20 +10,45 @@
             Id = id;
             Type = type;
         }
+        
+        public override string ToString()
+        {
+            return $"{Type} :: {Id}";
+        }
     }
 
     public class VarSymbol : Symbol
     {
-        public object Value { get; }
-
-        public VarSymbol(string id, SymbolType type, object value) : base(id, type)
+        public VarSymbol(string id, SymbolType type) : base(id, type)
         {
-            Value = value;
+        }
+    }
+    
+    public class ArraySymbol : Symbol
+    {
+        public ArraySymbol(string id, ArrayType type) : base(id, type)
+        {
+        }
+    }
+
+    public class PointerSymbol : Symbol
+    {
+        public Symbol Symbol { get; }
+
+        public PointerSymbol(Symbol symbol, PointerType type) : base(symbol.Id, type)
+        {
+            Symbol = symbol;
         }
 
-        public override string ToString()
+        public PointerSymbol(Symbol symbol) : this(symbol, new PointerType(false, false, symbol.Type))
         {
-            return $"Var \t {Type} \t {Id} \t {Value}";
+        }
+    }
+
+    public class FuncSymbol : Symbol
+    {
+        public FuncSymbol(string id, FuncType type) : base(id, type)
+        {
         }
     }
 }

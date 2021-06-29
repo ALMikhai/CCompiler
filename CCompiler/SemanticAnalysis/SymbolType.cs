@@ -10,7 +10,8 @@ namespace CCompiler.SemanticAnalysis
         STRING,
         STRUCT,
         FUNC,
-        POINTER
+        POINTER,
+        ARRAY
     }
     
     public class SymbolType
@@ -34,9 +35,18 @@ namespace CCompiler.SemanticAnalysis
 
     public class FuncType : SymbolType
     {
+        public SymbolType ReturnType { get; }
+        public SymbolTable Arguments { get; }
+
         public FuncType(SymbolType returnType, SymbolTable arguments) : base(true, false, SymbolTypeKind.FUNC)
         {
-            
+            ReturnType = returnType;
+            Arguments = arguments;
+        }
+        
+        public override string ToString()
+        {
+            return $"{SymbolTypeKind} returning {ReturnType}\nArguments {Arguments}";
         }
     }
 
@@ -50,21 +60,40 @@ namespace CCompiler.SemanticAnalysis
             Name = name;
             Members = members;
         }
+        
+        public override string ToString()
+        {
+            return $"{SymbolTypeKind} called {Name}\nMembers {Members}";
+        }
     }
 
     public class PointerType : SymbolType
     {
-        public PointerType(bool isConst, bool isVolatile, SymbolType type) : base(isConst, isVolatile, SymbolTypeKind.POINTER)
+        public SymbolType PointerToType { get; }
+
+        public PointerType(bool isConst, bool isVolatile, SymbolType pointerToType) : base(isConst, isVolatile, SymbolTypeKind.POINTER)
         {
-            
+            PointerToType = pointerToType;
+        }
+        
+        public override string ToString()
+        {
+            return base.ToString() + $" to {PointerToType}";
         }
     }
     
     public class ArrayType : SymbolType
     {
-        public ArrayType(bool isConst, bool isVolatile, SymbolType type) : base(isConst, isVolatile, SymbolTypeKind.POINTER)
+        public SymbolType Type { get; }
+
+        public ArrayType(bool isConst, bool isVolatile, SymbolType type) : base(isConst, isVolatile, SymbolTypeKind.ARRAY)
         {
-            
+            Type = type;
+        }
+        
+        public override string ToString()
+        {
+            return base.ToString() + $" of type {Type}";
         }
     }
 }
