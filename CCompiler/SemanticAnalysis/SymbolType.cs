@@ -1,6 +1,4 @@
 ﻿using System;
-using CCompiler.Parser;
-using CCompiler.Tokenizer;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -17,9 +15,9 @@ namespace CCompiler.SemanticAnalysis
     
     public class SymbolType
     {
-        public bool IsConst { get; }
-        public bool IsVolatile { get; }
-        public SymbolTypeKind SymbolTypeKind { get; }
+        public bool IsConst { get; set; }
+        public bool IsVolatile { get; set; }
+        public SymbolTypeKind SymbolTypeKind { get; set; }
 
         public SymbolType(bool isConst, bool isVolatile, SymbolTypeKind symbolTypeKind)
         {
@@ -27,8 +25,11 @@ namespace CCompiler.SemanticAnalysis
             IsVolatile = isVolatile;
             SymbolTypeKind = symbolTypeKind;
         }
-
-        public virtual bool EqualType(SymbolType other) => SymbolTypeKind == other.SymbolTypeKind;
+        
+        public override string ToString()
+        {
+            return $"{(IsConst ? "const " : "")}{(IsVolatile ? "volatile " : "")}{SymbolTypeKind}";
+        }
     }
 
     public class FuncType : SymbolType
@@ -37,23 +38,17 @@ namespace CCompiler.SemanticAnalysis
         {
             
         }
-
-        public override bool EqualType(SymbolType other)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public class StructType : SymbolType
     {
+        public string Name { get; }
+        public SymbolTable Members { get; }
+
         public StructType(bool isConst, bool isVolatile, string name, SymbolTable members) : base(isConst, isVolatile, SymbolTypeKind.STRUCT)
         {
-            
-        }
-        
-        public override bool EqualType(SymbolType other)
-        {
-            throw new NotImplementedException();
+            Name = name;
+            Members = members;
         }
     }
 
@@ -63,10 +58,13 @@ namespace CCompiler.SemanticAnalysis
         {
             
         }
-        
-        public override bool EqualType(SymbolType other)
+    }
+    
+    public class ArrayType : SymbolType
+    {
+        public ArrayType(bool isConst, bool isVolatile, SymbolType type) : base(isConst, isVolatile, SymbolTypeKind.POINTER)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

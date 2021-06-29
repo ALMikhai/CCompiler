@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using CCompiler.SemanticAnalysis;
-using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
@@ -65,7 +62,7 @@ namespace CCompiler.Parser
         STRUCTSPEC
     }
 
-    public class Node
+    public partial class Node
     {
         public virtual NodeType Type { get; }
 
@@ -78,8 +75,6 @@ namespace CCompiler.Parser
         {
             return "";
         }
-
-        public virtual bool CheckSemantic(ref SymbolTable symbolTable) => false;
 
         public static string NodePrefix(bool last)
         {

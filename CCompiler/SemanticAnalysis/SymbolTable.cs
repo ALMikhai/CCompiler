@@ -1,21 +1,25 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 
 namespace CCompiler.SemanticAnalysis
 {
     public class SymbolTable
     {
-        private Stack<Dictionary<string, Symbol>> _symbolsStack;
+        private Dictionary<string, Symbol> _symbols;
         
         public SymbolTable()
         {
-            _symbolsStack = new Stack<Dictionary<string, Symbol>>();
+            _symbols = new Dictionary<string, Symbol>();
         }
 
-        public void AddSymbolTable() => _symbolsStack.Push(new Dictionary<string, Symbol>());
-        public void RemoveSymbolTable() => _symbolsStack.Pop();
-        public void PushSymbol(Symbol symbol) => _symbolsStack.Peek().Add(symbol.Id, symbol);
-        public bool SymbolExist(string id) => _symbolsStack.Any(table => table.ContainsKey(id));
+        public void PushSymbol(Symbol symbol)
+        {
+            if (SymbolExist(symbol.Id))
+                throw new SemanticException($"redeclaration of '{symbol.Id}'");
+
+            _symbols.Add(symbol.Id, symbol);
+        }
+        public bool SymbolExist(string id) => _symbols.ContainsKey(id);
         
         public T GetSymbol<T>(string id)
             where T : Symbol
@@ -23,8 +27,18 @@ namespace CCompiler.SemanticAnalysis
             if (!SymbolExist(id))
                 return null;
 
-            var table = _symbolsStack.First(dictionary => dictionary.ContainsKey(id));
-            return table[id] as T;
+            return _symbols[id] as T;
+        }
+
+        public override string ToString()
+        {
+            var symbols = new StringBuilder();
+            foreach (var symbol in _symbols)
+            {
+                symbols.Append(symbol.Value + "\n");
+            }
+
+            return $"Symbol table\n" + symbols.ToString();
         }
     }
 }

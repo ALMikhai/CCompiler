@@ -7,10 +7,13 @@ namespace CCompiler.SemanticAnalysis
     {
         private readonly Token _token;
 
-        public SemanticException(Token token, string message) : base(message)
+        public SemanticException(string message, Token token) : base(message)
         {
             _token = token;
         }
+
+        public SemanticException(string message) : this(message,
+            new Token(TokenType.EOF, "", "").AddPosition(new Position(0, 0))) {}
 
         public override string ToString()
         {

@@ -306,7 +306,11 @@ namespace CCompiler.Parser
                     return initDeclaratorList;
                 
                 Expect(OperatorType.SEMICOLON);
-                return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclaratorList.ResultNode));
+
+                return new SuccessParseResult(new Decl(declSpecs.ResultNode as DeclSpecs,
+                    initDeclaratorList.IsNullStat()
+                        ? new InitDeclaratorList()
+                        : initDeclaratorList.ResultNode as InitDeclaratorList));
             }
 
             return declSpecs;
@@ -453,10 +457,14 @@ namespace CCompiler.Parser
                 if (initializer.IsNullStat())
                     return new FailedParseResult("expected initializer", _currentToken);
 
-                return new SuccessParseResult(new InitDeclarator(declarator.ResultNode, initializer.ResultNode));
+                if (initializer.ResultNode is Initializer list)
+                    return new SuccessParseResult(new InitDeclaratorByList(declarator.ResultNode as Declarator,
+                        list.InitializerList as InitializerList));
+                
+                return new SuccessParseResult(new InitDeclaratorByExp(declarator.ResultNode as Declarator, initializer.ResultNode));
             }
 
-            return declarator;
+            return new SuccessParseResult(new InitDeclarator(declarator.ResultNode as Declarator));
         }
         
         /*
@@ -605,7 +613,7 @@ namespace CCompiler.Parser
                 
                 break;
             }
-            
+
             return left;
         }
         
@@ -695,14 +703,15 @@ namespace CCompiler.Parser
                 return declSpecs;
 
             if (!declSpecs.IsNullStat() && Accept(OperatorType.SEMICOLON))
-                return new SuccessParseResult(new Decl(declSpecs.ResultNode, new EmptyExp()));
+                return new SuccessParseResult(new Decl(declSpecs.ResultNode as DeclSpecs, new InitDeclaratorList()));
             
             var initDeclarator = ParseInitDeclarator();
             if (!initDeclarator.IsSuccess)
                 return initDeclarator;
-
+            var initDeclaratorList = new InitDeclaratorList();
+            initDeclaratorList.Add(initDeclarator.ResultNode);
             if (!declSpecs.IsNullStat() && Accept(OperatorType.SEMICOLON))
-                return new SuccessParseResult(new Decl(declSpecs.ResultNode, initDeclarator.ResultNode));
+                return new SuccessParseResult(new Decl(declSpecs.ResultNode as DeclSpecs, initDeclaratorList));
 
             var declList = ParseDeclList();
             if (!declList.IsSuccess)
@@ -712,7 +721,7 @@ namespace CCompiler.Parser
             if (!compoundStat.IsSuccess)
                 return compoundStat;
 
-            if (initDeclarator.ResultNode is Declarator && !compoundStat.IsNullStat())
+            if (initDeclarator.ResultNode is InitDeclarator && !compoundStat.IsNullStat())
                 return new SuccessParseResult(new FuncDef(declSpecs.ResultNode, initDeclarator.ResultNode,
                     declList.ResultNode, compoundStat.ResultNode));
 

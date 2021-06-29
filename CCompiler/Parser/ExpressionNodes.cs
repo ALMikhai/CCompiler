@@ -20,6 +20,19 @@ namespace CCompiler.Parser
         {
             return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n";
         }
+
+        public override SymbolType GetType(SymbolTable symbolTable)
+        {
+            return Token.TokenType switch
+            {
+                TokenType.FLOAT => new SymbolType(true, false, SymbolTypeKind.FLOAT),
+                TokenType.INT => new SymbolType(true, false, SymbolTypeKind.INT),
+                TokenType.CHAR => new SymbolType(true, false, SymbolTypeKind.INT),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        public override bool IsLValue() => false;
     }
 
     public class Id : ExpNode

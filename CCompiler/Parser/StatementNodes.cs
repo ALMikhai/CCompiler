@@ -242,19 +242,27 @@ namespace CCompiler.Parser
                    PointerNode.ToString(indent + ChildrenPrefix(last), true);
         }
     }
-    
-    public class ArrayDecl : Node
+
+    public abstract class GenericDeclaration : Node
     {
         public Node Left { get; }
-        public Node ConstExp { get; }
-
-        public ArrayDecl(Node left, Node constExp)
+        
+        public GenericDeclaration(Node left)
         {
             Left = left;
+        }
+
+        public override NodeType Type => NodeType.DIRECTDECLARATOR;
+    }
+    
+    public partial class ArrayDecl : GenericDeclaration
+    {
+        public Node ConstExp { get; }
+
+        public ArrayDecl(Node left, Node constExp) : base(left)
+        {
             ConstExp = constExp;
         }
-        
-        public override NodeType Type => NodeType.DIRECTDECLARATOR;
         
         public override string ToString(string indent, bool last)
         {
@@ -264,19 +272,15 @@ namespace CCompiler.Parser
         }
     }
 
-    public class FuncDecl : Node
+    public partial class FuncDecl : GenericDeclaration
     {
-        public Node Left { get; }
         public Node ParamList { get; }
 
-        public FuncDecl(Node left, Node paramList)
+        public FuncDecl(Node left, Node paramList) : base(left)
         {
-            Left = left;
             ParamList = paramList;
         }
-        
-        public override NodeType Type => NodeType.DIRECTDECLARATOR;
-        
+
         public override string ToString(string indent, bool last)
         {
             return indent + NodePrefix(last) + "FUNC" + "\r\n" +
@@ -312,7 +316,7 @@ namespace CCompiler.Parser
         public override NodeType Type => NodeType.TYPEQUALIFIERLIST;
     }
 
-    public class Declarator : Node
+    public partial class Declarator : Node
     {
         public Node Pointer { get; }
         public Node DirectDeclarator { get; }
@@ -332,25 +336,56 @@ namespace CCompiler.Parser
                    DirectDeclarator.ToString(indent + ChildrenPrefix(last), true);
         }
     }
-    
-    public class InitDeclarator : Node
-    {
-        public Node Declarator { get; }
-        public Node Initializer { get; }
 
-        public InitDeclarator(Node declarator, Node initializer)
+    public partial class InitDeclarator : Node
+    {
+        public Declarator Declarator { get; }
+        
+        public InitDeclarator(Declarator declarator)
         {
             Declarator = declarator;
+        }
+        
+        public override NodeType Type => NodeType.INITDECLARATOR;
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   Declarator.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+    
+    public partial class InitDeclaratorByExp : InitDeclarator
+    {
+        public Node Initializer { get; }  // TODO Replace on expType
+
+        public InitDeclaratorByExp(Declarator declarator, Node initializer) : base(declarator)
+        {
             Initializer = initializer;
         }
-            
-        public override NodeType Type => NodeType.INITDECLARATOR;
         
         public override string ToString(string indent, bool last)
         {
             return indent + NodePrefix(last) + Type + "\r\n" +
                    Declarator.ToString(indent + ChildrenPrefix(last), false) +
                    Initializer.ToString(indent + ChildrenPrefix(last), true);
+        }
+    }
+    
+    public partial class InitDeclaratorByList : InitDeclarator
+    {
+        public InitializerList InitializerList { get; }
+
+        public InitDeclaratorByList(Declarator declarator, InitializerList initializerList) : base(declarator)
+        {
+            InitializerList = initializerList;
+        }
+        
+        public override string ToString(string indent, bool last)
+        {
+            return indent + NodePrefix(last) + Type + "\r\n" +
+                   Declarator.ToString(indent + ChildrenPrefix(last), false) +
+                   InitializerList.ToString(indent + ChildrenPrefix(last), true);
         }
     }
     
@@ -393,7 +428,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class DeclSpecs : Node
+    public partial class DeclSpecs : Node
     {
         public Node Spec { get; }
         public Node NextSpec { get; }
@@ -414,12 +449,12 @@ namespace CCompiler.Parser
         }
     }
 
-    public class Decl : Node
+    public partial class Decl : Node
     {
-        public Node DeclSpec { get; }
-        public Node InitDeclaratorList { get; }
+        public DeclSpecs DeclSpec { get; }
+        public InitDeclaratorList InitDeclaratorList { get; }
 
-        public Decl(Node declSpec, Node initDeclaratorList)
+        public Decl(DeclSpecs declSpec, InitDeclaratorList initDeclaratorList)
         {
             DeclSpec = declSpec;
             InitDeclaratorList = initDeclaratorList;
@@ -503,7 +538,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class TranslationUnit : List
+    public partial class TranslationUnit : List
     {
         public override NodeType Type => NodeType.TRANSLATIONUNIT;
     }

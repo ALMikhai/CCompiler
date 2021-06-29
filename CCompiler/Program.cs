@@ -51,8 +51,10 @@ namespace CCompiler
                 {
                     var parser = new SyntaxParser(tokenizer, SyntaxParserType.UNIT);
                     var syntaxTree = parser.SyntaxTree;
-                    var symbolTable = new SymbolTable();
-                    syntaxTree.CheckSemantic(ref symbolTable);
+                    Console.WriteLine(syntaxTree);
+                    var environment = new SemanticEnvironment();
+                    syntaxTree.CheckSemantic(ref environment);
+                    Console.WriteLine(environment.SymbolTable);
                 }
             }
             catch (FileNotFoundException e)
