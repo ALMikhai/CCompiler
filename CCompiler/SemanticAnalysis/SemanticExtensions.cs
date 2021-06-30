@@ -27,7 +27,7 @@ namespace CCompiler.Parser
             
             foreach (var node in InitDeclaratorList.Nodes)
             {
-                (node as InitDeclarator).CheckSemantic(type, ref environment);
+                environment.PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment));
             }
         }
     }
@@ -80,7 +80,7 @@ namespace CCompiler.Parser
                 }
 
                 if (spec is StructSpec structSpec)
-                    symbolType = structSpec.ParseStructType(ref environment);
+                    symbolType = structSpec.ParseType(ref environment);
                 
                 if (spec is TypeQualifier typeQualifier)
                 {
@@ -104,21 +104,21 @@ namespace CCompiler.Parser
 
     public partial class InitDeclaratorByList
     {
-        public override void CheckSemantic(SymbolType type, ref SemanticEnvironment environment) =>
+        public override Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment) =>
             throw new NotImplementedException("initializing by InitializerList is not supported");
     }
 
     public partial class InitDeclaratorByExp
     {
-        public override void CheckSemantic(SymbolType type, ref SemanticEnvironment environment) =>
+        public override Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment) =>
             throw new NotImplementedException();
     }
 
     public partial class InitDeclarator
     {
-        public virtual void CheckSemantic(SymbolType type, ref SemanticEnvironment environment)
+        public virtual Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment)
         {
-            environment.PushSymbol(Declarator.ParseSymbol(type, ref environment));
+            return Declarator.ParseSymbol(type, ref environment);
         }
     }
 
@@ -165,9 +165,10 @@ namespace CCompiler.Parser
             {
                 if (ParamList is EmptyExp)
                 {
-                    return new FuncSymbol(id.IdName, new FuncType(type, new SymbolTable()));
+                    return new FuncSymbol(id.IdName, new FuncType(type, new EnvironmentSnapshot()));
                 }
-                else if (ParamList is ParamList paramList)
+
+                if (ParamList is ParamList paramList)
                 {
                     environment.PushSnapshot();
                     foreach (var node in paramList.Nodes)
@@ -175,34 +176,25 @@ namespace CCompiler.Parser
                         environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
                     }
 
-                    return new FuncSymbol(id.IdName, new FuncType(type, environment.PopSnapshot().SymbolTable));
+                    return new FuncSymbol(id.IdName, new FuncType(type, environment.PopSnapshot()));
                 }
-                else if (ParamList is IdList idList)
+
+                if (ParamList is IdList idList)
                 {
-                    var symbolTable = new SymbolTable();
+                    environment.PushSnapshot();
                     foreach (var node in idList.Nodes)
                     {
-                        symbolTable.PushSymbol(new VarSymbol((node as Id).IdName,
-                            new SymbolType(false, false, SymbolTypeKind.INT)));
+                        var varSymbol = new VarSymbol((node as Id).IdName,
+                            new SymbolType(false, false, SymbolTypeKind.INT));
+                        environment.PushSymbol(varSymbol);
                     }
-                    return new FuncSymbol(id.IdName, new FuncType(type, symbolTable));
+                    return new FuncSymbol(id.IdName, new FuncType(type, environment.PopSnapshot()));
                 }
-                else
-                {
-                    throw new ArgumentException();
-                }
+
+                throw new ArgumentException();
             }
             
             throw new NotImplementedException();
-        }
-    }
-
-    public partial class ParamDecl
-    {
-        public Symbol ParseSymbol(ref SemanticEnvironment environment)
-        {
-            var type = DeclSpecs.NodeToType(DeclSpec, ref environment);
-            return Declarator.ParseSymbol(type, ref environment);
         }
     }
 
@@ -248,10 +240,19 @@ namespace CCompiler.Parser
             return new PointerSymbol(symbol, type);
         }
     }
+    
+    public partial class ParamDecl
+    {
+        public Symbol ParseSymbol(ref SemanticEnvironment environment)
+        {
+            var type = DeclSpecs.NodeToType(DeclSpec, ref environment);
+            return Declarator.ParseSymbol(type, ref environment);
+        }
+    }
 
     public partial class StructSpec
     {
-        public SymbolType ParseStructType(ref SemanticEnvironment environment)
+        public StructType ParseType(ref SemanticEnvironment environment)
         {
             if (StructDeclList is EmptyExp)
             {
@@ -263,7 +264,7 @@ namespace CCompiler.Parser
                 throw new SemanticException($"storage size of ‘{Id.IdName}’ isn’t known");
             }
 
-            var structTable = new SymbolTable();
+            var symbolTable = new Table<Symbol>();
 
             if (StructDeclList is StructDeclList structDeclList)
             {
@@ -274,14 +275,46 @@ namespace CCompiler.Parser
 
                     foreach (var declaratorListNode in structDecl.DeclaratorList.Nodes)
                     {
-                        structTable.PushSymbol((declaratorListNode as Declarator).ParseSymbol(type, ref environment));
+                        var symbol = (declaratorListNode as Declarator).ParseSymbol(type, ref environment);
+                        symbolTable.Push(symbol.Id, symbol);
                     }
                 }
             }
 
-            var structType = new StructType(false, false, Id.IdName, structTable);
+            var structType = new StructType(false, false, Id.IdName, symbolTable);
             environment.PushStructType(structType);
             return structType;
+        }
+    }
+
+    public partial class FuncDef
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment)
+        {
+            var returnType = new SymbolType(false, false, SymbolTypeKind.INT);
+            if (DeclSpec is DeclSpecs declSpecs)
+            {
+                returnType = DeclSpecs.NodeToType(declSpecs, ref environment);
+            }
+
+            var symbol = Declarator.ParseSymbolByType(returnType, ref environment) as FuncSymbol;
+            if (!(DeclList is NullStat))
+                throw new SemanticException("old-style (K&R) function definition is not supported");
+            
+            environment.PushSnapshot((symbol.Type as FuncType).Snapshot);
+
+            if (CompoundStat.DeclList is DeclList declList)
+            {
+                foreach (var node in declList.Nodes)
+                {
+                    node.CheckSemantic(ref environment);
+                }
+            }
+            
+            symbol.SetSnapshot(environment.PopSnapshot());
+            environment.PushSymbol(symbol);
+            
+            // TODO проверка StatList
         }
     }
 }

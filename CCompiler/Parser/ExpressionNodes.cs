@@ -21,7 +21,7 @@ namespace CCompiler.Parser
             return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n";
         }
 
-        public override SymbolType GetType(SymbolTable symbolTable)
+        public override SymbolType GetType()
         {
             return Token.TokenType switch
             {

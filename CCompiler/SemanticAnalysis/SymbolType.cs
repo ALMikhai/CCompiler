@@ -36,26 +36,26 @@ namespace CCompiler.SemanticAnalysis
     public class FuncType : SymbolType
     {
         public SymbolType ReturnType { get; }
-        public SymbolTable Arguments { get; }
+        public EnvironmentSnapshot Snapshot { get; }
 
-        public FuncType(SymbolType returnType, SymbolTable arguments) : base(true, false, SymbolTypeKind.FUNC)
+        public FuncType(SymbolType returnType, EnvironmentSnapshot snapshot) : base(true, false, SymbolTypeKind.FUNC)
         {
             ReturnType = returnType;
-            Arguments = arguments;
+            Snapshot = snapshot;
         }
         
         public override string ToString()
         {
-            return $"{SymbolTypeKind} returning {ReturnType}\nArguments {Arguments}";
+            return $"{SymbolTypeKind} returning {ReturnType}\nArguments {Snapshot.SymbolTable}";
         }
     }
 
     public class StructType : SymbolType
     {
         public string Name { get; }
-        public SymbolTable Members { get; }
+        public Table<Symbol> Members { get; }
 
-        public StructType(bool isConst, bool isVolatile, string name, SymbolTable members) : base(isConst, isVolatile, SymbolTypeKind.STRUCT)
+        public StructType(bool isConst, bool isVolatile, string name, Table<Symbol> members) : base(isConst, isVolatile, SymbolTypeKind.STRUCT)
         {
             Name = name;
             Members = members;

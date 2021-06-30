@@ -480,7 +480,7 @@ namespace CCompiler.Parser
         public override NodeType Type => NodeType.DECLLIST;
     }
 
-    public class CompoundStat : Node
+    public partial class CompoundStat : Node
     {
         public Node DeclList { get; }
         public Node StatList { get; }
@@ -511,16 +511,16 @@ namespace CCompiler.Parser
         }
     }
 
-    public class FuncDef : Node
+    public partial class FuncDef : Node
     {
-        public Node DeclSpecs { get; }
-        public Node Declarator { get; }
+        public Node DeclSpec { get; }
+        public InitDeclarator Declarator { get; }
         public Node DeclList { get; }
-        public Node CompoundStat { get; }
+        public CompoundStat CompoundStat { get; }
 
-        public FuncDef(Node declSpecs, Node declarator, Node declList, Node compoundStat)
+        public FuncDef(Node declSpec, InitDeclarator declarator, Node declList, CompoundStat compoundStat)
         {
-            DeclSpecs = declSpecs;
+            DeclSpec = declSpec;
             Declarator = declarator;
             DeclList = declList;
             CompoundStat = compoundStat;
@@ -531,7 +531,7 @@ namespace CCompiler.Parser
         public override string ToString(string indent, bool last)
         {
             return indent + NodePrefix(last) + Type + "\r\n" +
-                   DeclSpecs.ToString(indent + ChildrenPrefix(last), false) +
+                   DeclSpec.ToString(indent + ChildrenPrefix(last), false) +
                    Declarator.ToString(indent + ChildrenPrefix(last), false) +
                    DeclList.ToString(indent + ChildrenPrefix(last), false) +
                    CompoundStat.ToString(indent + ChildrenPrefix(last), true);

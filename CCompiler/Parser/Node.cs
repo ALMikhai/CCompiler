@@ -90,7 +90,7 @@ namespace CCompiler.Parser
     public class ExpNode : Node
     {
         public virtual bool IsLValue() => throw new NotImplementedException();
-        public new virtual SymbolType GetType(SymbolTable symbolTable) => throw new NotImplementedException();
+        public new virtual SymbolType GetType() => throw new NotImplementedException();
         public virtual object GetValue() => throw new NotImplementedException(); // TODO for interpretation.
     }
 }

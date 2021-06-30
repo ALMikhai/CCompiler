@@ -4,7 +4,12 @@ namespace CCompiler.SemanticAnalysis
 {
     public class EnvironmentSnapshot
     {
-        public SymbolTable SymbolTable { get; } = new SymbolTable();
-        public Dictionary<string, StructType> StructTypes { get; } = new Dictionary<string, StructType>();
+        public Table<Symbol> SymbolTable { get; } = new Table<Symbol>();
+        public Table<StructType> StructTable { get; } = new Table<StructType>();
+
+        public override string ToString()
+        {
+            return $"Structs {StructTable}\nSymbols{SymbolTable}";
+        }
     }
 }

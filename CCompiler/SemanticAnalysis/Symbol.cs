@@ -47,8 +47,28 @@
 
     public class FuncSymbol : Symbol
     {
+        public EnvironmentSnapshot Snapshot { get; private set; }
+        public bool IsDefined { get; private set; }
+        
         public FuncSymbol(string id, FuncType type) : base(id, type)
         {
+            IsDefined = false;
+        }
+        public FuncSymbol(string id, FuncType type, EnvironmentSnapshot snapshot) : base(id, type)
+        {
+            Snapshot = snapshot;
+            IsDefined = true;
+        }
+
+        public void SetSnapshot(EnvironmentSnapshot snapshot)
+        {
+            Snapshot = snapshot;
+            IsDefined = true;
+        }
+        
+        public override string ToString()
+        {
+            return $"{Type}" + (IsDefined ? $"\n{Snapshot} " : " ") + $":: {Id}";
         }
     }
 }

@@ -722,9 +722,9 @@ namespace CCompiler.Parser
             if (!compoundStat.IsSuccess)
                 return compoundStat;
 
-            if (initDeclarator.ResultNode is InitDeclarator && !compoundStat.IsNullStat())
-                return new SuccessParseResult(new FuncDef(declSpecs.ResultNode, initDeclarator.ResultNode,
-                    declList.ResultNode, compoundStat.ResultNode));
+            if (initDeclarator.ResultNode is InitDeclarator declarator && !compoundStat.IsNullStat())
+                return new SuccessParseResult(new FuncDef(declSpecs.ResultNode, declarator,
+                    declList.ResultNode, compoundStat.ResultNode as CompoundStat));
 
             if (initDeclarator.IsNullStat() && declSpecs.IsNullStat() && declList.IsNullStat())
                 return new SuccessParseResult(new NullStat());

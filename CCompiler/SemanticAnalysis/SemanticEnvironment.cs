@@ -17,55 +17,44 @@ namespace CCompiler.SemanticAnalysis
             if (SymbolExist(symbol.Id))
                 throw new SemanticException($"redeclaration of '{symbol.Id}'");
 
-            _snapshots.Peek().SymbolTable.PushSymbol(symbol);
+            _snapshots.Peek().SymbolTable.Push(symbol.Id, symbol);
         }
-        
-        public bool SymbolExist(string id)
+
+        public bool SymbolExist(string id) => _snapshots.Peek().SymbolTable.Exist(id);
+
+        public void PushSnapshot() => _snapshots.Push(new EnvironmentSnapshot());
+
+        public void PushSnapshot(EnvironmentSnapshot snapshot)
         {
-            foreach (var snapshot in _snapshots)
+            PushSnapshot();
+            foreach (var pair in snapshot.SymbolTable.GetData())
             {
-                if (snapshot.SymbolTable.SymbolExist(id))
-                    return true;
+                PushSymbol(pair.Value);
             }
-
-            return false;
+            foreach (var pair in snapshot.StructTable.GetData())
+            {
+                PushStructType(pair.Value);
+            }
         }
 
-        public void PushSnapshot()
-        {
-            _snapshots.Push(new EnvironmentSnapshot());
-        }
-
-        public EnvironmentSnapshot PopSnapshot()
-        {
-            return _snapshots.Pop();
-        }
+        public EnvironmentSnapshot PopSnapshot() => _snapshots.Pop();
 
         public void PushStructType(StructType type)
         {
             if (StructExist(type.Name))
                 throw new SemanticException($"redeclaration of '{type.Name}'");
             
-            _snapshots.Peek().StructTypes.Add(type.Name, type);
+            _snapshots.Peek().StructTable.Push(type.Name, type);
         }
 
-        public bool StructExist(string name)
+        public bool StructExist(string name) => _snapshots.Peek().StructTable.Exist(name);
+
+        public StructType GetStructType(string name)
         {
             foreach (var snapshot in _snapshots)
             {
-                if (snapshot.StructTypes.ContainsKey(name))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public StructType GetStructType(string name)
-        { 
-            foreach (var snapshot in _snapshots)
-            {
-                if (snapshot.StructTypes.ContainsKey(name))
-                    return snapshot.StructTypes[name];
+                if (snapshot.StructTable.Exist(name))
+                    return snapshot.StructTable.Get(name);
             }
 
             throw new SemanticException($"struct '{name}' is not define");

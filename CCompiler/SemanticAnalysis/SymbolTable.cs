@@ -3,28 +3,31 @@ using System.Text;
 
 namespace CCompiler.SemanticAnalysis
 {
-    public class SymbolTable
+    public class Table<T>
     {
-        private Dictionary<string, Symbol> _symbols;
+        private Dictionary<string, T> _members;
         
-        public SymbolTable()
+        public Table()
         {
-            _symbols = new Dictionary<string, Symbol>();
+            _members = new Dictionary<string, T>();
         }
 
-        public void PushSymbol(Symbol symbol) => _symbols.Add(symbol.Id, symbol);
+        public void Push(string id, T member) => _members.Add(id, member);
         
-        public bool SymbolExist(string id) => _symbols.ContainsKey(id);
+        public bool Exist(string id) => _members.ContainsKey(id);
+        public T Get(string id) => _members[id];
 
         public override string ToString()
         {
-            var symbols = new StringBuilder();
-            foreach (var symbol in _symbols)
+            var result = new StringBuilder();
+            foreach (var member in _members)
             {
-                symbols.Append(symbol.Value + "\n");
+                result.Append(member.Value + "\n");
             }
 
-            return "Symbol table {\n" + symbols.ToString() + "}";
+            return "{\n" + result.ToString() + "}";
         }
+
+        public Dictionary<string, T> GetData() => _members;
     }
 }
