@@ -26,7 +26,17 @@ namespace CCompiler.SemanticAnalysis
             IsVolatile = isVolatile;
             SymbolTypeKind = symbolTypeKind;
         }
-        
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is SymbolType type)
+            {
+                return SymbolTypeKind == type.SymbolTypeKind;
+            }
+
+            return false;
+        }
+
         public override string ToString()
         {
             return $"{(IsConst ? "const " : "")}{(IsVolatile ? "volatile " : "")}{SymbolTypeKind}";
@@ -42,6 +52,11 @@ namespace CCompiler.SemanticAnalysis
         {
             ReturnType = returnType;
             Snapshot = snapshot;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            throw new NotImplementedException("Func comp is not impl");
         }
         
         public override string ToString()
@@ -61,6 +76,11 @@ namespace CCompiler.SemanticAnalysis
             Members = members;
         }
         
+        public override bool Equals(object? obj)
+        {
+            throw new NotImplementedException("Struct comp is not impl");
+        }
+        
         public override string ToString()
         {
             return $"{SymbolTypeKind} called {Name}\nMembers {Members}";
@@ -76,6 +96,16 @@ namespace CCompiler.SemanticAnalysis
             PointerToType = pointerToType;
         }
         
+        public override bool Equals(object? obj)
+        {
+            if (obj is PointerType type)
+            {
+                return PointerToType.Equals(type.PointerToType);
+            }
+
+            return false;
+        }
+        
         public override string ToString()
         {
             return base.ToString() + $" to {PointerToType}";
@@ -84,16 +114,26 @@ namespace CCompiler.SemanticAnalysis
     
     public class ArrayType : SymbolType
     {
-        public SymbolType Type { get; }
+        public SymbolType TypeOfArray { get; }
 
-        public ArrayType(bool isConst, bool isVolatile, SymbolType type) : base(isConst, isVolatile, SymbolTypeKind.ARRAY)
+        public ArrayType(bool isConst, bool isVolatile, SymbolType typeOfArray) : base(isConst, isVolatile, SymbolTypeKind.ARRAY)
         {
-            Type = type;
+            TypeOfArray = typeOfArray;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            if (obj is ArrayType type)
+            {
+                return TypeOfArray.Equals(type.TypeOfArray);
+            }
+
+            return false;
         }
         
         public override string ToString()
         {
-            return base.ToString() + $" of type {Type}";
+            return base.ToString() + $" of type {TypeOfArray}";
         }
     }
 }

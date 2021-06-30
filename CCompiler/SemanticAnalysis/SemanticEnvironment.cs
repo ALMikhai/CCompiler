@@ -59,5 +59,16 @@ namespace CCompiler.SemanticAnalysis
 
             throw new SemanticException($"struct '{name}' is not define");
         }
+
+        public Symbol GetSymbol(string id)
+        {
+            foreach (var snapshot in _snapshots)
+            {
+                if (snapshot.SymbolTable.Exist(id))
+                    return snapshot.SymbolTable.Get(id);
+            }
+
+            throw new SemanticException($"symbol '{id}' is not define");
+        }
     }
 }

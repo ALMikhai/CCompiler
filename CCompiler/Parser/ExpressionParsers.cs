@@ -95,7 +95,8 @@ namespace CCompiler.Parser
                     if (exp.IsNullStat())
                         return ExpectedExpressionFailure();
                     Expect(OperatorType.RSBRACKET);
-                    result = new SuccessParseResult(new AccessingArrayElement(result.ResultNode, exp.ResultNode));
+                    result = new SuccessParseResult(new AccessingArrayElement(result.ResultNode as ExpNode,
+                        exp.ResultNode as ExpNode));
                     continue;
                 }
 
@@ -125,14 +126,14 @@ namespace CCompiler.Parser
                         return new FailedParseResult("expected identifier", _currentToken);
 
                     result = new SuccessParseResult(
-                        new MemberCall(result.ResultNode, id.ResultNode,
+                        new MemberCall(result.ResultNode as ExpNode, id.ResultNode as ExpNode,
                             (op.Type == OperatorType.DOT ? MemberCall.CallType.VALUE : MemberCall.CallType.POINTER)));
                     continue;
                 }
 
                 if (Accept(new [] {OperatorType.INC, OperatorType.DEC}, ref op))
                 {
-                    result = new SuccessParseResult(new PostfixIncDec(result.ResultNode,
+                    result = new SuccessParseResult(new PostfixIncDec(result.ResultNode as ExpNode,
                         (op.Type == OperatorType.INC ? PostfixIncDec.OpType.INC : PostfixIncDec.OpType.DEC)));
                     continue;
                 }
@@ -178,7 +179,7 @@ namespace CCompiler.Parser
                 if (postfixUnaryExp.IsNullStat())
                     return ExpectedExpressionFailure();
                 
-                return new SuccessParseResult(new PrefixIncDec(postfixUnaryExp.ResultNode,
+                return new SuccessParseResult(new PrefixIncDec(postfixUnaryExp.ResultNode as ExpNode,
                     (op.Type == OperatorType.INC ? PrefixIncDec.OpType.INC : PrefixIncDec.OpType.DEC)));
             }
 
@@ -188,7 +189,7 @@ namespace CCompiler.Parser
             
             var unaryExp = ParseUnaryExp();
             if (unaryExp.IsSuccess)
-                return new SuccessParseResult(new UnaryExp(unaryExp.ResultNode,
+                return new SuccessParseResult(new UnaryExp(unaryExp.ResultNode as ExpNode,
                     unaryOperator.ResultNode as UnaryOperator));
 
             return unaryExp;

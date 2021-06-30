@@ -87,10 +87,9 @@ namespace CCompiler.Parser
         }
     }
 
-    public class ExpNode : Node
+    public abstract class ExpNode : Node
     {
-        public virtual bool IsLValue() => throw new NotImplementedException();
-        public new virtual SymbolType GetType() => throw new NotImplementedException();
-        public virtual object GetValue() => throw new NotImplementedException(); // TODO for interpretation.
+        public abstract bool IsLValue();
+        public new abstract SymbolType GetType(ref SemanticEnvironment environment);
     }
 }

@@ -6,36 +6,24 @@ using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
-    public class Const : ExpNode
+    public partial class Const : ExpNode
     {
+        public Token Token { get; }
+
         public Const(Token token)
         {
             Token = token;
         }
 
-        public Token Token { get; }
         public override NodeType Type => NodeType.CONST;
 
         public override string ToString(string indent, bool last)
         {
             return indent + NodePrefix(last) + $"{Token.Value}" + "\r\n";
         }
-
-        public override SymbolType GetType()
-        {
-            return Token.TokenType switch
-            {
-                TokenType.FLOAT => new SymbolType(true, false, SymbolTypeKind.FLOAT),
-                TokenType.INT => new SymbolType(true, false, SymbolTypeKind.INT),
-                TokenType.CHAR => new SymbolType(true, false, SymbolTypeKind.INT),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        }
-
-        public override bool IsLValue() => false;
     }
 
-    public class Id : ExpNode
+    public partial class Id : ExpNode
     {
         public string IdName { get; }
 
@@ -52,7 +40,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class String : ExpNode
+    public partial class String : ExpNode
     {
         public string Str { get; }
         
@@ -69,12 +57,12 @@ namespace CCompiler.Parser
         }
     }
 
-    public class AccessingArrayElement : Node
+    public partial class AccessingArrayElement : ExpNode
     {
-        public Node PostfixNode { get; }
-        public Node Exp { get; }
+        public ExpNode PostfixNode { get; }
+        public ExpNode Exp { get; }
 
-        public AccessingArrayElement(Node postfixNode, Node exp)
+        public AccessingArrayElement(ExpNode postfixNode, ExpNode exp)
         {
             PostfixNode = postfixNode;
             Exp = exp;
@@ -113,7 +101,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class MemberCall : Node
+    public partial class MemberCall : ExpNode
     {
         public enum CallType
         {
@@ -121,12 +109,12 @@ namespace CCompiler.Parser
             POINTER
         }
         
-        public Node PostfixNode { get; }
-        public Node Id { get; }
+        public ExpNode PostfixNode { get; }
+        public ExpNode Id { get; }
 
         private readonly CallType _callType;
 
-        public MemberCall(Node postfixNode, Node id, CallType callType)
+        public MemberCall(ExpNode postfixNode, ExpNode id, CallType callType)
         {
             _callType = callType;
             PostfixNode = postfixNode;
@@ -144,7 +132,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class PostfixIncDec : Node
+    public partial class PostfixIncDec : ExpNode
     {
         private readonly OpType _opType;
 
@@ -153,12 +141,12 @@ namespace CCompiler.Parser
             INC,
             DEC
         }
-        public Node PostfixNode { get; }
+        public ExpNode PrefixNode { get; }
 
-        public PostfixIncDec(Node postfixNode, OpType opType)
+        public PostfixIncDec(ExpNode prefixNode, OpType opType)
         {
             _opType = opType;
-            PostfixNode = postfixNode;
+            PrefixNode = prefixNode;
         }
         
         public override NodeType Type => NodeType.POSTFIXEXP;
@@ -167,7 +155,7 @@ namespace CCompiler.Parser
         {
             return
                 indent + NodePrefix(last) + $"POSTFIX {_opType}" + "\r\n" +
-                PostfixNode.ToString(indent + ChildrenPrefix(last), true);
+                PrefixNode.ToString(indent + ChildrenPrefix(last), true);
         }
     }
 
@@ -182,7 +170,7 @@ namespace CCompiler.Parser
         public override NodeType Type => NodeType.UNARYOPERATOR;
     }
 
-    public class PrefixIncDec : Node
+    public partial class PrefixIncDec : ExpNode
     {
         private readonly OpType _opType;
 
@@ -191,9 +179,9 @@ namespace CCompiler.Parser
             INC,
             DEC
         }
-        public Node PostfixNode { get; }
+        public ExpNode PostfixNode { get; }
 
-        public PrefixIncDec(Node postfixNode, OpType opType)
+        public PrefixIncDec(ExpNode postfixNode, OpType opType)
         {
             _opType = opType;
             PostfixNode = postfixNode;
@@ -209,15 +197,15 @@ namespace CCompiler.Parser
         }
     }
     
-    public class UnaryExp : Node
+    public partial class UnaryExp : ExpNode
     {
-        public UnaryExp(Node unaryExpNode, UnaryOperator unaryOperator)
+        public UnaryExp(ExpNode unaryExpNode, UnaryOperator unaryOperator)
         {
             UnaryOperator = unaryOperator;
             UnaryExpNode = unaryExpNode;
         }
 
-        public Node UnaryExpNode { get; }
+        public ExpNode UnaryExpNode { get; }
         public UnaryOperator UnaryOperator { get; }
 
         public override NodeType Type => NodeType.UNARYEXP;

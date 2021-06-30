@@ -110,8 +110,16 @@ namespace CCompiler.Parser
 
     public partial class InitDeclaratorByExp
     {
-        public override Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment) =>
-            throw new NotImplementedException();
+        public override Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment)
+        {
+            var symbol = Declarator.ParseSymbol(type, ref environment);
+            var valueType = (Initializer as ExpNode).GetType(ref environment);
+            if (symbol.Type.Equals(valueType))
+                return symbol;
+
+            throw new SemanticException(
+                $"trying to assign to variable of type {symbol.Type} value with type {valueType}");
+        }
     }
 
     public partial class InitDeclarator
@@ -315,6 +323,165 @@ namespace CCompiler.Parser
             environment.PushSymbol(symbol);
             
             // TODO проверка StatList
+        }
+    }
+
+    public partial class Const
+    {
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            return Token.TokenType switch
+            {
+                TokenType.FLOAT => new SymbolType(true, false, SymbolTypeKind.FLOAT),
+                TokenType.INT => new SymbolType(true, false, SymbolTypeKind.INT),
+                TokenType.CHAR => new SymbolType(true, false, SymbolTypeKind.INT),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+        public override bool IsLValue() => false;
+    }
+
+    public partial class String
+    {
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment) => new SymbolType(true, false, SymbolTypeKind.STRING);
+    }
+
+    public partial class Id
+    {
+        public override bool IsLValue() => true;
+        public override SymbolType GetType(ref SemanticEnvironment environment) => environment.GetSymbol(IdName).Type;
+    }
+    
+    public partial class AccessingArrayElement
+    {
+        public override bool IsLValue() => true;
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            if (PostfixNode.GetType(ref environment) is ArrayType prefixType)
+            {
+                var symbolType = Exp.GetType(ref environment);
+                if (symbolType.SymbolTypeKind == SymbolTypeKind.INT)
+                {
+                    return prefixType.TypeOfArray;
+                }
+                
+                throw new SemanticException("array subscript is not an integer");
+            }
+
+            throw new SemanticException("subscripted value is neither array nor pointer nor vector");
+        }
+    }
+
+    public partial class MemberCall
+    {
+        public override bool IsLValue() => true;
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            if (_callType == CallType.VALUE)
+            {
+                if (PostfixNode.GetType(ref environment) is StructType structType)
+                {
+                    var name = (Id as Id).IdName;
+                    if (structType.Members.Exist(name))
+                    {
+                        return structType.Members.Get(name).Type;
+                    }
+                    
+                    throw new SemanticException($"‘{structType.Name}’ has no member named ‘{name}’");
+                }
+                throw new SemanticException($"request for member in something not a structure");
+            }
+            else
+            {
+                if (PostfixNode.GetType(ref environment) is PointerType {PointerToType: StructType structType})
+                {
+                    var name = (Id as Id).IdName;
+                    if (structType.Members.Exist(name))
+                    {
+                        return structType.Members.Get(name).Type;
+                    }
+                    
+                    throw new SemanticException($"‘{structType.Name}’ has no member named ‘{name}’");
+                }
+                throw new SemanticException($"invalid type argument of ‘->’");
+            }
+        }
+    }
+
+    public partial class PostfixIncDec
+    {
+        public override bool IsLValue() => false;
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            if (!PrefixNode.IsLValue())
+                throw new SemanticException("lvalue required as inc or dec operand");
+            var symbolType = PrefixNode.GetType(ref environment);
+            if (symbolType.SymbolTypeKind == SymbolTypeKind.INT || symbolType.SymbolTypeKind == SymbolTypeKind.FLOAT)
+            {
+                return symbolType;
+            }
+
+            throw new SemanticException("INT or FLOAT required for inc or dec operand");
+        }
+    }
+
+    public partial class PrefixIncDec
+    {
+        public override bool IsLValue() => false;
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            if (!PostfixNode.IsLValue())
+                throw new SemanticException("lvalue required as inc or dec operand");
+            var symbolType = PostfixNode.GetType(ref environment);
+            if (symbolType.SymbolTypeKind == SymbolTypeKind.INT || symbolType.SymbolTypeKind == SymbolTypeKind.FLOAT)
+            {
+                return symbolType;
+            }
+
+            throw new SemanticException("INT or FLOAT required for inc or dec operand");
+        }
+    }
+
+    public partial class UnaryExp
+    {
+        public override bool IsLValue() => UnaryOperator.Operator.Type == OperatorType.MULT;
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            var symbolType = UnaryExpNode.GetType(ref environment);
+            if (UnaryOperator.Operator.Type == OperatorType.MULT)
+            {
+                if (UnaryExpNode.IsLValue())
+                {
+                    if (symbolType is PointerType pointerType)
+                    {
+                        return pointerType.PointerToType;
+                    }
+                    throw new SemanticException("invalid type argument of unary");
+                }
+                throw new SemanticException("lvalue required as operand");
+            }
+
+            if (UnaryOperator.Operator.Type == OperatorType.BITAND)
+            {
+                if (UnaryExpNode.IsLValue())
+                {
+                    return new PointerType(false, false, symbolType);
+                }
+                throw new SemanticException("lvalue required as operand");
+            }
+            
+            if (symbolType.SymbolTypeKind == SymbolTypeKind.INT || symbolType.SymbolTypeKind == SymbolTypeKind.FLOAT)
+            {
+                return symbolType;
+            }
+            
+            throw new SemanticException("INT or FLOAT required as operand");
         }
     }
 }
