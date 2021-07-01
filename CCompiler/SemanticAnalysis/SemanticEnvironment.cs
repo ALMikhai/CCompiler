@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -15,7 +16,7 @@ namespace CCompiler.SemanticAnalysis
         public void PushSymbol(Symbol symbol)
         {
             if (SymbolExist(symbol.Id))
-                throw new SemanticException($"redeclaration of '{symbol.Id}'");
+                throw new ArgumentException($"redeclaration of '{symbol.Id}'");
 
             _snapshots.Peek().SymbolTable.Push(symbol.Id, symbol);
         }
@@ -42,7 +43,7 @@ namespace CCompiler.SemanticAnalysis
         public void PushStructType(StructType type)
         {
             if (StructExist(type.Name))
-                throw new SemanticException($"redeclaration of '{type.Name}'");
+                throw new ArgumentException($"redeclaration of '{type.Name}'");
             
             _snapshots.Peek().StructTable.Push(type.Name, type);
         }
@@ -57,7 +58,7 @@ namespace CCompiler.SemanticAnalysis
                     return snapshot.StructTable.Get(name);
             }
 
-            throw new SemanticException($"struct '{name}' is not define");
+            throw new ArgumentException($"struct '{name}' is not define");
         }
 
         public Symbol GetSymbol(string id)
@@ -68,7 +69,7 @@ namespace CCompiler.SemanticAnalysis
                     return snapshot.SymbolTable.Get(id);
             }
 
-            throw new SemanticException($"symbol '{id}' is not define");
+            throw new ArgumentException($"symbol '{id}' is not define");
         }
     }
 }

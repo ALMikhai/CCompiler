@@ -257,7 +257,7 @@ namespace CCompiler.Parser
     
     public partial class ArrayDecl : GenericDeclaration
     {
-        public Node ConstExp { get; } // TODO Replace on expType
+        public Node ConstExp { get; }
 
         public ArrayDecl(Node left, Node constExp) : base(left)
         {
@@ -357,9 +357,9 @@ namespace CCompiler.Parser
     
     public partial class InitDeclaratorByExp : InitDeclarator
     {
-        public Node Initializer { get; }  // TODO Replace on expType
+        public ExpNode Initializer { get; }
 
-        public InitDeclaratorByExp(Declarator declarator, Node initializer) : base(declarator)
+        public InitDeclaratorByExp(Declarator declarator, ExpNode initializer) : base(declarator)
         {
             Initializer = initializer;
         }

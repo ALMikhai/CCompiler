@@ -460,8 +460,9 @@ namespace CCompiler.Parser
                 if (initializer.ResultNode is Initializer list)
                     return new SuccessParseResult(new InitDeclaratorByList(declarator.ResultNode as Declarator,
                         list.InitializerList as InitializerList));
-                
-                return new SuccessParseResult(new InitDeclaratorByExp(declarator.ResultNode as Declarator, initializer.ResultNode));
+
+                return new SuccessParseResult(new InitDeclaratorByExp(declarator.ResultNode as Declarator,
+                    initializer.ResultNode as ExpNode));
             }
 
             return new SuccessParseResult(new InitDeclarator(declarator.ResultNode as Declarator));

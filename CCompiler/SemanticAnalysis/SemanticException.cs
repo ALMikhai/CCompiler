@@ -5,19 +5,16 @@ namespace CCompiler.SemanticAnalysis
 {
     public class SemanticException : Exception
     {
-        private readonly Token _token;
-
-        public SemanticException(string message, Token token) : base(message)
+        public Position Position { get; }
+        
+        public SemanticException(string message, Position position) : base(message)
         {
-            _token = token;
+            Position = position;
         }
-
-        public SemanticException(string message) : this(message,
-            new Token(TokenType.EOF, "", "").AddPosition(new Position(0, 0))) {}
 
         public override string ToString()
         {
-            return $"{_token.Position}: semantic error: {Message}";
+            return $"{Position}: semantic error: {Message}";
         }
     }
 }

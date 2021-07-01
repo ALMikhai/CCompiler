@@ -1,5 +1,6 @@
 ﻿using System;
 using CCompiler.SemanticAnalysis;
+using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
@@ -90,7 +91,13 @@ namespace CCompiler.Parser
 
     public abstract class ExpNode : Node
     {
+        public Position StartNodePosition { get; }
         public abstract bool IsLValue();
         public new abstract SymbolType GetType(ref SemanticEnvironment environment);
+
+        protected ExpNode(Position startNodePosition)
+        {
+            StartNodePosition = startNodePosition;
+        }
     }
 }

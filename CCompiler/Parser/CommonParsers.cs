@@ -28,12 +28,13 @@ namespace CCompiler.Parser
 
 
                 var constructor =
-                    typeof(T).GetConstructor(new[] {typeof(OperatorToken), typeof(ExpNode), typeof(ExpNode)});
+                    typeof(T).GetConstructor(new[] {typeof(OperatorToken), typeof(ExpNode), typeof(ExpNode), typeof(Position)});
                 if (constructor == null)
                     throw new ArgumentException($"{typeof(T)} not suitable for creating BinaryExp");
 
+                var leftExpNode = left.ResultNode as ExpNode;
                 var @object = constructor.Invoke(new object[]
-                    {op, left.ResultNode as ExpNode, right.ResultNode as ExpNode});
+                    {op, leftExpNode, right.ResultNode as ExpNode, leftExpNode.StartNodePosition});
                 left = new SuccessParseResult(@object as Node);
             }
 

@@ -27,7 +27,7 @@ namespace CCompiler.Parser
             var type = DeclSpecs.NodeToType(DeclSpec, ref environment);
             
             foreach (var node in InitDeclaratorList.Nodes)
-                environment.PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment));
+                environment.PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment)); // TODO catch arg excep
         }
     }
 
@@ -50,7 +50,7 @@ namespace CCompiler.Parser
                 {
                     if (storageClassSpecExist)
                         throw new SemanticException("multiple storage classes in declaration specifiers",
-                            storageClassSpec.Token);
+                            storageClassSpec.Token.Position);
                     storageClassSpecExist = true;
                 }
 
@@ -58,7 +58,7 @@ namespace CCompiler.Parser
                 {
                     if (typeSpecExist)
                         throw new SemanticException("two or more data types in declaration specifiers",
-                        typeSpec.TokenType);
+                        typeSpec.TokenType.Position);
                     typeSpecExist = true;
 
                     switch (typeSpec.TokenType.Type)
@@ -74,7 +74,7 @@ namespace CCompiler.Parser
                             break;
                         default:
                             throw new SemanticException("this data type is not supported",
-                                typeSpec.TokenType);
+                                typeSpec.TokenType.Position);
                     }
                 }
 
@@ -112,12 +112,13 @@ namespace CCompiler.Parser
         public override Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment)
         {
             var symbol = Declarator.ParseSymbol(type, ref environment);
-            var valueType = (Initializer as ExpNode).GetType(ref environment);
+            var valueType = Initializer.GetType(ref environment);
             if (symbol.Type.Equals(valueType))
                 return symbol;
 
             throw new SemanticException(
-                $"trying to assign to variable of type {symbol.Type} value with type {valueType}");
+                $"trying to assign to variable of type {symbol.Type} value with type {valueType}",
+                Initializer.StartNodePosition);
         }
     }
 
@@ -164,7 +165,7 @@ namespace CCompiler.Parser
             {
                 environment.PushSnapshot();
                 foreach (var node in paramList.Nodes)
-                    environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
+                    environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment)); // TODO catch arg excep
 
                 funcType = new FuncType(type, environment.PopSnapshot());
             }
@@ -174,7 +175,7 @@ namespace CCompiler.Parser
                 foreach (var node in idList.Nodes)
                 {
                     var varSymbol = new VarSymbol((node as Id).IdName,
-                        new SymbolType(false, false, SymbolTypeKind.INT));
+                        new SymbolType(false, false, SymbolTypeKind.INT)); // TODO catch arg excep
                     environment.PushSymbol(varSymbol);
                 }
                 funcType = new FuncType(type, environment.PopSnapshot());
@@ -198,6 +199,14 @@ namespace CCompiler.Parser
     {
         public override Symbol ParseSymbol(SymbolType type, ref SemanticEnvironment environment)
         {
+            if (ConstExp is ExpNode constExp)
+            {
+                if (constExp.GetType(ref environment).SymbolTypeKind != SymbolTypeKind.INT)
+                    throw new SemanticException("size of array has non-integer type", constExp.StartNodePosition);
+            }
+            else
+                throw new NotImplementedException("non-static arrays are not supported");
+            
             var arrayType = new ArrayType(type.IsConst, type.IsVolatile, type);
             return Left switch
             {
@@ -253,10 +262,7 @@ namespace CCompiler.Parser
         {
             if (StructDeclList is EmptyExp)
             {
-                if (environment.StructExist(Id.IdName))
-                    return environment.GetStructType(Id.IdName);
-                
-                throw new SemanticException($"storage size of ‘{Id.IdName}’ isn’t known");
+                return environment.GetStructType(Id.IdName); // TODO catch arg excep
             }
 
             var symbolTable = new Table<Symbol>();
@@ -277,7 +283,7 @@ namespace CCompiler.Parser
             }
 
             var structType = new StructType(false, false, Id.IdName, symbolTable);
-            environment.PushStructType(structType);
+            environment.PushStructType(structType); // TODO catch arg excep
             return structType;
         }
     }
@@ -292,7 +298,7 @@ namespace CCompiler.Parser
 
             var symbol = Declarator.ParseSymbolByType(returnType, ref environment) as FuncSymbol;
             if (!(DeclList is NullStat))
-                throw new SemanticException("old-style (K&R) function definition is not supported");
+                throw new NotImplementedException("old-style (K&R) function definition is not supported");
             
             environment.PushSnapshot((symbol.Type as FuncType).Snapshot);
 
@@ -300,8 +306,8 @@ namespace CCompiler.Parser
                 foreach (var node in declList.Nodes)
                     node.CheckSemantic(ref environment);
             
-            symbol.SetSnapshot(environment.PopSnapshot());
-            environment.PushSymbol(symbol);
+            symbol.SetSnapshot(environment.PopSnapshot()); 
+            environment.PushSymbol(symbol); // TODO catch arg excep
             
             // TODO проверка StatList
         }
@@ -331,7 +337,7 @@ namespace CCompiler.Parser
     public partial class Id
     {
         public override bool IsLValue() => true;
-        public override SymbolType GetType(ref SemanticEnvironment environment) => environment.GetSymbol(IdName).Type;
+        public override SymbolType GetType(ref SemanticEnvironment environment) => environment.GetSymbol(IdName).Type; // TODO catch arg excep
     }
     
     public partial class AccessingArrayElement
@@ -345,10 +351,10 @@ namespace CCompiler.Parser
                 if (symbolType.SymbolTypeKind == SymbolTypeKind.INT)
                     return prefixType.TypeOfArray;
                 
-                throw new SemanticException("array subscript is not an integer");
+                throw new SemanticException("array subscript is not an integer", Exp.StartNodePosition);
             }
 
-            throw new SemanticException("subscripted value is neither array nor pointer nor vector");
+            throw new SemanticException("subscripted value is neither array nor pointer nor vector", StartNodePosition);
         }
     }
 
@@ -357,29 +363,33 @@ namespace CCompiler.Parser
         public override bool IsLValue() => true;
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
+            var id = Id as Id;
             if (_callType == CallType.VALUE)
             {
                 if (PostfixNode.GetType(ref environment) is StructType structType)
                 {
-                    var name = (Id as Id).IdName;
+                    var name = id.IdName;
                     if (structType.Members.Exist(name))
                         return structType.Members.Get(name).Type;
-                    
-                    throw new SemanticException($"‘{structType.Name}’ has no member named ‘{name}’");
+
+                    throw new SemanticException($"‘{structType.Name}’ has no member named ‘{name}’",
+                        id.StartNodePosition);
                 }
-                throw new SemanticException($"request for member in something not a structure");
+
+                throw new SemanticException($"request for member in something not a structure", StartNodePosition);
             }
             else
             {
                 if (PostfixNode.GetType(ref environment) is PointerType {PointerToType: StructType structType})
                 {
-                    var name = (Id as Id).IdName;
+                    var name = id.IdName;
                     if (structType.Members.Exist(name))
                         return structType.Members.Get(name).Type;
-                    
-                    throw new SemanticException($"‘{structType.Name}’ has no member named ‘{name}’");
+
+                    throw new SemanticException($"‘{structType.Name}’ has no member named ‘{name}’",
+                        id.StartNodePosition);
                 }
-                throw new SemanticException($"invalid type argument of ‘->’");
+                throw new SemanticException($"invalid type argument of ‘->’", StartNodePosition);
             }
         }
     }
@@ -390,12 +400,12 @@ namespace CCompiler.Parser
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
             if (!PrefixNode.IsLValue())
-                throw new SemanticException("lvalue required as inc or dec operand");
+                throw new SemanticException("lvalue required as inc or dec operand", PrefixNode.StartNodePosition);
             var symbolType = PrefixNode.GetType(ref environment);
             if (symbolType.IsScalar)
                 return symbolType;
 
-            throw new SemanticException("INT or FLOAT required for inc or dec operand");
+            throw new SemanticException("INT or FLOAT required for inc or dec operand", PrefixNode.StartNodePosition);
         }
     }
 
@@ -405,12 +415,12 @@ namespace CCompiler.Parser
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
             if (!PostfixNode.IsLValue())
-                throw new SemanticException("lvalue required as inc or dec operand");
+                throw new SemanticException("lvalue required as inc or dec operand", PostfixNode.StartNodePosition);
             var symbolType = PostfixNode.GetType(ref environment);
             if (symbolType.IsScalar)
                 return symbolType;
 
-            throw new SemanticException("INT or FLOAT required for inc or dec operand");
+            throw new SemanticException("INT or FLOAT required for inc or dec operand", PostfixNode.StartNodePosition);
         }
     }
 
@@ -427,9 +437,9 @@ namespace CCompiler.Parser
                     if (symbolType is PointerType pointerType)
                         return pointerType.PointerToType;
                     
-                    throw new SemanticException("invalid type argument of unary");
+                    throw new SemanticException("invalid type argument of unary", UnaryExpNode.StartNodePosition);
                 }
-                throw new SemanticException("lvalue required as operand");
+                throw new SemanticException("lvalue required as operand", UnaryExpNode.StartNodePosition);
             }
 
             if (UnaryOperator.Operator.Type == OperatorType.BITAND)
@@ -437,13 +447,13 @@ namespace CCompiler.Parser
                 if (UnaryExpNode.IsLValue())
                     return new PointerType(false, false, symbolType);
                 
-                throw new SemanticException("lvalue required as operand");
+                throw new SemanticException("lvalue required as operand", UnaryExpNode.StartNodePosition);
             }
             
             if (symbolType.IsScalar)
                 return symbolType;
             
-            throw new SemanticException("INT or FLOAT required as operand");
+            throw new SemanticException("INT or FLOAT required as operand", UnaryExpNode.StartNodePosition);
         }
     }
 
@@ -459,10 +469,10 @@ namespace CCompiler.Parser
                 if (leftType.Equals(rightType))
                     return leftType;
                 
-                throw new SemanticException("operands must be of the same type");
+                throw new SemanticException("operands must be of the same type", binaryExp.StartNodePosition);
             }
 
-            throw new SemanticException("INT or FLOAT required as operand");
+            throw new SemanticException("INT or FLOAT required as operands", binaryExp.StartNodePosition);
         }
 
         public static SymbolType Int(BinaryExp binaryExp, ref SemanticEnvironment environment)
@@ -473,7 +483,7 @@ namespace CCompiler.Parser
             if (leftType.SymbolTypeKind == SymbolTypeKind.INT && rightType.SymbolTypeKind == SymbolTypeKind.INT)
                 return leftType;
 
-            throw new SemanticException("INT required as operand");
+            throw new SemanticException("INT required as operands", binaryExp.StartNodePosition);
         }
 
         public static SymbolType ScalarAndEqualRetInt(BinaryExp binaryExp, ref SemanticEnvironment environment)
@@ -486,10 +496,10 @@ namespace CCompiler.Parser
                 if (leftType.Equals(rightType))
                     return new SymbolType(false, false, SymbolTypeKind.INT);
                 
-                throw new SemanticException("operands must be of the same type");
+                throw new SemanticException("operands must be of the same type", binaryExp.StartNodePosition);
             }
 
-            throw new SemanticException("INT or FLOAT required as operand");
+            throw new SemanticException("INT or FLOAT required as operands", binaryExp.StartNodePosition);
         }
 
         public static SymbolType ScalarRetInt(BinaryExp binaryExp, ref SemanticEnvironment environment)
@@ -500,7 +510,7 @@ namespace CCompiler.Parser
             if (leftType.IsScalar && rightType.IsScalar)
                 return new SymbolType(false, false, SymbolTypeKind.INT);
 
-            throw new SemanticException("INT or FLOAT required as operand");
+            throw new SemanticException("INT or FLOAT required as operands", binaryExp.StartNodePosition);
         }
     }
 
@@ -586,12 +596,13 @@ namespace CCompiler.Parser
             {
                 if (leftType.Equals(rightType))
                     return leftType;
-                
+
                 throw new SemanticException(
-                    $"trying to assign to variable of type {leftType} value with type {rightType}");
+                    $"trying to assign to variable of type {leftType} value with type {rightType}",
+                    Right.StartNodePosition);
             }
 
-            throw new SemanticException("lvalue required as left operand of assignment");
+            throw new SemanticException("lvalue required as left operand of assignment", Left.StartNodePosition);
         }
     }
 
@@ -617,10 +628,10 @@ namespace CCompiler.Parser
                 if (type1.Equals(type2))
                     return type1;
                 
-                throw new SemanticException("type mismatch in conditional expression");
+                throw new SemanticException("type mismatch in conditional expression", Exp1.StartNodePosition);
             }
 
-            throw new SemanticException("INT or FLOAT required as condition");
+            throw new SemanticException("INT or FLOAT required as condition", Condition.StartNodePosition);
         }
     }
 
@@ -638,21 +649,23 @@ namespace CCompiler.Parser
                 var requiredTypes = funcType.GetArguments().ToList();
 
                 if (list.Nodes.Count != requiredTypes.Count)
-                    throw new SemanticException($"wrong number of arguments");
+                    throw new SemanticException($"wrong number of arguments", StartNodePosition);
                 
                 for (int i = 0; i < list.Nodes.Count; i++)
                 {
-                    var currentType = (list.Nodes[i] as ExpNode).GetType(ref environment);
+                    var expNode = list.Nodes[i] as ExpNode;
+                    var currentType = expNode.GetType(ref environment);
                     var requiredType = requiredTypes[i].Value.Type;
                     if (currentType.Equals(requiredType) == false)
                         throw new SemanticException(
-                            $"incompatible type for argument, expected ‘{requiredType}’ but argument is of type ‘{currentType}’");
+                            $"incompatible type for argument, expected ‘{requiredType}’ but argument is of type ‘{currentType}’",
+                            expNode.StartNodePosition);
                 }
 
                 return funcType.ReturnType;
             }
 
-            throw new SemanticException("called object is not a function");
+            throw new SemanticException("called object is not a function", StartNodePosition);
         }
     }
 }

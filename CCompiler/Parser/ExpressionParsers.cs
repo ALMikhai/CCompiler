@@ -15,7 +15,7 @@ namespace CCompiler.Parser
         {
             Token token = null;
             if (Accept(new [] { TokenType.INT, TokenType.CHAR, TokenType.FLOAT }, ref token))
-                return new SuccessParseResult(new Const(token));
+                return new SuccessParseResult(new Const(token, token.Position));
 
             return new SuccessParseResult(new NullStat());
         }
@@ -29,7 +29,7 @@ namespace CCompiler.Parser
         {
             Token token = null;
             if (Accept(TokenType.IDENTIFIER, ref token))
-                return new SuccessParseResult(new Id((string)token.Value));
+                return new SuccessParseResult(new Id((string)token.Value, token.Position));
             
             return new SuccessParseResult(new NullStat());
         }
@@ -60,7 +60,7 @@ namespace CCompiler.Parser
 
             Token token = null;
             if (Accept(TokenType.STRING, ref token))
-                return new SuccessParseResult(new String(token.Source));
+                return new SuccessParseResult(new String(token.Source, token.Position));
 
             var @const = ParseConst();
             return @const;
@@ -85,6 +85,7 @@ namespace CCompiler.Parser
 
             while (true)
             {
+                var resultExpNode = result.ResultNode as ExpNode;
                 if (Accept(OperatorType.LSBRACKET))
                 {
                     var exp = ParseExp();
@@ -93,8 +94,8 @@ namespace CCompiler.Parser
                     if (exp.IsNullStat())
                         return ExpectedExpressionFailure();
                     Expect(OperatorType.RSBRACKET);
-                    result = new SuccessParseResult(new AccessingArrayElement(result.ResultNode as ExpNode,
-                        exp.ResultNode as ExpNode));
+                    result = new SuccessParseResult(new AccessingArrayElement(resultExpNode,
+                        exp.ResultNode as ExpNode, resultExpNode.StartNodePosition));
                     continue;
                 }
 
@@ -102,7 +103,8 @@ namespace CCompiler.Parser
                 {
                     if (Accept(OperatorType.RRBRACKET))
                     {
-                        result = new SuccessParseResult(new FuncCall(result.ResultNode as ExpNode, new NullStat()));
+                        result = new SuccessParseResult(new FuncCall(resultExpNode, new NullStat(),
+                            resultExpNode.StartNodePosition));
                         continue;
                     }
                     
@@ -111,7 +113,8 @@ namespace CCompiler.Parser
                         return exp;
                     
                     Expect(OperatorType.RRBRACKET);
-                    result = new SuccessParseResult(new FuncCall(result.ResultNode as ExpNode, exp.ResultNode));
+                    result = new SuccessParseResult(new FuncCall(resultExpNode, exp.ResultNode,
+                        resultExpNode.StartNodePosition));
                     continue;
                 }
 
@@ -123,15 +126,17 @@ namespace CCompiler.Parser
                         return new FailedParseResult("expected identifier", _currentToken);
 
                     result = new SuccessParseResult(
-                        new MemberCall(result.ResultNode as ExpNode, id.ResultNode as ExpNode,
-                            (op.Type == OperatorType.DOT ? MemberCall.CallType.VALUE : MemberCall.CallType.POINTER)));
+                        new MemberCall(resultExpNode, id.ResultNode as ExpNode,
+                            (op.Type == OperatorType.DOT ? MemberCall.CallType.VALUE : MemberCall.CallType.POINTER),
+                            resultExpNode.StartNodePosition));
                     continue;
                 }
 
                 if (Accept(new [] {OperatorType.INC, OperatorType.DEC}, ref op))
                 {
-                    result = new SuccessParseResult(new PostfixIncDec(result.ResultNode as ExpNode,
-                        (op.Type == OperatorType.INC ? PostfixIncDec.OpType.INC : PostfixIncDec.OpType.DEC)));
+                    result = new SuccessParseResult(new PostfixIncDec(resultExpNode,
+                        (op.Type == OperatorType.INC ? PostfixIncDec.OpType.INC : PostfixIncDec.OpType.DEC),
+                        resultExpNode.StartNodePosition));
                     continue;
                 }
 
@@ -177,7 +182,7 @@ namespace CCompiler.Parser
                     return ExpectedExpressionFailure();
                 
                 return new SuccessParseResult(new PrefixIncDec(postfixUnaryExp.ResultNode as ExpNode,
-                    (op.Type == OperatorType.INC ? PrefixIncDec.OpType.INC : PrefixIncDec.OpType.DEC)));
+                    (op.Type == OperatorType.INC ? PrefixIncDec.OpType.INC : PrefixIncDec.OpType.DEC), op.Position));
             }
 
             var unaryOperator = ParseUnaryOperator();
@@ -186,8 +191,11 @@ namespace CCompiler.Parser
             
             var unaryExp = ParseUnaryExp();
             if (unaryExp.IsSuccess)
+            {
+                var @operator = unaryOperator.ResultNode as UnaryOperator;
                 return new SuccessParseResult(new UnaryExp(unaryExp.ResultNode as ExpNode,
-                    unaryOperator.ResultNode as UnaryOperator));
+                    @operator, @operator.Operator.Position));
+            }
 
             return unaryExp;
         }
@@ -341,8 +349,9 @@ namespace CCompiler.Parser
                 if (conditionalExp.IsNullStat())
                     return ExpectedExpressionFailure();
 
-                return new SuccessParseResult(new ConditionalExp(left.ResultNode as ExpNode, exp.ResultNode as ExpNode,
-                    conditionalExp.ResultNode as ExpNode));
+                var leftExpNode = left.ResultNode as ExpNode;
+                return new SuccessParseResult(new ConditionalExp(leftExpNode, exp.ResultNode as ExpNode,
+                    conditionalExp.ResultNode as ExpNode, leftExpNode.StartNodePosition));
             }
 
             return left;
@@ -383,8 +392,9 @@ namespace CCompiler.Parser
                     if (assignmentExp.IsNullStat())
                         return ExpectedExpressionFailure();
 
-                    return new SuccessParseResult(new AssignmentExp(op, result.ResultNode as ExpNode,
-                        assignmentExp.ResultNode as ExpNode));
+                    var expNode = result.ResultNode as ExpNode;
+                    return new SuccessParseResult(new AssignmentExp(op, expNode,
+                        assignmentExp.ResultNode as ExpNode, expNode.StartNodePosition));
                 }
             }
 

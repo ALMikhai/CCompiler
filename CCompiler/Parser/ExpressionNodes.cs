@@ -6,7 +6,7 @@ namespace CCompiler.Parser
     {
         public Token Token { get; }
 
-        public Const(Token token)
+        public Const(Token token, Position startNodePosition) : base(startNodePosition)
         {
             Token = token;
         }
@@ -23,7 +23,7 @@ namespace CCompiler.Parser
     {
         public string IdName { get; }
 
-        public Id(string idName)
+        public Id(string idName, Position startNodePosition) : base(startNodePosition)
         {
             IdName = idName;
         }
@@ -40,7 +40,7 @@ namespace CCompiler.Parser
     {
         public string Str { get; }
         
-        public String(string str)
+        public String(string str, Position startNodePosition) : base(startNodePosition)
         {
             Str = str;
         }
@@ -58,7 +58,7 @@ namespace CCompiler.Parser
         public ExpNode PostfixNode { get; }
         public ExpNode Exp { get; }
 
-        public AccessingArrayElement(ExpNode postfixNode, ExpNode exp)
+        public AccessingArrayElement(ExpNode postfixNode, ExpNode exp, Position startNodePosition) : base(startNodePosition)
         {
             PostfixNode = postfixNode;
             Exp = exp;
@@ -80,7 +80,7 @@ namespace CCompiler.Parser
         public ExpNode PostfixNode { get; }
         public Node ExpList { get; }
 
-        public FuncCall(ExpNode postfixNode, Node expList)
+        public FuncCall(ExpNode postfixNode, Node expList, Position startNodePosition) : base(startNodePosition)
         {
             PostfixNode = postfixNode;
             ExpList = expList;
@@ -110,7 +110,7 @@ namespace CCompiler.Parser
 
         private readonly CallType _callType;
 
-        public MemberCall(ExpNode postfixNode, ExpNode id, CallType callType)
+        public MemberCall(ExpNode postfixNode, ExpNode id, CallType callType, Position startNodePosition) : base(startNodePosition)
         {
             _callType = callType;
             PostfixNode = postfixNode;
@@ -139,7 +139,7 @@ namespace CCompiler.Parser
         }
         public ExpNode PrefixNode { get; }
 
-        public PostfixIncDec(ExpNode prefixNode, OpType opType)
+        public PostfixIncDec(ExpNode prefixNode, OpType opType, Position startNodePosition) : base(startNodePosition)
         {
             _opType = opType;
             PrefixNode = prefixNode;
@@ -177,7 +177,7 @@ namespace CCompiler.Parser
         }
         public ExpNode PostfixNode { get; }
 
-        public PrefixIncDec(ExpNode postfixNode, OpType opType)
+        public PrefixIncDec(ExpNode postfixNode, OpType opType, Position startNodePosition) : base(startNodePosition)
         {
             _opType = opType;
             PostfixNode = postfixNode;
@@ -195,7 +195,7 @@ namespace CCompiler.Parser
     
     public partial class UnaryExp : ExpNode
     {
-        public UnaryExp(ExpNode unaryExpNode, UnaryOperator unaryOperator)
+        public UnaryExp(ExpNode unaryExpNode, UnaryOperator unaryOperator, Position startNodePosition) : base(startNodePosition)
         {
             UnaryOperator = unaryOperator;
             UnaryExpNode = unaryExpNode;
@@ -216,7 +216,7 @@ namespace CCompiler.Parser
 
     public abstract class BinaryExp : ExpNode
     {
-        public BinaryExp(OperatorToken token, ExpNode left, ExpNode right)
+        public BinaryExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(startNodePosition)
         {
             Token = token;
             Left = left;
@@ -237,70 +237,70 @@ namespace CCompiler.Parser
     
     public partial class AdditiveExp : BinaryExp
     {
-        public AdditiveExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public AdditiveExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.ADDITIVEEXP;
     }
 
     public partial class MultExp : BinaryExp
     {
-        public MultExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public MultExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.MULTEXP;
     }
 
     public partial class ShiftExp : BinaryExp
     {
-        public ShiftExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public ShiftExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.SHIFTEXP;
     }
 
     public partial class RelationalExp : BinaryExp
     {
-        public RelationalExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public RelationalExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.RELATIONALEXP;
     }
 
     public partial class EqualityExp : BinaryExp
     {
-        public EqualityExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public EqualityExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.EQUALITYEXP;
     }
     
     public partial class AndExp : BinaryExp
     {
-        public AndExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public AndExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.ANDEXP;
     }
 
     public partial class ExclusiveOrExp : BinaryExp
     {
-        public ExclusiveOrExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public ExclusiveOrExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.EXCLUSIVEOREXP;
     }
 
     public partial class InclusiveOrExp : BinaryExp
     {
-        public InclusiveOrExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public InclusiveOrExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.INCLUSIVEOREXP;
     }
 
     public partial class LogicalAndExp : BinaryExp
     {
-        public LogicalAndExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public LogicalAndExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.LOGICALAND;
     }
 
     public partial class LogicalOrExp : BinaryExp
     {
-        public LogicalOrExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public LogicalOrExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.LOGICALOR;
     }
@@ -311,7 +311,7 @@ namespace CCompiler.Parser
         public ExpNode Exp1 { get; }
         public ExpNode Exp2 { get; }
 
-        public ConditionalExp(ExpNode condition, ExpNode exp1, ExpNode exp2)
+        public ConditionalExp(ExpNode condition, ExpNode exp1, ExpNode exp2, Position startNodePosition) : base(startNodePosition)
         {
             Condition = condition;
             Exp1 = exp1;
@@ -331,14 +331,14 @@ namespace CCompiler.Parser
 
     public partial class AssignmentExp : BinaryExp
     {
-        public AssignmentExp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public AssignmentExp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.ASSIGNMENTEXP;
     }
 
     public partial class Exp : BinaryExp
     {
-        public Exp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
+        public Exp(OperatorToken token, ExpNode left, ExpNode right, Position startNodePosition) : base(token, left, right, startNodePosition) { }
         
         public override NodeType Type => NodeType.EXP;
     }
