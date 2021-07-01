@@ -59,7 +59,8 @@ namespace CCompiler.Parser
         STRUCTDECLLIST,
         STRUCTDECL,
         STRUCTDECLARATORLIST,
-        STRUCTSPEC
+        STRUCTSPEC,
+        EXPLIST
     }
 
     public partial class Node

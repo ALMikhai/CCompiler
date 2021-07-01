@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -65,6 +65,11 @@ namespace CCompiler.SemanticAnalysis
                 return false;
 
             return true;
+        }
+
+        public Dictionary<string, Symbol> GetArguments()
+        {
+            return Snapshot.SymbolTable.GetData();
         }
         
         public override string ToString()

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CCompiler.Tokenizer;
-using BindingFlags = System.Reflection.BindingFlags;
 
 namespace CCompiler.Parser
 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using CCompiler.SemanticAnalysis;
-using CCompiler.Tokenizer;
+﻿using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
@@ -79,15 +75,15 @@ namespace CCompiler.Parser
         }
     }
 
-    public class FuncCall : Node
+    public partial class FuncCall : ExpNode
     {
-        public Node PostfixNode { get; }
-        public Node Exp { get; }
+        public ExpNode PostfixNode { get; }
+        public Node ExpList { get; }
 
-        public FuncCall(Node postfixNode, Node exp)
+        public FuncCall(ExpNode postfixNode, Node expList)
         {
             PostfixNode = postfixNode;
-            Exp = exp;
+            ExpList = expList;
         }
         
         public override NodeType Type => NodeType.POSTFIXEXP;
@@ -96,8 +92,8 @@ namespace CCompiler.Parser
         {
             return
                 indent + NodePrefix(last) + $"()" + "\r\n" +
-                PostfixNode.ToString(indent + ChildrenPrefix(last), Exp is NullStat) +
-                Exp.ToString(indent + ChildrenPrefix(last), true);
+                PostfixNode.ToString(indent + ChildrenPrefix(last), ExpList is NullStat) +
+                ExpList.ToString(indent + ChildrenPrefix(last), true);
         }
     }
 
@@ -309,13 +305,13 @@ namespace CCompiler.Parser
         public override NodeType Type => NodeType.LOGICALOR;
     }
 
-    public class ConditionalExp : Node
+    public partial class ConditionalExp : ExpNode
     {
-        public Node Condition { get; }
-        public Node Exp1 { get; }
-        public Node Exp2 { get; }
+        public ExpNode Condition { get; }
+        public ExpNode Exp1 { get; }
+        public ExpNode Exp2 { get; }
 
-        public ConditionalExp(Node condition, Node exp1, Node exp2)
+        public ConditionalExp(ExpNode condition, ExpNode exp1, ExpNode exp2)
         {
             Condition = condition;
             Exp1 = exp1;
@@ -345,5 +341,10 @@ namespace CCompiler.Parser
         public Exp(OperatorToken token, ExpNode left, ExpNode right) : base(token, left, right) { }
         
         public override NodeType Type => NodeType.EXP;
+    }
+    
+    public class ExpList : List
+    {
+        public override NodeType Type => NodeType.EXPLIST;
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Globalization;
+using System.Linq;
 using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 
@@ -27,9 +27,7 @@ namespace CCompiler.Parser
             var type = DeclSpecs.NodeToType(DeclSpec, ref environment);
             
             foreach (var node in InitDeclaratorList.Nodes)
-            {
                 environment.PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment));
-            }
         }
     }
 
@@ -125,10 +123,8 @@ namespace CCompiler.Parser
 
     public partial class InitDeclarator
     {
-        public virtual Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment)
-        {
-            return Declarator.ParseSymbol(type, ref environment);
-        }
+        public virtual Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment) =>
+            Declarator.ParseSymbol(type, ref environment);
     }
 
     public partial class Declarator
@@ -136,9 +132,7 @@ namespace CCompiler.Parser
         public Symbol ParseSymbol(SymbolType type, ref SemanticEnvironment environment)
         {
             if (Pointer is Pointer pointer)
-            {
                 type = pointer.ParseType(type, ref environment);
-            }
 
             return DirectDeclarator switch
             {
@@ -152,10 +146,8 @@ namespace CCompiler.Parser
 
     public abstract partial class GenericDeclaration
     {
-        public virtual Symbol ParseSymbol(SymbolType type, ref SemanticEnvironment environment)
-        {
+        public virtual Symbol ParseSymbol(SymbolType type, ref SemanticEnvironment environment) =>
             throw new NotImplementedException();
-        }
     }
 
     public partial class FuncDecl
@@ -172,9 +164,7 @@ namespace CCompiler.Parser
             {
                 environment.PushSnapshot();
                 foreach (var node in paramList.Nodes)
-                {
                     environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
-                }
 
                 funcType = new FuncType(type, environment.PopSnapshot());
             }
@@ -264,9 +254,7 @@ namespace CCompiler.Parser
             if (StructDeclList is EmptyExp)
             {
                 if (environment.StructExist(Id.IdName))
-                {
                     return environment.GetStructType(Id.IdName);
-                }
                 
                 throw new SemanticException($"storage size of ‘{Id.IdName}’ isn’t known");
             }
@@ -300,9 +288,7 @@ namespace CCompiler.Parser
         {
             var returnType = new SymbolType(false, false, SymbolTypeKind.INT);
             if (DeclSpec is DeclSpecs declSpecs)
-            {
                 returnType = DeclSpecs.NodeToType(declSpecs, ref environment);
-            }
 
             var symbol = Declarator.ParseSymbolByType(returnType, ref environment) as FuncSymbol;
             if (!(DeclList is NullStat))
@@ -311,12 +297,8 @@ namespace CCompiler.Parser
             environment.PushSnapshot((symbol.Type as FuncType).Snapshot);
 
             if (CompoundStat.DeclList is DeclList declList)
-            {
                 foreach (var node in declList.Nodes)
-                {
                     node.CheckSemantic(ref environment);
-                }
-            }
             
             symbol.SetSnapshot(environment.PopSnapshot());
             environment.PushSymbol(symbol);
@@ -361,9 +343,7 @@ namespace CCompiler.Parser
             {
                 var symbolType = Exp.GetType(ref environment);
                 if (symbolType.SymbolTypeKind == SymbolTypeKind.INT)
-                {
                     return prefixType.TypeOfArray;
-                }
                 
                 throw new SemanticException("array subscript is not an integer");
             }
@@ -383,9 +363,7 @@ namespace CCompiler.Parser
                 {
                     var name = (Id as Id).IdName;
                     if (structType.Members.Exist(name))
-                    {
                         return structType.Members.Get(name).Type;
-                    }
                     
                     throw new SemanticException($"‘{structType.Name}’ has no member named ‘{name}’");
                 }
@@ -397,9 +375,7 @@ namespace CCompiler.Parser
                 {
                     var name = (Id as Id).IdName;
                     if (structType.Members.Exist(name))
-                    {
                         return structType.Members.Get(name).Type;
-                    }
                     
                     throw new SemanticException($"‘{structType.Name}’ has no member named ‘{name}’");
                 }
@@ -417,9 +393,7 @@ namespace CCompiler.Parser
                 throw new SemanticException("lvalue required as inc or dec operand");
             var symbolType = PrefixNode.GetType(ref environment);
             if (symbolType.IsScalar)
-            {
                 return symbolType;
-            }
 
             throw new SemanticException("INT or FLOAT required for inc or dec operand");
         }
@@ -434,9 +408,7 @@ namespace CCompiler.Parser
                 throw new SemanticException("lvalue required as inc or dec operand");
             var symbolType = PostfixNode.GetType(ref environment);
             if (symbolType.IsScalar)
-            {
                 return symbolType;
-            }
 
             throw new SemanticException("INT or FLOAT required for inc or dec operand");
         }
@@ -453,9 +425,8 @@ namespace CCompiler.Parser
                 if (UnaryExpNode.IsLValue())
                 {
                     if (symbolType is PointerType pointerType)
-                    {
                         return pointerType.PointerToType;
-                    }
+                    
                     throw new SemanticException("invalid type argument of unary");
                 }
                 throw new SemanticException("lvalue required as operand");
@@ -464,170 +435,224 @@ namespace CCompiler.Parser
             if (UnaryOperator.Operator.Type == OperatorType.BITAND)
             {
                 if (UnaryExpNode.IsLValue())
-                {
                     return new PointerType(false, false, symbolType);
-                }
+                
                 throw new SemanticException("lvalue required as operand");
             }
             
             if (symbolType.IsScalar)
-            {
                 return symbolType;
-            }
             
             throw new SemanticException("INT or FLOAT required as operand");
         }
     }
-    
+
+    public class BinaryExpUtils
+    {
+        public static SymbolType ScalarAndEqual(BinaryExp binaryExp, ref SemanticEnvironment environment)
+        {
+            var leftType = binaryExp.Left.GetType(ref environment);
+            var rightType = binaryExp.Right.GetType(ref environment);
+
+            if (leftType.IsScalar && rightType.IsScalar)
+            {
+                if (leftType.Equals(rightType))
+                    return leftType;
+                
+                throw new SemanticException("operands must be of the same type");
+            }
+
+            throw new SemanticException("INT or FLOAT required as operand");
+        }
+
+        public static SymbolType Int(BinaryExp binaryExp, ref SemanticEnvironment environment)
+        {
+            var leftType = binaryExp.Left.GetType(ref environment);
+            var rightType = binaryExp.Right.GetType(ref environment);
+
+            if (leftType.SymbolTypeKind == SymbolTypeKind.INT && rightType.SymbolTypeKind == SymbolTypeKind.INT)
+                return leftType;
+
+            throw new SemanticException("INT required as operand");
+        }
+
+        public static SymbolType ScalarAndEqualRetInt(BinaryExp binaryExp, ref SemanticEnvironment environment)
+        {
+            var leftType = binaryExp.Left.GetType(ref environment);
+            var rightType = binaryExp.Right.GetType(ref environment);
+
+            if (leftType.IsScalar && rightType.IsScalar)
+            {
+                if (leftType.Equals(rightType))
+                    return new SymbolType(false, false, SymbolTypeKind.INT);
+                
+                throw new SemanticException("operands must be of the same type");
+            }
+
+            throw new SemanticException("INT or FLOAT required as operand");
+        }
+
+        public static SymbolType ScalarRetInt(BinaryExp binaryExp, ref SemanticEnvironment environment)
+        {
+            var leftType = binaryExp.Left.GetType(ref environment);
+            var rightType = binaryExp.Right.GetType(ref environment);
+
+            if (leftType.IsScalar && rightType.IsScalar)
+                return new SymbolType(false, false, SymbolTypeKind.INT);
+
+            throw new SemanticException("INT or FLOAT required as operand");
+        }
+    }
+
     public partial class AdditiveExp
     {
         public override bool IsLValue() => false;
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            BinaryExpUtils.ScalarAndEqual(this, ref environment);
     }
 
     public partial class MultExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            BinaryExpUtils.ScalarAndEqual(this, ref environment);
     }
 
     public partial class ShiftExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            BinaryExpUtils.Int(this, ref environment);
     }
 
     public partial class RelationalExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            BinaryExpUtils.ScalarAndEqualRetInt(this, ref environment);
     }
 
     public partial class EqualityExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            BinaryExpUtils.ScalarAndEqualRetInt(this, ref environment);
     }
 
     public partial class AndExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            BinaryExpUtils.Int(this, ref environment);
     }
 
     public partial class ExclusiveOrExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment)  =>
+            BinaryExpUtils.Int(this, ref environment);
     }
 
     public partial class InclusiveOrExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            BinaryExpUtils.Int(this, ref environment);
     }
 
     public partial class LogicalAndExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            BinaryExpUtils.ScalarRetInt(this, ref environment);
     }
 
     public partial class LogicalOrExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override SymbolType GetType(ref SemanticEnvironment environment)
-        {
-            throw new NotImplementedException();
-        }
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            BinaryExpUtils.ScalarRetInt(this, ref environment);
     }
 
     public partial class AssignmentExp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
+        public override bool IsLValue() => false;
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
-            throw new NotImplementedException();
+            var leftType = Left.GetType(ref environment);
+            var rightType = Right.GetType(ref environment);
+
+            if (Left.IsLValue())
+            {
+                if (leftType.Equals(rightType))
+                    return leftType;
+                
+                throw new SemanticException(
+                    $"trying to assign to variable of type {leftType} value with type {rightType}");
+            }
+
+            throw new SemanticException("lvalue required as left operand of assignment");
         }
     }
 
     public partial class Exp
     {
-        public override bool IsLValue()
-        {
-            throw new NotImplementedException();
-        }
-
+        public override bool IsLValue() => false;
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
-            throw new NotImplementedException();
+            Left.GetType(ref environment);
+            return Right.GetType(ref environment);
+        }
+    }
+
+    public partial class ConditionalExp
+    {
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            if (Condition.GetType(ref environment).IsScalar)
+            {
+                var type1 = Exp1.GetType(ref environment);
+                var type2 = Exp2.GetType(ref environment);
+                if (type1.Equals(type2))
+                    return type1;
+                
+                throw new SemanticException("type mismatch in conditional expression");
+            }
+
+            throw new SemanticException("INT or FLOAT required as condition");
+        }
+    }
+
+    public partial class FuncCall
+    {
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            if (PostfixNode.GetType(ref environment) is FuncType funcType)
+            {
+                ExpList list = new ExpList();
+                if (ExpList is ExpList expList)
+                    list = expList;
+
+                var requiredTypes = funcType.GetArguments().ToList();
+
+                if (list.Nodes.Count != requiredTypes.Count)
+                    throw new SemanticException($"wrong number of arguments");
+                
+                for (int i = 0; i < list.Nodes.Count; i++)
+                {
+                    var currentType = (list.Nodes[i] as ExpNode).GetType(ref environment);
+                    var requiredType = requiredTypes[i].Value.Type;
+                    if (currentType.Equals(requiredType) == false)
+                        throw new SemanticException(
+                            $"incompatible type for argument, expected ‘{requiredType}’ but argument is of type ‘{currentType}’");
+                }
+
+                return funcType.ReturnType;
+            }
+
+            throw new SemanticException("called object is not a function");
         }
     }
 }

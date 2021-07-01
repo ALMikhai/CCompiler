@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using CCompiler.Tokenizer;
+﻿using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
@@ -104,17 +102,16 @@ namespace CCompiler.Parser
                 {
                     if (Accept(OperatorType.RRBRACKET))
                     {
-                        result = new SuccessParseResult(new FuncCall(result.ResultNode, new NullStat()));
+                        result = new SuccessParseResult(new FuncCall(result.ResultNode as ExpNode, new NullStat()));
                         continue;
                     }
-
-                    var exp = ParseExp();
+                    
+                    var exp = ParseList<ExpList>(ParseAssignmentExp, OperatorType.COMMA);
                     if (!exp.IsSuccess)
                         return exp;
-                    if (exp.IsNullStat())
-                        return ExpectedExpressionFailure();
+                    
                     Expect(OperatorType.RRBRACKET);
-                    result = new SuccessParseResult(new FuncCall(result.ResultNode, exp.ResultNode));
+                    result = new SuccessParseResult(new FuncCall(result.ResultNode as ExpNode, exp.ResultNode));
                     continue;
                 }
 
@@ -344,7 +341,8 @@ namespace CCompiler.Parser
                 if (conditionalExp.IsNullStat())
                     return ExpectedExpressionFailure();
 
-                return new SuccessParseResult(new ConditionalExp(left.ResultNode, exp.ResultNode, conditionalExp.ResultNode));
+                return new SuccessParseResult(new ConditionalExp(left.ResultNode as ExpNode, exp.ResultNode as ExpNode,
+                    conditionalExp.ResultNode as ExpNode));
             }
 
             return left;
