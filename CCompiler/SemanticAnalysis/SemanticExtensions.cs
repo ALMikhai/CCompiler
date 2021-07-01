@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 
@@ -134,26 +135,18 @@ namespace CCompiler.Parser
     {
         public Symbol ParseSymbol(SymbolType type, ref SemanticEnvironment environment)
         {
-            Symbol result;
-            if (DirectDeclarator is Id id)
-            {
-                result = new VarSymbol(id.IdName, type);
-            }
-            else if (DirectDeclarator is GenericDeclaration genericDeclaration)
-            {
-                result = genericDeclaration.ParseSymbol(type, ref environment);
-            }
-            else
-            {
-                throw new ArgumentException();
-            }
-            
             if (Pointer is Pointer pointer)
             {
-                result = pointer.ParseSymbol(result, ref environment);
+                type = pointer.ParseType(type, ref environment);
             }
 
-            return result;
+            return DirectDeclarator switch
+            {
+                Id id => new VarSymbol(id.IdName, type),
+                Declarator declarator => declarator.ParseSymbol(type, ref environment),
+                GenericDeclaration genericDeclaration => genericDeclaration.ParseSymbol(type, ref environment),
+                _ => throw new ArgumentException()
+            };
         }
     }
 
@@ -169,40 +162,45 @@ namespace CCompiler.Parser
     {
         public override Symbol ParseSymbol(SymbolType type, ref SemanticEnvironment environment)
         {
-            if (Left is Id id)
+            FuncType funcType;
+            
+            if (ParamList is EmptyExp)
             {
-                if (ParamList is EmptyExp)
+                funcType = new FuncType(type, new EnvironmentSnapshot());
+            }
+            else if (ParamList is ParamList paramList)
+            {
+                environment.PushSnapshot();
+                foreach (var node in paramList.Nodes)
                 {
-                    return new FuncSymbol(id.IdName, new FuncType(type, new EnvironmentSnapshot()));
+                    environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
                 }
 
-                if (ParamList is ParamList paramList)
+                funcType = new FuncType(type, environment.PopSnapshot());
+            }
+            else if (ParamList is IdList idList)
+            {
+                environment.PushSnapshot();
+                foreach (var node in idList.Nodes)
                 {
-                    environment.PushSnapshot();
-                    foreach (var node in paramList.Nodes)
-                    {
-                        environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
-                    }
-
-                    return new FuncSymbol(id.IdName, new FuncType(type, environment.PopSnapshot()));
+                    var varSymbol = new VarSymbol((node as Id).IdName,
+                        new SymbolType(false, false, SymbolTypeKind.INT));
+                    environment.PushSymbol(varSymbol);
                 }
-
-                if (ParamList is IdList idList)
-                {
-                    environment.PushSnapshot();
-                    foreach (var node in idList.Nodes)
-                    {
-                        var varSymbol = new VarSymbol((node as Id).IdName,
-                            new SymbolType(false, false, SymbolTypeKind.INT));
-                        environment.PushSymbol(varSymbol);
-                    }
-                    return new FuncSymbol(id.IdName, new FuncType(type, environment.PopSnapshot()));
-                }
-
+                funcType = new FuncType(type, environment.PopSnapshot());
+            }
+            else
+            {
                 throw new ArgumentException();
             }
             
-            throw new NotImplementedException();
+            return Left switch
+            {
+                Id id => new FuncSymbol(id.IdName, funcType),
+                Declarator declarator => declarator.ParseSymbol(funcType, ref environment),
+                GenericDeclaration genericDeclaration => genericDeclaration.ParseSymbol(funcType, ref environment),
+                _ => throw new ArgumentException()
+            };
         }
     }
 
@@ -210,24 +208,25 @@ namespace CCompiler.Parser
     {
         public override Symbol ParseSymbol(SymbolType type, ref SemanticEnvironment environment)
         {
-            if (Left is Id id)
+            var arrayType = new ArrayType(type.IsConst, type.IsVolatile, type);
+            return Left switch
             {
-                // TODO Check ConstExp.
-                return new ArraySymbol(id.IdName, new ArrayType(type.IsConst, type.IsVolatile, type));
-            }
-            
-            throw new NotImplementedException();
+                Id id => new VarSymbol(id.IdName, arrayType),
+                Declarator declarator => declarator.ParseSymbol(arrayType, ref environment),
+                GenericDeclaration genericDeclaration => genericDeclaration.ParseSymbol(arrayType, ref environment),
+                _ => throw new ArgumentException()
+            };
         }
     }
 
     public partial class Pointer
     {
-        public Symbol ParseSymbol(Symbol symbol, ref SemanticEnvironment environment)
+        public PointerType ParseType(SymbolType symbolType, ref SemanticEnvironment environment)
         {
             if (PointerNode is Pointer pointer)
-                symbol = pointer.ParseSymbol(symbol, ref environment);
+                symbolType = pointer.ParseType(symbolType, ref environment);
 
-            var type = new PointerType(false, false, symbol.Type);
+            var type = new PointerType(false, false, symbolType);
             
             if (!(TypeQualifierList is NullStat))
             {
@@ -245,7 +244,7 @@ namespace CCompiler.Parser
                 }
             }
 
-            return new PointerSymbol(symbol, type);
+            return type;
         }
     }
     
@@ -356,7 +355,6 @@ namespace CCompiler.Parser
     public partial class AccessingArrayElement
     {
         public override bool IsLValue() => true;
-
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
             if (PostfixNode.GetType(ref environment) is ArrayType prefixType)
@@ -377,7 +375,6 @@ namespace CCompiler.Parser
     public partial class MemberCall
     {
         public override bool IsLValue() => true;
-
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
             if (_callType == CallType.VALUE)
@@ -414,13 +411,12 @@ namespace CCompiler.Parser
     public partial class PostfixIncDec
     {
         public override bool IsLValue() => false;
-
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
             if (!PrefixNode.IsLValue())
                 throw new SemanticException("lvalue required as inc or dec operand");
             var symbolType = PrefixNode.GetType(ref environment);
-            if (symbolType.SymbolTypeKind == SymbolTypeKind.INT || symbolType.SymbolTypeKind == SymbolTypeKind.FLOAT)
+            if (symbolType.IsScalar)
             {
                 return symbolType;
             }
@@ -432,13 +428,12 @@ namespace CCompiler.Parser
     public partial class PrefixIncDec
     {
         public override bool IsLValue() => false;
-
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
             if (!PostfixNode.IsLValue())
                 throw new SemanticException("lvalue required as inc or dec operand");
             var symbolType = PostfixNode.GetType(ref environment);
-            if (symbolType.SymbolTypeKind == SymbolTypeKind.INT || symbolType.SymbolTypeKind == SymbolTypeKind.FLOAT)
+            if (symbolType.IsScalar)
             {
                 return symbolType;
             }
@@ -450,7 +445,6 @@ namespace CCompiler.Parser
     public partial class UnaryExp
     {
         public override bool IsLValue() => UnaryOperator.Operator.Type == OperatorType.MULT;
-
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
             var symbolType = UnaryExpNode.GetType(ref environment);
@@ -476,12 +470,164 @@ namespace CCompiler.Parser
                 throw new SemanticException("lvalue required as operand");
             }
             
-            if (symbolType.SymbolTypeKind == SymbolTypeKind.INT || symbolType.SymbolTypeKind == SymbolTypeKind.FLOAT)
+            if (symbolType.IsScalar)
             {
                 return symbolType;
             }
             
             throw new SemanticException("INT or FLOAT required as operand");
+        }
+    }
+    
+    public partial class AdditiveExp
+    {
+        public override bool IsLValue() => false;
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class MultExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class ShiftExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class RelationalExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class EqualityExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class AndExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class ExclusiveOrExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class InclusiveOrExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class LogicalAndExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class LogicalOrExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class AssignmentExp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public partial class Exp
+    {
+        public override bool IsLValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            throw new NotImplementedException();
         }
     }
 }

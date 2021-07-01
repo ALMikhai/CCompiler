@@ -15,32 +15,21 @@
         {
             return $"{Type} :: {Id}";
         }
+
+        public override bool Equals(object? obj) // TODO пока так, но не уверен
+        {
+            if (obj is Symbol symbol)
+            {
+                return Type.Equals(symbol.Type);
+            }
+
+            return false;
+        }
     }
 
     public class VarSymbol : Symbol
     {
         public VarSymbol(string id, SymbolType type) : base(id, type)
-        {
-        }
-    }
-    
-    public class ArraySymbol : Symbol
-    {
-        public ArraySymbol(string id, ArrayType type) : base(id, type)
-        {
-        }
-    }
-
-    public class PointerSymbol : Symbol
-    {
-        public Symbol Symbol { get; }
-
-        public PointerSymbol(Symbol symbol, PointerType type) : base(symbol.Id, type)
-        {
-            Symbol = symbol;
-        }
-
-        public PointerSymbol(Symbol symbol) : this(symbol, new PointerType(false, false, symbol.Type))
         {
         }
     }

@@ -385,8 +385,8 @@ namespace CCompiler.Parser
                     if (assignmentExp.IsNullStat())
                         return ExpectedExpressionFailure();
 
-                    return new SuccessParseResult(new AssignmentExp(op, result.ResultNode,
-                        assignmentExp.ResultNode));
+                    return new SuccessParseResult(new AssignmentExp(op, result.ResultNode as ExpNode,
+                        assignmentExp.ResultNode as ExpNode));
                 }
             }
 

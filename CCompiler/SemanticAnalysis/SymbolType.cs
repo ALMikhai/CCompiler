@@ -18,6 +18,7 @@ namespace CCompiler.SemanticAnalysis
     {
         public bool IsConst { get; set; }
         public bool IsVolatile { get; set; }
+        public bool IsScalar { get; }
         public SymbolTypeKind SymbolTypeKind { get; set; }
 
         public SymbolType(bool isConst, bool isVolatile, SymbolTypeKind symbolTypeKind)
@@ -25,6 +26,7 @@ namespace CCompiler.SemanticAnalysis
             IsConst = isConst;
             IsVolatile = isVolatile;
             SymbolTypeKind = symbolTypeKind;
+            IsScalar = symbolTypeKind == SymbolTypeKind.INT || symbolTypeKind == SymbolTypeKind.FLOAT;
         }
 
         public override bool Equals(object? obj)
@@ -56,7 +58,13 @@ namespace CCompiler.SemanticAnalysis
         
         public override bool Equals(object? obj)
         {
-            throw new NotImplementedException("Func comp is not impl");
+            if (!(obj is FuncType funcType)) return false;
+            if (ReturnType.Equals(funcType.ReturnType) == false ||
+                Snapshot.SymbolTable.Equals(funcType.Snapshot.SymbolTable) == false ||
+                Snapshot.StructTable.Equals(funcType.Snapshot.StructTable) == false)
+                return false;
+
+            return true;
         }
         
         public override string ToString()
@@ -78,7 +86,8 @@ namespace CCompiler.SemanticAnalysis
         
         public override bool Equals(object? obj)
         {
-            throw new NotImplementedException("Struct comp is not impl");
+            if (!(obj is StructType structType)) return false;
+            return Name == structType.Name && Members.Equals(structType.Members);
         }
         
         public override string ToString()

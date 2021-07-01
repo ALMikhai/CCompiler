@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CCompiler.SemanticAnalysis
@@ -29,5 +30,19 @@ namespace CCompiler.SemanticAnalysis
         }
 
         public Dictionary<string, T> GetData() => _members;
+
+        public override bool Equals(object? obj)
+        {
+            if (!(obj is Table<T> table)) return false;
+            var currentMembers = _members.ToList();
+            var otherMembers = table._members.ToList();
+            if (currentMembers.Count != otherMembers.Count)
+                return false;
+            for (var i = 0; i < currentMembers.Count; i++)
+                if (currentMembers[i].Value.Equals(otherMembers[i].Value) == false)
+                    return false;
+
+            return true;
+        }
     }
 }
