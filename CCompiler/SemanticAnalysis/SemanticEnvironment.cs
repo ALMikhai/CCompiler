@@ -16,7 +16,7 @@ namespace CCompiler.SemanticAnalysis
         public void PushSymbol(Symbol symbol)
         {
             if (SymbolExist(symbol.Id))
-                throw new ArgumentException($"redeclaration of '{symbol.Id}'");
+                throw new SemanticException($"redeclaration of '{symbol.Id}'", symbol.DeclPosition);
 
             _snapshots.Peek().SymbolTable.Push(symbol.Id, symbol);
         }
@@ -43,7 +43,7 @@ namespace CCompiler.SemanticAnalysis
         public void PushStructType(StructType type)
         {
             if (StructExist(type.Name))
-                throw new ArgumentException($"redeclaration of '{type.Name}'");
+                throw new SemanticException($"redeclaration of '{type.Name}'", type.DeclPosition);
             
             _snapshots.Peek().StructTable.Push(type.Name, type);
         }

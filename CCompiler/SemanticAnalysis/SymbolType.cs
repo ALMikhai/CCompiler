@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CCompiler.Tokenizer;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -80,13 +81,15 @@ namespace CCompiler.SemanticAnalysis
 
     public class StructType : SymbolType
     {
+        public Position DeclPosition { get; }
         public string Name { get; }
         public Table<Symbol> Members { get; }
 
-        public StructType(bool isConst, bool isVolatile, string name, Table<Symbol> members) : base(isConst, isVolatile, SymbolTypeKind.STRUCT)
+        public StructType(bool isConst, bool isVolatile, string name, Table<Symbol> members, Position declPosition) : base(isConst, isVolatile, SymbolTypeKind.STRUCT)
         {
             Name = name;
             Members = members;
+            DeclPosition = declPosition;
         }
         
         public override bool Equals(object? obj)

@@ -27,7 +27,7 @@ namespace CCompiler.Parser
             var type = DeclSpecs.NodeToType(DeclSpec, ref environment);
             
             foreach (var node in InitDeclaratorList.Nodes)
-                environment.PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment)); // TODO catch arg excep
+                environment.PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment));
         }
     }
 
@@ -137,7 +137,7 @@ namespace CCompiler.Parser
 
             return DirectDeclarator switch
             {
-                Id id => new VarSymbol(id.IdName, type),
+                Id id => new VarSymbol(id.IdName, type, id.StartNodePosition),
                 Declarator declarator => declarator.ParseSymbol(type, ref environment),
                 GenericDeclaration genericDeclaration => genericDeclaration.ParseSymbol(type, ref environment),
                 _ => throw new ArgumentException()
@@ -165,7 +165,8 @@ namespace CCompiler.Parser
             {
                 environment.PushSnapshot();
                 foreach (var node in paramList.Nodes)
-                    environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment)); // TODO catch arg excep
+                    environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
+                    
 
                 funcType = new FuncType(type, environment.PopSnapshot());
             }
@@ -174,8 +175,9 @@ namespace CCompiler.Parser
                 environment.PushSnapshot();
                 foreach (var node in idList.Nodes)
                 {
-                    var varSymbol = new VarSymbol((node as Id).IdName,
-                        new SymbolType(false, false, SymbolTypeKind.INT)); // TODO catch arg excep
+                    var id = node as Id;
+                    var varSymbol = new VarSymbol(id.IdName,
+                        new SymbolType(false, false, SymbolTypeKind.INT), id.StartNodePosition);
                     environment.PushSymbol(varSymbol);
                 }
                 funcType = new FuncType(type, environment.PopSnapshot());
@@ -187,7 +189,7 @@ namespace CCompiler.Parser
             
             return Left switch
             {
-                Id id => new FuncSymbol(id.IdName, funcType),
+                Id id => new FuncSymbol(id.IdName, funcType, id.StartNodePosition),
                 Declarator declarator => declarator.ParseSymbol(funcType, ref environment),
                 GenericDeclaration genericDeclaration => genericDeclaration.ParseSymbol(funcType, ref environment),
                 _ => throw new ArgumentException()
@@ -210,7 +212,7 @@ namespace CCompiler.Parser
             var arrayType = new ArrayType(type.IsConst, type.IsVolatile, type);
             return Left switch
             {
-                Id id => new VarSymbol(id.IdName, arrayType),
+                Id id => new VarSymbol(id.IdName, arrayType, id.StartNodePosition),
                 Declarator declarator => declarator.ParseSymbol(arrayType, ref environment),
                 GenericDeclaration genericDeclaration => genericDeclaration.ParseSymbol(arrayType, ref environment),
                 _ => throw new ArgumentException()
@@ -262,7 +264,14 @@ namespace CCompiler.Parser
         {
             if (StructDeclList is EmptyExp)
             {
-                return environment.GetStructType(Id.IdName); // TODO catch arg excep
+                try
+                {
+                    return environment.GetStructType(Id.IdName);
+                }
+                catch (ArgumentException e)
+                {
+                    throw new SemanticException(e.Message, Id.StartNodePosition);
+                }
             }
 
             var symbolTable = new Table<Symbol>();
@@ -282,8 +291,8 @@ namespace CCompiler.Parser
                 }
             }
 
-            var structType = new StructType(false, false, Id.IdName, symbolTable);
-            environment.PushStructType(structType); // TODO catch arg excep
+            var structType = new StructType(false, false, Id.IdName, symbolTable, Id.StartNodePosition);
+            environment.PushStructType(structType);
             return structType;
         }
     }
@@ -307,7 +316,7 @@ namespace CCompiler.Parser
                     node.CheckSemantic(ref environment);
             
             symbol.SetSnapshot(environment.PopSnapshot()); 
-            environment.PushSymbol(symbol); // TODO catch arg excep
+            environment.PushSymbol(symbol);
             
             // TODO проверка StatList
         }
@@ -337,7 +346,17 @@ namespace CCompiler.Parser
     public partial class Id
     {
         public override bool IsLValue() => true;
-        public override SymbolType GetType(ref SemanticEnvironment environment) => environment.GetSymbol(IdName).Type; // TODO catch arg excep
+        public override SymbolType GetType(ref SemanticEnvironment environment)
+        {
+            try
+            {
+                return environment.GetSymbol(IdName).Type;
+            }
+            catch (ArgumentException e)
+            {
+                throw new SemanticException(e.Message, StartNodePosition);
+            }
+        }
     }
     
     public partial class AccessingArrayElement

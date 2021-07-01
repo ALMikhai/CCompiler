@@ -1,14 +1,18 @@
-﻿namespace CCompiler.SemanticAnalysis
+﻿using CCompiler.Tokenizer;
+
+namespace CCompiler.SemanticAnalysis
 {
     public class Symbol
     {
         public string Id { get; }
         public SymbolType Type { get; }
+        public Position DeclPosition { get; }
 
-        public Symbol(string id, SymbolType type)
+        public Symbol(string id, SymbolType type, Position declPosition)
         {
             Id = id;
             Type = type;
+            DeclPosition = declPosition;
         }
         
         public override string ToString()
@@ -29,7 +33,7 @@
 
     public class VarSymbol : Symbol
     {
-        public VarSymbol(string id, SymbolType type) : base(id, type)
+        public VarSymbol(string id, SymbolType type, Position declPosition) : base(id, type, declPosition)
         {
         }
     }
@@ -39,11 +43,11 @@
         public EnvironmentSnapshot Snapshot { get; private set; }
         public bool IsDefined { get; private set; }
         
-        public FuncSymbol(string id, FuncType type) : base(id, type)
+        public FuncSymbol(string id, FuncType type, Position declPosition) : base(id, type, declPosition)
         {
             IsDefined = false;
         }
-        public FuncSymbol(string id, FuncType type, EnvironmentSnapshot snapshot) : base(id, type)
+        public FuncSymbol(string id, FuncType type, EnvironmentSnapshot snapshot, Position declPosition) : base(id, type, declPosition)
         {
             Snapshot = snapshot;
             IsDefined = true;
