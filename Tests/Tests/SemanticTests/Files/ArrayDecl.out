@@ -54,9 +54,8 @@
             |-b1
             \-3
 
-Structs{
-}
-Symbols{
+Structs { }
+Symbols {
 	ARRAY of type INT :: a
 	ARRAY of type FLOAT :: b
 	ARRAY of type POINTER to INT :: c

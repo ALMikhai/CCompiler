@@ -1,0 +1,1 @@
+(6:16): semantic error: incompatible type for argument, expected 'INT' but argument is of type 'const FLOAT'

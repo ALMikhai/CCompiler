@@ -41,9 +41,8 @@
         |   \-3
         \-foo
 
-Structs{
-}
-Symbols{
+Structs { }
+Symbols {
 	POINTER to FUNC returning POINTER to ARRAY of type INT
 	Arguments{
 		FLOAT :: a

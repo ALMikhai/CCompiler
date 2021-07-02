@@ -1,0 +1,67 @@
+\-TRANSLATIONUNIT
+  |-FUNC
+  | |-DECLSPEC
+  | | |-INT
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-f1
+  | |     \-EMPTY
+  | \-COMPOUNDSTAT
+  |   \-STATLIST
+  |     \-RETURN
+  |       \-0
+  |-FUNC
+  | |-DECLSPEC
+  | | |-FLOAT
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-f2
+  | |     \-EMPTY
+  | \-COMPOUNDSTAT
+  |   \-STATLIST
+  |     \-RETURN
+  |       \-0
+  |-DECL
+  | |-DECLSPEC
+  | | |-STRUCTSPEC
+  | | | |-a
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-a1
+  \-FUNC
+    |-DECLSPEC
+    | |-STRUCTSPEC
+    | | |-a
+    | | \-EMPTY
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-f3
+    |     \-EMPTY
+    \-COMPOUNDSTAT
+      \-STATLIST
+        \-RETURN
+          \-a1
+
+Structs {
+	STRUCT called a
+	Members { }
+}
+Symbols {
+	FUNC returning INT
+	Arguments{ }
+	Structs { }
+	Symbols { } :: f1
+	FUNC returning FLOAT
+	Arguments{ }
+	Structs { }
+	Symbols { } :: f2
+	STRUCT called a :: a1
+	FUNC returning STRUCT called a
+	Arguments{ }
+	Structs { }
+	Symbols { } :: f3
+}

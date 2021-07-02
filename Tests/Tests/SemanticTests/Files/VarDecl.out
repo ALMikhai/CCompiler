@@ -46,9 +46,8 @@
           |   | \-VOLATILE
           \-b1
 
-Structs{
-}
-Symbols{
+Structs { }
+Symbols {
 	INT :: a
 	FLOAT :: b
 	POINTER to INT :: c

@@ -1,0 +1,7 @@
+int f() {
+    int a = 1;
+    do {
+        int b = 2;
+    }
+    while (a == 2);
+}

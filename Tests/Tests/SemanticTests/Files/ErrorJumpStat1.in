@@ -1,0 +1,9 @@
+int f() {
+    for (;;) {
+        for (;;) {
+            continue;
+        }
+        break;
+    }
+    break;   
+}

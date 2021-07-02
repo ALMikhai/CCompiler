@@ -55,24 +55,22 @@
       |         |-c2
       |         \-b
 
-Structs{
+Structs {
 	STRUCT called a
 	Members {
 		INT :: b
 	}
 }
-Symbols{
+Symbols {
 	POINTER to STRUCT called a
 	Members {
 		INT :: b
 	} :: c1
 	STRUCT called a :: c2
 	FUNC returning INT
-	Arguments{
-	}
-	Structs{
-	}
-	Symbols{
+	Arguments{ }
+	Structs { }
+	Symbols {
 		INT :: a1
 		INT :: a2
 	} :: f

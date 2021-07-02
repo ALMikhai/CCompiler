@@ -83,12 +83,10 @@
             |         \-a
             \-3
 
-Structs{
-}
-Symbols{
+Structs { }
+Symbols {
 	FUNC returning INT
-	Arguments{
-	} :: f
+	Arguments{ } :: f
 	FUNC returning FLOAT
 	Arguments{
 		INT :: a
@@ -98,8 +96,7 @@ Symbols{
 		INT :: a
 		VOID :: b
 		FUNC returning POINTER to INT
-		Arguments{
-		} :: foo
+		Arguments{ } :: foo
 	} :: w
 	FUNC returning FLOAT
 	Arguments{

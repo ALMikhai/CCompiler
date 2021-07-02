@@ -1,0 +1,297 @@
+\-TRANSLATIONUNIT
+  |-FUNC
+  | |-DECLSPEC
+  | | |-VOID
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-swap
+  | |     \-PARAMLIST
+  | |       |-PARAMDECLARATOR
+  | |       | |-DECLSPEC
+  | |       | | |-INT
+  | |       | \-DECLARATOR
+  | |       |   |-POINTER
+  | |       |   \-a
+  | |       \-PARAMDECLARATOR
+  | |         |-DECLSPEC
+  | |         | |-INT
+  | |         \-DECLARATOR
+  | |           |-POINTER
+  | |           \-b
+  | \-COMPOUNDSTAT
+  |   |-DECLLIST
+  |   | \-DECL
+  |   |   |-DECLSPEC
+  |   |   | |-INT
+  |   |   \-INITDECLARATORLIST
+  |   |     \-INITDECLARATOR
+  |   |       |-DECLARATOR
+  |   |       | \-t
+  |   |       \-MULT
+  |   |         \-a
+  |   \-STATLIST
+  |     |-ASSIGN
+  |     | |-MULT
+  |     | | \-a
+  |     | \-MULT
+  |     |   \-b
+  |     \-ASSIGN
+  |       |-MULT
+  |       | \-b
+  |       \-t
+  |-FUNC
+  | |-DECLSPEC
+  | | |-INT
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-partition
+  | |     \-PARAMLIST
+  | |       |-PARAMDECLARATOR
+  | |       | |-DECLSPEC
+  | |       | | |-INT
+  | |       | \-DECLARATOR
+  | |       |   \-ARRAY
+  | |       |     |-arr
+  | |       |     \-100
+  | |       |-PARAMDECLARATOR
+  | |       | |-DECLSPEC
+  | |       | | |-INT
+  | |       | \-DECLARATOR
+  | |       |   \-low
+  | |       \-PARAMDECLARATOR
+  | |         |-DECLSPEC
+  | |         | |-INT
+  | |         \-DECLARATOR
+  | |           \-high
+  | \-COMPOUNDSTAT
+  |   |-DECLLIST
+  |   | |-DECL
+  |   | | |-DECLSPEC
+  |   | | | |-INT
+  |   | | \-INITDECLARATORLIST
+  |   | |   \-INITDECLARATOR
+  |   | |     |-DECLARATOR
+  |   | |     | \-pivot
+  |   | |     \-[]
+  |   | |       |-arr
+  |   | |       \-high
+  |   | |-DECL
+  |   | | |-DECLSPEC
+  |   | | | |-INT
+  |   | | \-INITDECLARATORLIST
+  |   | |   \-INITDECLARATOR
+  |   | |     |-DECLARATOR
+  |   | |     | \-i
+  |   | |     \-SUB
+  |   | |       |-low
+  |   | |       \-1
+  |   | \-DECL
+  |   |   |-DECLSPEC
+  |   |   | |-INT
+  |   |   \-INITDECLARATORLIST
+  |   |     \-INITDECLARATOR
+  |   |       |-DECLARATOR
+  |   |       | \-j
+  |   |       \-low
+  |   \-STATLIST
+  |     |-FOR
+  |     | |-EMPTY
+  |     | |-LESSEQ
+  |     | | |-j
+  |     | | \-SUB
+  |     | |   |-high
+  |     | |   \-1
+  |     | |-POSTFIX INC
+  |     | | \-j
+  |     | \-COMPOUNDSTAT
+  |     |   \-STATLIST
+  |     |     \-IF
+  |     |       |-LESS
+  |     |       | |-[]
+  |     |       | | |-arr
+  |     |       | | \-j
+  |     |       | \-pivot
+  |     |       |-COMPOUNDSTAT
+  |     |       | \-STATLIST
+  |     |       |   |-POSTFIX INC
+  |     |       |   | \-i
+  |     |       |   \-()
+  |     |       |     |-swap
+  |     |       |     \-EXPLIST
+  |     |       |       |-BITAND
+  |     |       |       | \-[]
+  |     |       |       |   |-arr
+  |     |       |       |   \-i
+  |     |       |       \-BITAND
+  |     |       |         \-[]
+  |     |       |           |-arr
+  |     |       |           \-j
+  |     |       \-EMPTY
+  |     |-()
+  |     | |-swap
+  |     | \-EXPLIST
+  |     |   |-BITAND
+  |     |   | \-[]
+  |     |   |   |-arr
+  |     |   |   \-ADD
+  |     |   |     |-i
+  |     |   |     \-1
+  |     |   \-BITAND
+  |     |     \-[]
+  |     |       |-arr
+  |     |       \-high
+  |     \-RETURN
+  |       \-BITOR
+  |         |-i
+  |         \-1
+  |-FUNC
+  | |-DECLSPEC
+  | | |-VOID
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-quickSort
+  | |     \-PARAMLIST
+  | |       |-PARAMDECLARATOR
+  | |       | |-DECLSPEC
+  | |       | | |-INT
+  | |       | \-DECLARATOR
+  | |       |   \-ARRAY
+  | |       |     |-arr
+  | |       |     \-100
+  | |       |-PARAMDECLARATOR
+  | |       | |-DECLSPEC
+  | |       | | |-INT
+  | |       | \-DECLARATOR
+  | |       |   \-low
+  | |       \-PARAMDECLARATOR
+  | |         |-DECLSPEC
+  | |         | |-INT
+  | |         \-DECLARATOR
+  | |           \-high
+  | \-COMPOUNDSTAT
+  |   \-STATLIST
+  |     \-IF
+  |       |-LESS
+  |       | |-low
+  |       | \-high
+  |       |-COMPOUNDSTAT
+  |       | |-DECLLIST
+  |       | | \-DECL
+  |       | |   |-DECLSPEC
+  |       | |   | |-INT
+  |       | |   \-INITDECLARATORLIST
+  |       | |     \-INITDECLARATOR
+  |       | |       |-DECLARATOR
+  |       | |       | \-pi
+  |       | |       \-()
+  |       | |         |-partition
+  |       | |         \-EXPLIST
+  |       | |           |-arr
+  |       | |           |-low
+  |       | |           \-high
+  |       \-EMPTY
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-main
+    |     \-EMPTY
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     \-DECLARATOR
+      | |       \-ARRAY
+      | |         |-arr
+      | |         \-100
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-INT
+      |   \-INITDECLARATORLIST
+      |     \-INITDECLARATOR
+      |       |-DECLARATOR
+      |       | \-n
+      |       \-100
+      \-STATLIST
+        |-()
+        | |-quickSort
+        | \-EXPLIST
+        |   |-arr
+        |   |-0
+        |   \-SUB
+        |     |-n
+        |     \-1
+        \-RETURN
+          \-0
+
+Structs { }
+Symbols {
+	FUNC returning VOID
+	Arguments{
+		POINTER to INT :: a
+		POINTER to INT :: b
+	}
+	Structs { }
+	Symbols {
+		POINTER to INT :: a
+		POINTER to INT :: b
+		INT :: t
+	} :: swap
+	FUNC returning INT
+	Arguments{
+		ARRAY of type INT :: arr
+		INT :: low
+		INT :: high
+	}
+	Structs { }
+	Symbols {
+		ARRAY of type INT :: arr
+		INT :: low
+		INT :: high
+		INT :: pivot
+		INT :: i
+		INT :: j
+		Nested block {
+			Structs { }
+			Symbols {
+				Nested block {
+					Structs { }
+					Symbols { }
+				}
+			}
+		}
+	} :: partition
+	FUNC returning VOID
+	Arguments{
+		ARRAY of type INT :: arr
+		INT :: low
+		INT :: high
+	}
+	Structs { }
+	Symbols {
+		ARRAY of type INT :: arr
+		INT :: low
+		INT :: high
+		Nested block {
+			Structs { }
+			Symbols {
+				INT :: pi
+			}
+		}
+	} :: quickSort
+	FUNC returning INT
+	Arguments{ }
+	Structs { }
+	Symbols {
+		ARRAY of type INT :: arr
+		INT :: n
+	} :: main
+}

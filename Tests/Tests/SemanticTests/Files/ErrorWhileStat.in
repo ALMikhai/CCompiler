@@ -1,0 +1,6 @@
+int f() {
+    int a = 1;
+    while ("asd") {
+        int a = 1;
+    }
+}

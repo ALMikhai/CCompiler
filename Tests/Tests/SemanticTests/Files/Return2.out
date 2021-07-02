@@ -1,0 +1,34 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-STRUCTSPEC
+  | | | |-a
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-a1
+  \-FUNC
+    |-DECLSPEC
+    | |-STRUCTSPEC
+    | | |-a
+    | | \-EMPTY
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-f3
+    |     \-EMPTY
+    \-COMPOUNDSTAT
+      \-STATLIST
+        \-RETURN
+
+Structs {
+	STRUCT called a
+	Members { }
+}
+Symbols {
+	STRUCT called a :: a1
+	FUNC returning STRUCT called a
+	Arguments{ }
+	Structs { }
+	Symbols { } :: f3
+}

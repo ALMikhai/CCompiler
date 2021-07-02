@@ -36,15 +36,12 @@
       |       \-PREFIX INC
       |         \-a
 
-Structs{
-}
-Symbols{
+Structs { }
+Symbols {
 	FUNC returning INT
-	Arguments{
-	}
-	Structs{
-	}
-	Symbols{
+	Arguments{ }
+	Structs { }
+	Symbols {
 		INT :: a
 		INT :: b
 		INT :: c

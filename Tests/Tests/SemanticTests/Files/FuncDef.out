@@ -37,20 +37,18 @@
       |       \-DECLARATOR
       |         \-c
 
-Structs{
-}
-Symbols{
+Structs { }
+Symbols {
 	FUNC returning INT
 	Arguments{
 		STRUCT called a :: a1
 		INT :: b
 	}
-	Structs{
+	Structs {
 		STRUCT called a
-		Members {
-		}
+		Members { }
 	}
-	Symbols{
+	Symbols {
 		STRUCT called a :: a1
 		INT :: b
 		STRUCT called a :: a2

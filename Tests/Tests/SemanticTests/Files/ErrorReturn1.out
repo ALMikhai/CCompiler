@@ -1,0 +1,1 @@
+(3:12): semantic error: incompatible types when returning type 'const INT' but 'STRUCT called a' was expected

@@ -1,0 +1,7 @@
+struct a {} a1;
+
+int f() {
+    if (a1) {
+        int a = 2;
+    }
+}

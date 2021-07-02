@@ -1,0 +1,4 @@
+struct a {} a1;
+struct a f() {
+    return 1;
+}

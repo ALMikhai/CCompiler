@@ -1,0 +1,78 @@
+\-TRANSLATIONUNIT
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-f
+    |     \-EMPTY
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-a
+      | |     \-1
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-INT
+      |   \-INITDECLARATORLIST
+      |     \-INITDECLARATOR
+      |       |-DECLARATOR
+      |       | \-i
+      |       \-0
+      \-STATLIST
+        |-FOR
+        | |-EMPTY
+        | |-EMPTY
+        | |-EMPTY
+        | \-ASSIGN
+        |   |-a
+        |   \-2
+        |-FOR
+        | |-ASSIGN
+        | | |-i
+        | | \-0
+        | |-EMPTY
+        | |-EMPTY
+        | \-ASSIGN
+        |   |-a
+        |   \-2
+        |-FOR
+        | |-ASSIGN
+        | | |-i
+        | | \-0
+        | |-LESS
+        | | |-i
+        | | \-10
+        | |-EMPTY
+        | \-ASSIGN
+        |   |-a
+        |   \-2
+        \-FOR
+          |-ASSIGN
+          | |-i
+          | \-0
+          |-LESS
+          | |-i
+          | \-10
+          |-PREFIX INC
+          | \-i
+          \-ASSIGN
+            |-a
+            \-2
+
+Structs { }
+Symbols {
+	FUNC returning INT
+	Arguments{ }
+	Structs { }
+	Symbols {
+		INT :: a
+		INT :: i
+	} :: f
+}

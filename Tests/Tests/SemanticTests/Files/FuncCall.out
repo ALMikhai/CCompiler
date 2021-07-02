@@ -1,0 +1,49 @@
+\-TRANSLATIONUNIT
+  |-FUNC
+  | |-DECLSPEC
+  | | |-INT
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-foo
+  | |     \-PARAMLIST
+  | |       \-PARAMDECLARATOR
+  | |         |-DECLSPEC
+  | |         | |-INT
+  | |         \-DECLARATOR
+  | |           \-a
+  | \-COMPOUNDSTAT
+  |   \-STATLIST
+  |     \-RETURN
+  |       \-a
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-f
+    |     \-EMPTY
+    \-COMPOUNDSTAT
+      \-STATLIST
+        \-RETURN
+          \-()
+            |-foo
+            \-EXPLIST
+              \-1
+
+Structs { }
+Symbols {
+	FUNC returning INT
+	Arguments{
+		INT :: a
+	}
+	Structs { }
+	Symbols {
+		INT :: a
+	} :: foo
+	FUNC returning INT
+	Arguments{ }
+	Structs { }
+	Symbols { } :: f
+}

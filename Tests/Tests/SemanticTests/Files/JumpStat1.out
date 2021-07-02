@@ -1,0 +1,43 @@
+\-TRANSLATIONUNIT
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-f
+    |     \-EMPTY
+    \-COMPOUNDSTAT
+      \-STATLIST
+        \-FOR
+          |-EMPTY
+          |-EMPTY
+          |-EMPTY
+          \-COMPOUNDSTAT
+            \-STATLIST
+              |-FOR
+              | |-EMPTY
+              | |-EMPTY
+              | |-EMPTY
+              | \-COMPOUNDSTAT
+              |   \-STATLIST
+              |     \-CONTINUE
+              \-BREAK
+
+Structs { }
+Symbols {
+	FUNC returning INT
+	Arguments{ }
+	Structs { }
+	Symbols {
+		Nested block {
+			Structs { }
+			Symbols {
+				Nested block {
+					Structs { }
+					Symbols { }
+				}
+			}
+		}
+	} :: f
+}

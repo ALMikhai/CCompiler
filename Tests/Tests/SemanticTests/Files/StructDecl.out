@@ -51,17 +51,16 @@
                 \-DECLARATOR
                   \-c
 
-Structs{
+Structs {
 	STRUCT called node
 	Members {
 		INT :: a
 		FLOAT :: b
 	}
 	STRUCT called a
-	Members {
-	}
+	Members { }
 }
-Symbols{
+Symbols {
 	STRUCT called node :: left
 	STRUCT called a :: b
 	FUNC returning VOID

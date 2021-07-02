@@ -1,0 +1,6 @@
+int f() {
+    int a = 1;
+    int i = 0;
+    for (;"asd";)
+        a = 2;
+}
