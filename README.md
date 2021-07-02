@@ -11,6 +11,8 @@ After downloading the source, open CCompiler.sln in Visual Studio.
 # Implemented
 * Lexical analyzer
 * Parser for simple math expressions
+* Parser (AST)
+* Semantic analyzer
 
 # Author
 Alexander Mikhailenko - third year student of AMI, group Б8118-01.03.02миопд,  Far Eastern Federal University
