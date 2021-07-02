@@ -1,0 +1,59 @@
+\-TRANSLATIONUNIT
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-foo
+    |     \-PARAMLIST
+    |       |-PARAMDECLARATOR
+    |       | |-DECLSPEC
+    |       | | |-STRUCTSPEC
+    |       | | | |-a
+    |       | \-DECLARATOR
+    |       |   \-a1
+    |       \-PARAMDECLARATOR
+    |         |-DECLSPEC
+    |         | |-INT
+    |         \-DECLARATOR
+    |           \-b
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-STRUCTSPEC
+      | | | | |-a
+      | | | | \-EMPTY
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     \-DECLARATOR
+      | |       \-a2
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-FLOAT
+      |   \-INITDECLARATORLIST
+      |     \-INITDECLARATOR
+      |       \-DECLARATOR
+      |         \-c
+
+Structs{
+}
+Symbols{
+	FUNC returning INT
+	Arguments{
+		STRUCT called a :: a1
+		INT :: b
+	}
+	Structs{
+		STRUCT called a
+		Members {
+		}
+	}
+	Symbols{
+		STRUCT called a :: a1
+		INT :: b
+		STRUCT called a :: a2
+		FLOAT :: c
+	} :: foo
+}

@@ -1,0 +1,1 @@
+int foo(int c, int c);

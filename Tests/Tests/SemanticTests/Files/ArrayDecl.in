@@ -1,0 +1,5 @@
+int a[];
+float b[1];
+int *c[2];
+const volatile float c1[5];
+int * const *b1[];

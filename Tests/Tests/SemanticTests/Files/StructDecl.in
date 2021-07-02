@@ -1,0 +1,9 @@
+struct node {
+    int a;
+    float b;
+} left;
+
+struct a {};
+struct a b;
+
+void foo(struct a c);

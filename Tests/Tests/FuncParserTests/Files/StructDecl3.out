@@ -38,13 +38,16 @@
   | | |       \-DECLARATOR
   | | |         |-POINTER
   | | |         \-c
-  | \-DECLARATOR
-  |   \-b1
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-b1
   |-FUNC
-  | |-DECLARATOR
-  | | \-FUNC
-  | |   |-f
-  | |   \-EMPTY
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-f
+  | |     \-EMPTY
   | \-COMPOUNDSTAT
   \-DECL
     |-DECLSPEC
@@ -65,5 +68,5 @@
     | |     \-STRUCTDECLARATORLIST
     | |       \-DECLARATOR
     | |         \-a
-    \-EMPTY
+    \-INITDECLARATORLIST
 

@@ -1,0 +1,5 @@
+int a;
+float b;
+int *c;
+const volatile float c1;
+int * const *b1;

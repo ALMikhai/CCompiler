@@ -1,0 +1,71 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-STRUCTSPEC
+  | | | |-node
+  | | | \-STRUCTDECLLIST
+  | | |   |-STRUCTDECL
+  | | |   | |-DECLSPEC
+  | | |   | | |-INT
+  | | |   | \-STRUCTDECLARATORLIST
+  | | |   |   \-DECLARATOR
+  | | |   |     \-a
+  | | |   \-STRUCTDECL
+  | | |     |-DECLSPEC
+  | | |     | |-FLOAT
+  | | |     \-STRUCTDECLARATORLIST
+  | | |       \-DECLARATOR
+  | | |         \-b
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-left
+  |-DECL
+  | |-DECLSPEC
+  | | |-STRUCTSPEC
+  | | | |-a
+  | \-INITDECLARATORLIST
+  |-DECL
+  | |-DECLSPEC
+  | | |-STRUCTSPEC
+  | | | |-a
+  | | | \-EMPTY
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-b
+  \-DECL
+    |-DECLSPEC
+    | |-VOID
+    \-INITDECLARATORLIST
+      \-INITDECLARATOR
+        \-DECLARATOR
+          \-FUNC
+            |-foo
+            \-PARAMLIST
+              \-PARAMDECLARATOR
+                |-DECLSPEC
+                | |-STRUCTSPEC
+                | | |-a
+                | | \-EMPTY
+                \-DECLARATOR
+                  \-c
+
+Structs{
+	STRUCT called node
+	Members {
+		INT :: a
+		FLOAT :: b
+	}
+	STRUCT called a
+	Members {
+	}
+}
+Symbols{
+	STRUCT called node :: left
+	STRUCT called a :: b
+	FUNC returning VOID
+	Arguments{
+		STRUCT called a :: c
+	} :: foo
+}

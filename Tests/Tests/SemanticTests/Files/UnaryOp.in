@@ -1,0 +1,10 @@
+int f() {
+    int a = -1;
+    int b = +a;
+    int c = !a;
+    int d = ~2;
+    float a1 = 0.0;
+    float *b1 = &a1;
+    float c1 = *b1;
+    float **b2 = &b1;
+}

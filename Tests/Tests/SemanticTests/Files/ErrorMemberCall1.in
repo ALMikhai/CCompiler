@@ -1,0 +1,8 @@
+struct a {
+    int b;
+} *c1;
+struct a c2;
+
+int f() {
+    int a1 = c1.b;
+}

@@ -1,0 +1,55 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-a
+  |-DECL
+  | |-DECLSPEC
+  | | |-FLOAT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-b
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       |-POINTER
+  |       \-c
+  |-DECL
+  | |-DECLSPEC
+  | | |-CONST
+  | | \-DECLSPEC
+  | |   |-VOLATILE
+  | |   \-DECLSPEC
+  | |     |-FLOAT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-c1
+  \-DECL
+    |-DECLSPEC
+    | |-INT
+    \-INITDECLARATORLIST
+      \-INITDECLARATOR
+        \-DECLARATOR
+          |-POINTER
+          | |-TYPEQUALIFIERLIST
+          | | \-CONST
+          | \-POINTER
+          \-b1
+
+Structs{
+}
+Symbols{
+	INT :: a
+	FLOAT :: b
+	POINTER to INT :: c
+	const volatile FLOAT :: c1
+	const POINTER to POINTER to INT :: b1
+}

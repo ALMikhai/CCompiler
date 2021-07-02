@@ -2,10 +2,11 @@
   |-FUNC
   | |-DECLSPEC
   | | |-INT
-  | |-DECLARATOR
-  | | \-FUNC
-  | |   |-main
-  | |   \-EMPTY
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-main
+  | |     \-EMPTY
   | \-COMPOUNDSTAT
   |   \-STATLIST
   |     \-RETURN
@@ -13,34 +14,41 @@
   |-DECL
   | |-DECLSPEC
   | | |-INT
-  | \-DECLARATOR
-  |   \-FUNC
-  |     |-main
-  |     \-EMPTY
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-FUNC
+  |         |-main
+  |         \-EMPTY
   |-DECL
   | |-DECLSPEC
   | | |-INT
-  | \-DECLARATOR
-  |   \-FUNC
-  |     |-main
-  |     \-PARAMLIST
-  |       \-PARAMDECLARATOR
-  |         |-DECLSPEC
-  |         | |-INT
-  |         \-DECLARATOR
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-FUNC
+  |         |-main
+  |         \-PARAMLIST
+  |           \-PARAMDECLARATOR
+  |             |-DECLSPEC
+  |             | |-INT
+  |             \-DECLARATOR
+  |               \-x
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-FUNC
+  |         |-main
+  |         \-IDLIST
   |           \-x
-  |-DECL
-  | |-DECLSPEC
-  | | |-INT
-  | \-DECLARATOR
-  |   \-FUNC
-  |     |-main
-  |     \-IDLIST
-  |       \-x
   \-FUNC
-    |-DECLARATOR
-    | \-FUNC
-    |   |-main
-    |   \-EMPTY
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-main
+    |     \-EMPTY
     \-COMPOUNDSTAT
 

@@ -1,0 +1,4 @@
+int f() {
+    int b = 1;
+    int a = *b;
+}

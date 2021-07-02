@@ -1,0 +1,79 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-STRUCTSPEC
+  | | | |-a
+  | | | \-STRUCTDECLLIST
+  | | |   \-STRUCTDECL
+  | | |     |-DECLSPEC
+  | | |     | |-INT
+  | | |     \-STRUCTDECLARATORLIST
+  | | |       \-DECLARATOR
+  | | |         \-b
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       |-POINTER
+  |       \-c1
+  |-DECL
+  | |-DECLSPEC
+  | | |-STRUCTSPEC
+  | | | |-a
+  | | | \-EMPTY
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-c2
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-f
+    |     \-EMPTY
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-a1
+      | |     \-->
+      | |       |-c1
+      | |       \-b
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-INT
+      |   \-INITDECLARATORLIST
+      |     \-INITDECLARATOR
+      |       |-DECLARATOR
+      |       | \-a2
+      |       \-.
+      |         |-c2
+      |         \-b
+
+Structs{
+	STRUCT called a
+	Members {
+		INT :: b
+	}
+}
+Symbols{
+	POINTER to STRUCT called a
+	Members {
+		INT :: b
+	} :: c1
+	STRUCT called a :: c2
+	FUNC returning INT
+	Arguments{
+	}
+	Structs{
+	}
+	Symbols{
+		INT :: a1
+		INT :: a2
+	} :: f
+}

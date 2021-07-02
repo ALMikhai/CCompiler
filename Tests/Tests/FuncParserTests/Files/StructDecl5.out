@@ -2,6 +2,7 @@
   \-DECL
     |-DECLSPEC
     | |-STRUCTSPEC
+    | | |-a
     | | \-STRUCTDECLLIST
     | |   \-STRUCTDECL
     | |     |-DECLSPEC
@@ -9,6 +10,8 @@
     | |     \-STRUCTDECLARATORLIST
     | |       \-DECLARATOR
     | |         \-a
-    \-DECLARATOR
-      \-a1
+    \-INITDECLARATORLIST
+      \-INITDECLARATOR
+        \-DECLARATOR
+          \-a1
 

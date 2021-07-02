@@ -38,6 +38,8 @@
     | |       \-DECLARATOR
     | |         |-POINTER
     | |         \-c
-    \-DECLARATOR
-      \-b1
+    \-INITDECLARATORLIST
+      \-INITDECLARATOR
+        \-DECLARATOR
+          \-b1
 

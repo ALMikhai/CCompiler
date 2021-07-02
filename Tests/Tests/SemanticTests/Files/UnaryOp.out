@@ -1,0 +1,105 @@
+\-TRANSLATIONUNIT
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-f
+    |     \-EMPTY
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-a
+      | |     \-SUB
+      | |       \-1
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-b
+      | |     \-ADD
+      | |       \-a
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-c
+      | |     \-NOT
+      | |       \-a
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-d
+      | |     \-TILDE
+      | |       \-2
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-FLOAT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-a1
+      | |     \-0
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-FLOAT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | |-POINTER
+      | |     | \-b1
+      | |     \-BITAND
+      | |       \-a1
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-FLOAT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-c1
+      | |     \-MULT
+      | |       \-b1
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-FLOAT
+      |   \-INITDECLARATORLIST
+      |     \-INITDECLARATOR
+      |       |-DECLARATOR
+      |       | |-POINTER
+      |       | | \-POINTER
+      |       | \-b2
+      |       \-BITAND
+      |         \-b1
+
+Structs{
+}
+Symbols{
+	FUNC returning INT
+	Arguments{
+	}
+	Structs{
+	}
+	Symbols{
+		INT :: a
+		INT :: b
+		INT :: c
+		INT :: d
+		FLOAT :: a1
+		POINTER to FLOAT :: b1
+		FLOAT :: c1
+		POINTER to POINTER to FLOAT :: b2
+	} :: f
+}

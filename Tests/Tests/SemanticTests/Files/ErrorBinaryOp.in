@@ -1,0 +1,5 @@
+struct a {} a1;
+
+int f() {
+    int a = 1 + a1;
+}

@@ -1,0 +1,2 @@
+int (*(*foo)(float a))[3];
+int (*(*abc)(float b))[3] = foo;

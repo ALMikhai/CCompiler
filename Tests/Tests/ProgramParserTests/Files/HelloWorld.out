@@ -2,15 +2,17 @@
   \-FUNC
     |-DECLSPEC
     | |-INT
-    |-DECLARATOR
-    | \-FUNC
-    |   |-main
-    |   \-EMPTY
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-main
+    |     \-EMPTY
     \-COMPOUNDSTAT
       \-STATLIST
         |-()
         | |-printf
-        | \-"Hello, World!"
+        | \-EXPLIST
+        |   \-"Hello, World!"
         \-RETURN
           \-0
 

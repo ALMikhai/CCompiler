@@ -1,0 +1,7 @@
+struct a {
+    int b;
+} c1;
+
+int f() {
+    int a1 = c1.a;
+}

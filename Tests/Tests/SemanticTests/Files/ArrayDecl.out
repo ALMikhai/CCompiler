@@ -1,0 +1,7 @@
+System.NotImplementedException: non-static arrays are not supported
+   at CCompiler.Parser.ArrayDecl.ParseSymbol(SymbolType type, SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 212
+   at CCompiler.Parser.Declarator.ParseSymbol(SymbolType type, SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 142
+   at CCompiler.Parser.InitDeclarator.ParseSymbolByType(SymbolType type, SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 128
+   at CCompiler.Parser.Decl.CheckSemantic(SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 30
+   at CCompiler.Parser.TranslationUnit.CheckSemantic(SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 19
+   at CCompiler.Program.Main(String[] args) in D:\Documents\All my projects\CCompiler\CCompiler\Program.cs:line 55

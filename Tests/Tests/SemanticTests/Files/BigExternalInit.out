@@ -1,0 +1,55 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-ARRAY
+  |         |-DECLARATOR
+  |         | |-POINTER
+  |         | \-FUNC
+  |         |   |-DECLARATOR
+  |         |   | |-POINTER
+  |         |   | \-foo
+  |         |   \-PARAMLIST
+  |         |     \-PARAMDECLARATOR
+  |         |       |-DECLSPEC
+  |         |       | |-FLOAT
+  |         |       \-DECLARATOR
+  |         |         \-a
+  |         \-3
+  \-DECL
+    |-DECLSPEC
+    | |-INT
+    \-INITDECLARATORLIST
+      \-INITDECLARATOR
+        |-DECLARATOR
+        | \-ARRAY
+        |   |-DECLARATOR
+        |   | |-POINTER
+        |   | \-FUNC
+        |   |   |-DECLARATOR
+        |   |   | |-POINTER
+        |   |   | \-abc
+        |   |   \-PARAMLIST
+        |   |     \-PARAMDECLARATOR
+        |   |       |-DECLSPEC
+        |   |       | |-FLOAT
+        |   |       \-DECLARATOR
+        |   |         \-b
+        |   \-3
+        \-foo
+
+Structs{
+}
+Symbols{
+	POINTER to FUNC returning POINTER to ARRAY of type INT
+	Arguments{
+		FLOAT :: a
+	} :: foo
+	POINTER to FUNC returning POINTER to ARRAY of type INT
+	Arguments{
+		FLOAT :: b
+	} :: abc
+}

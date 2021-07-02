@@ -1,0 +1,4 @@
+int f() {
+    float b = 10.0;
+    int a = b;
+}

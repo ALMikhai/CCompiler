@@ -2,31 +2,34 @@
   \-FUNC
     |-DECLSPEC
     | |-INT
-    |-DECLARATOR
-    | \-FUNC
-    |   |-main
-    |   \-EMPTY
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-main
+    |     \-EMPTY
     \-COMPOUNDSTAT
       |-DECLLIST
       | \-DECL
       |   |-DECLSPEC
       |   | |-INT
       |   \-INITDECLARATORLIST
-      |     \-DECLARATOR
-      |       \-number
+      |     \-INITDECLARATOR
+      |       \-DECLARATOR
+      |         \-number
       \-STATLIST
         |-()
         | |-printf
-        | \-"Enter an integer: "
+        | \-EXPLIST
+        |   \-"Enter an integer: "
         |-()
         | |-scanf
-        | \-COMMA
+        | \-EXPLIST
         |   |-"%d"
         |   \-BITAND
         |     \-number
         |-()
         | |-printf
-        | \-COMMA
+        | \-EXPLIST
         |   |-"You entered: %d"
         |   \-number
         \-RETURN

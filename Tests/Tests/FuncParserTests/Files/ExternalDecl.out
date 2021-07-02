@@ -2,80 +2,90 @@
   |-DECL
   | |-DECLSPEC
   | | |-INT
-  | \-EMPTY
+  | \-INITDECLARATORLIST
   |-DECL
   | |-DECLSPEC
   | | |-INT
-  | \-DECLARATOR
-  |   \-a
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-a
   |-DECL
   | |-DECLSPEC
   | | |-INT
-  | \-INITDECLARATOR
-  |   |-DECLARATOR
-  |   | \-a
-  |   \-1
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     |-DECLARATOR
+  |     | \-a
+  |     \-1
   |-DECL
   | |-DECLSPEC
   | | |-INT
-  | \-DECLARATOR
-  |   \-FUNC
-  |     |-f
-  |     \-EMPTY
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-FUNC
+  |         |-f
+  |         \-EMPTY
   |-FUNC
   | |-DECLSPEC
   | | |-INT
-  | |-DECLARATOR
-  | | \-FUNC
-  | |   |-f
-  | |   \-EMPTY
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-f
+  | |     \-EMPTY
   | \-COMPOUNDSTAT
   |-FUNC
   | |-DECLSPEC
   | | |-INT
-  | |-DECLARATOR
-  | | \-FUNC
-  | |   |-f
-  | |   \-IDLIST
-  | |     |-x
-  | |     \-y
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-f
+  | |     \-IDLIST
+  | |       |-x
+  | |       \-y
   | \-COMPOUNDSTAT
   |-FUNC
   | |-DECLSPEC
   | | |-LONG
   | | \-DECLSPEC
   | |   |-LONG
-  | |-DECLARATOR
-  | | \-FUNC
-  | |   |-f
-  | |   \-PARAMLIST
-  | |     |-PARAMDECLARATOR
-  | |     | |-DECLSPEC
-  | |     | | |-INT
-  | |     | \-DECLARATOR
-  | |     |   \-x
-  | |     \-PARAMDECLARATOR
-  | |       |-DECLSPEC
-  | |       | |-INT
-  | |       \-DECLARATOR
-  | |         \-y
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-f
+  | |     \-PARAMLIST
+  | |       |-PARAMDECLARATOR
+  | |       | |-DECLSPEC
+  | |       | | |-INT
+  | |       | \-DECLARATOR
+  | |       |   \-x
+  | |       \-PARAMDECLARATOR
+  | |         |-DECLSPEC
+  | |         | |-INT
+  | |         \-DECLARATOR
+  | |           \-y
   | \-COMPOUNDSTAT
   |-DECL
   | |-DECLSPEC
   | | |-DOUBLE
-  | \-DECLARATOR
-  |   \-ARRAY
-  |     |-b
-  |     \-EMPTY
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-ARRAY
+  |         |-b
+  |         \-EMPTY
   \-DECL
     |-DECLSPEC
     | |-DOUBLE
-    \-INITDECLARATOR
-      |-DECLARATOR
-      | \-ARRAY
-      |   |-b
-      |   \-EMPTY
-      \-INITIALIZER
+    \-INITDECLARATORLIST
+      \-INITDECLARATOR
+        |-DECLARATOR
+        | \-ARRAY
+        |   |-b
+        |   \-EMPTY
         \-INITIALIZERLIST
           \-1
 

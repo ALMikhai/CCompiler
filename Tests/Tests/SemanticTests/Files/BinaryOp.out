@@ -1,0 +1,54 @@
+\-TRANSLATIONUNIT
+  \-FUNC
+    |-DECLSPEC
+    | |-INT
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-f
+    |     \-EMPTY
+    \-COMPOUNDSTAT
+      |-DECLLIST
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-b
+      | |     \-1
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-a
+      | |     \-ADD
+      | |       |-1
+      | |       \-b
+      | \-DECL
+      |   |-DECLSPEC
+      |   | |-INT
+      |   \-INITDECLARATORLIST
+      |     \-INITDECLARATOR
+      |       |-DECLARATOR
+      |       | \-c
+      |       \-ADD
+      |         |-2
+      |         \-3
+
+Structs{
+}
+Symbols{
+	FUNC returning INT
+	Arguments{
+	}
+	Structs{
+	}
+	Symbols{
+		INT :: b
+		INT :: a
+		INT :: c
+	} :: f
+}

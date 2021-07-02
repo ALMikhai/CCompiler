@@ -2,51 +2,59 @@
   |-DECL
   | |-DECLSPEC
   | | |-INT
-  | \-DECLARATOR
-  |   \-FUNC
-  |     |-checkPrimeNumber
-  |     \-PARAMLIST
-  |       \-PARAMDECLARATOR
-  |         |-DECLSPEC
-  |         | |-INT
-  |         \-DECLARATOR
-  |           \-n
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-FUNC
+  |         |-checkPrimeNumber
+  |         \-PARAMLIST
+  |           \-PARAMDECLARATOR
+  |             |-DECLSPEC
+  |             | |-INT
+  |             \-DECLARATOR
+  |               \-n
   |-DECL
   | |-DECLSPEC
   | | |-INT
-  | \-DECLARATOR
-  |   \-FUNC
-  |     |-checkArmstrongNumber
-  |     \-PARAMLIST
-  |       \-PARAMDECLARATOR
-  |         |-DECLSPEC
-  |         | |-INT
-  |         \-DECLARATOR
-  |           \-n
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-FUNC
+  |         |-checkArmstrongNumber
+  |         \-PARAMLIST
+  |           \-PARAMDECLARATOR
+  |             |-DECLSPEC
+  |             | |-INT
+  |             \-DECLARATOR
+  |               \-n
   |-FUNC
   | |-DECLSPEC
   | | |-INT
-  | |-DECLARATOR
-  | | \-FUNC
-  | |   |-main
-  | |   \-EMPTY
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-main
+  | |     \-EMPTY
   | \-COMPOUNDSTAT
   |   |-DECLLIST
   |   | \-DECL
   |   |   |-DECLSPEC
   |   |   | |-INT
   |   |   \-INITDECLARATORLIST
-  |   |     |-DECLARATOR
-  |   |     | \-n
-  |   |     \-DECLARATOR
-  |   |       \-flag
+  |   |     |-INITDECLARATOR
+  |   |     | \-DECLARATOR
+  |   |     |   \-n
+  |   |     \-INITDECLARATOR
+  |   |       \-DECLARATOR
+  |   |         \-flag
   |   \-STATLIST
   |     |-()
   |     | |-printf
-  |     | \-"Enter a positive integer: "
+  |     | \-EXPLIST
+  |     |   \-"Enter a positive integer: "
   |     |-()
   |     | |-scanf
-  |     | \-COMMA
+  |     | \-EXPLIST
   |     |   |-"%d"
   |     |   \-BITAND
   |     |     \-n
@@ -54,38 +62,40 @@
   |     | |-flag
   |     | \-()
   |     |   |-checkPrimeNumber
-  |     |   \-n
+  |     |   \-EXPLIST
+  |     |     \-n
   |     |-IF
   |     | |-EQ
   |     | | |-flag
   |     | | \-1
   |     | |-()
   |     | | |-printf
-  |     | | \-COMMA
+  |     | | \-EXPLIST
   |     | |   |-"%d is a prime number.\n"
   |     | |   \-n
   |     | \-()
   |     |   |-printf
-  |     |   \-COMMA
+  |     |   \-EXPLIST
   |     |     |-"%d is not a prime number.\n"
   |     |     \-n
   |     |-ASSIGN
   |     | |-flag
   |     | \-()
   |     |   |-checkArmstrongNumber
-  |     |   \-n
+  |     |   \-EXPLIST
+  |     |     \-n
   |     |-IF
   |     | |-EQ
   |     | | |-flag
   |     | | \-1
   |     | |-()
   |     | | |-printf
-  |     | | \-COMMA
+  |     | | \-EXPLIST
   |     | |   |-"%d is an Armstrong number."
   |     | |   \-n
   |     | \-()
   |     |   |-printf
-  |     |   \-COMMA
+  |     |   \-EXPLIST
   |     |     |-"%d is not an Armstrong number."
   |     |     \-n
   |     \-RETURN
@@ -93,35 +103,39 @@
   |-FUNC
   | |-DECLSPEC
   | | |-INT
-  | |-DECLARATOR
-  | | \-FUNC
-  | |   |-checkPrimeNumber
-  | |   \-PARAMLIST
-  | |     \-PARAMDECLARATOR
-  | |       |-DECLSPEC
-  | |       | |-INT
-  | |       \-DECLARATOR
-  | |         \-n
+  | |-INITDECLARATOR
+  | | \-DECLARATOR
+  | |   \-FUNC
+  | |     |-checkPrimeNumber
+  | |     \-PARAMLIST
+  | |       \-PARAMDECLARATOR
+  | |         |-DECLSPEC
+  | |         | |-INT
+  | |         \-DECLARATOR
+  | |           \-n
   | \-COMPOUNDSTAT
   |   |-DECLLIST
   |   | \-DECL
   |   |   |-DECLSPEC
   |   |   | |-INT
   |   |   \-INITDECLARATORLIST
-  |   |     |-DECLARATOR
-  |   |     | \-i
+  |   |     |-INITDECLARATOR
+  |   |     | \-DECLARATOR
+  |   |     |   \-i
   |   |     |-INITDECLARATOR
   |   |     | |-DECLARATOR
   |   |     | | \-flag
   |   |     | \-1
-  |   |     \-DECLARATOR
-  |   |       \-squareRoot
+  |   |     \-INITDECLARATOR
+  |   |       \-DECLARATOR
+  |   |         \-squareRoot
   |   \-STATLIST
   |     |-ASSIGN
   |     | |-squareRoot
   |     | \-()
   |     |   |-sqrt
-  |     |   \-n
+  |     |   \-EXPLIST
+  |     |     \-n
   |     |-FOR
   |     | |-ASSIGN
   |     | | |-i
@@ -151,31 +165,35 @@
   \-FUNC
     |-DECLSPEC
     | |-INT
-    |-DECLARATOR
-    | \-FUNC
-    |   |-checkArmstrongNumber
-    |   \-PARAMLIST
-    |     \-PARAMDECLARATOR
-    |       |-DECLSPEC
-    |       | |-INT
-    |       \-DECLARATOR
-    |         \-num
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-checkArmstrongNumber
+    |     \-PARAMLIST
+    |       \-PARAMDECLARATOR
+    |         |-DECLSPEC
+    |         | |-INT
+    |         \-DECLARATOR
+    |           \-num
     \-COMPOUNDSTAT
       |-DECLLIST
       | |-DECL
       | | |-DECLSPEC
       | | | |-INT
       | | \-INITDECLARATORLIST
-      | |   |-DECLARATOR
-      | |   | \-originalNum
-      | |   |-DECLARATOR
-      | |   | \-remainder
+      | |   |-INITDECLARATOR
+      | |   | \-DECLARATOR
+      | |   |   \-originalNum
+      | |   |-INITDECLARATOR
+      | |   | \-DECLARATOR
+      | |   |   \-remainder
       | |   |-INITDECLARATOR
       | |   | |-DECLARATOR
       | |   | | \-n
       | |   | \-0
-      | |   \-DECLARATOR
-      | |     \-flag
+      | |   \-INITDECLARATOR
+      | |     \-DECLARATOR
+      | |       \-flag
       | \-DECL
       |   |-DECLSPEC
       |   | |-DOUBLE
@@ -220,14 +238,15 @@
         |       |-result
         |       \-()
         |         |-pow
-        |         \-COMMA
+        |         \-EXPLIST
         |           |-remainder
         |           \-n
         |-IF
         | |-EQ
         | | |-()
         | | | |-round
-        | | | \-result
+        | | | \-EXPLIST
+        | | |   \-result
         | | \-num
         | |-ASSIGN
         | | |-flag

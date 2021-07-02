@@ -1,0 +1,4 @@
+int foo(struct a {} a1, int b) {
+    struct a a2;
+    float c;
+}

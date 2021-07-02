@@ -2,25 +2,28 @@
   \-FUNC
     |-DECLSPEC
     | |-INT
-    |-DECLARATOR
-    | \-FUNC
-    |   |-main
-    |   \-EMPTY
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-main
+    |     \-EMPTY
     \-COMPOUNDSTAT
       |-DECLLIST
       | \-DECL
       |   |-DECLSPEC
       |   | |-DOUBLE
       |   \-INITDECLARATORLIST
-      |     \-DECLARATOR
-      |       \-num
+      |     \-INITDECLARATOR
+      |       \-DECLARATOR
+      |         \-num
       \-STATLIST
         |-()
         | |-printf
-        | \-"Enter a number: "
+        | \-EXPLIST
+        |   \-"Enter a number: "
         |-()
         | |-scanf
-        | \-COMMA
+        | \-EXPLIST
         |   |-"%lf"
         |   \-BITAND
         |     \-num
@@ -36,13 +39,16 @@
         | |     | \-0
         | |     |-()
         | |     | |-printf
-        | |     | \-"You entered 0."
+        | |     | \-EXPLIST
+        | |     |   \-"You entered 0."
         | |     \-()
         | |       |-printf
-        | |       \-"You entered a negative number."
+        | |       \-EXPLIST
+        | |         \-"You entered a negative number."
         | \-()
         |   |-printf
-        |   \-"You entered a positive number."
+        |   \-EXPLIST
+        |     \-"You entered a positive number."
         \-RETURN
           \-0
 

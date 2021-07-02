@@ -17,14 +17,15 @@
   | | |       \-DECLARATOR
   | | |         |-POINTER
   | | |         \-c
-  | \-EMPTY
+  | \-INITDECLARATORLIST
   \-FUNC
     |-DECLSPEC
     | |-INT
-    |-DECLARATOR
-    | \-FUNC
-    |   |-main
-    |   \-EMPTY
+    |-INITDECLARATOR
+    | \-DECLARATOR
+    |   \-FUNC
+    |     |-main
+    |     \-EMPTY
     \-COMPOUNDSTAT
       |-DECLLIST
       | \-DECL
@@ -33,8 +34,9 @@
       |   | | |-a
       |   | | \-EMPTY
       |   \-INITDECLARATORLIST
-      |     \-DECLARATOR
-      |       \-a1
+      |     \-INITDECLARATOR
+      |       \-DECLARATOR
+      |         \-a1
       \-STATLIST
         \-RETURN
           \-0

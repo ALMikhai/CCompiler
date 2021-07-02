@@ -1,0 +1,72 @@
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-FUNC
+  |         |-f
+  |         \-EMPTY
+  |-DECL
+  | |-DECLSPEC
+  | | |-FLOAT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-FUNC
+  |         |-g
+  |         \-PARAMLIST
+  |           \-PARAMDECLARATOR
+  |             |-DECLSPEC
+  |             | |-INT
+  |             \-DECLARATOR
+  |               \-a
+  \-DECL
+    |-DECLSPEC
+    | |-INT
+    \-INITDECLARATORLIST
+      \-INITDECLARATOR
+        \-DECLARATOR
+          |-POINTER
+          \-FUNC
+            |-w
+            \-PARAMLIST
+              |-PARAMDECLARATOR
+              | |-DECLSPEC
+              | | |-INT
+              | \-DECLARATOR
+              |   \-a
+              |-PARAMDECLARATOR
+              | |-DECLSPEC
+              | | |-VOID
+              | \-DECLARATOR
+              |   \-b
+              \-PARAMDECLARATOR
+                |-DECLSPEC
+                | |-INT
+                \-DECLARATOR
+                  |-POINTER
+                  \-FUNC
+                    |-foo
+                    \-EMPTY
+
+Structs{
+}
+Symbols{
+	FUNC returning INT
+	Arguments{
+	} :: f
+	FUNC returning FLOAT
+	Arguments{
+		INT :: a
+	} :: g
+	FUNC returning POINTER to INT
+	Arguments{
+		INT :: a
+		VOID :: b
+		FUNC returning POINTER to INT
+		Arguments{
+		} :: foo
+	} :: w
+}

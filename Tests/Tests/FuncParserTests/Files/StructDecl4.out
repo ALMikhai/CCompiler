@@ -3,11 +3,11 @@
   | |-DECLSPEC
   | | |-STRUCTSPEC
   | | | |-b
-  | \-EMPTY
+  | \-INITDECLARATORLIST
   \-DECL
     |-DECLSPEC
     | |-STRUCTSPEC
     | | |-a
     | | \-EMPTY
-    \-EMPTY
+    \-INITDECLARATORLIST
 

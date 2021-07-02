@@ -1,0 +1,3 @@
+int f();
+float g(int a);
+int *w(int a, void b, int *foo());
