@@ -71,5 +71,7 @@ namespace CCompiler.SemanticAnalysis
 
             throw new ArgumentException($"symbol '{id}' is not define");
         }
+
+        public void PushSnapshotAsSymbol(EnvironmentSnapshot snapshot) => PushSymbol(new SnapshotSymbol(snapshot));
     }
 }

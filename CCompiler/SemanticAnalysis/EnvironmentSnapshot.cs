@@ -7,7 +7,7 @@
 
         public override string ToString()
         {
-            return $"Structs{StructTable}\nSymbols{SymbolTable}";
+            return $"Structs {StructTable}\nSymbols {SymbolTable}";
         }
     }
 }

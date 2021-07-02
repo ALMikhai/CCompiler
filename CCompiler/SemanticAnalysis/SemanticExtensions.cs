@@ -166,7 +166,6 @@ namespace CCompiler.Parser
                 environment.PushSnapshot();
                 foreach (var node in paramList.Nodes)
                     environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
-                    
 
                 funcType = new FuncType(type, environment.PopSnapshot());
             }
@@ -315,10 +314,28 @@ namespace CCompiler.Parser
                 foreach (var node in declList.Nodes)
                     node.CheckSemantic(ref environment);
             
-            symbol.SetSnapshot(environment.PopSnapshot()); 
-            environment.PushSymbol(symbol);
+            if (CompoundStat.StatList is StatList statList)
+                foreach (var node in statList.Nodes)
+                    node.CheckSemantic(ref environment);
             
-            // TODO проверка StatList
+            symbol.SetSnapshot(environment.PopSnapshot());
+            environment.PushSymbol(symbol);
+        }
+    }
+
+    public partial class CompoundStat
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment)
+        {
+            environment.PushSnapshot();
+            if (DeclList is DeclList declList)
+                foreach (var node in declList.Nodes)
+                    node.CheckSemantic(ref environment);
+            
+            if (StatList is StatList statList)
+                foreach (var node in statList.Nodes)
+                    node.CheckSemantic(ref environment);
+            environment.PushSnapshotAsSymbol(environment.PopSnapshot());
         }
     }
 
@@ -340,7 +357,9 @@ namespace CCompiler.Parser
     public partial class String
     {
         public override bool IsLValue() => false;
-        public override SymbolType GetType(ref SemanticEnvironment environment) => new SymbolType(true, false, SymbolTypeKind.STRING);
+
+        public override SymbolType GetType(ref SemanticEnvironment environment) =>
+            new SymbolType(true, false, SymbolTypeKind.STRING);
     }
 
     public partial class Id

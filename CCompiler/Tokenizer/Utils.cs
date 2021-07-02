@@ -1,4 +1,6 @@
-﻿namespace CCompiler.Tokenizer
+﻿using System.Text;
+
+namespace CCompiler.Tokenizer
 {
     public class Utils
     {
@@ -12,5 +14,14 @@
         {
             return char.IsDigit(ch) && ch != '9' && ch != '8';
         }
+
+        public static string AddTab(string str)
+        {
+            var result = new StringBuilder();
+            foreach (var s in str.Split('\n'))
+                result.Append($"\t{s}\n");
+            
+            return result.ToString();
+        } 
     }
 }

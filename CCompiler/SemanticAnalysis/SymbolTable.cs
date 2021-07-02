@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CCompiler.Tokenizer;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -21,10 +22,9 @@ namespace CCompiler.SemanticAnalysis
         {
             var result = new StringBuilder();
             foreach (var member in _members)
-                foreach (var s in member.Value.ToString().Split('\n'))
-                    result.Append($"\t{s}\n");
-
-            return "{\n" + result.ToString() + "}";
+                result.Append($"{member.Value}\n");
+            
+            return result.Length == 0 ? "{ }" : "{\n" + Utils.AddTab(result.ToString(0, result.Length - 1)) + "}";
         }
 
         public Dictionary<string, T> GetData() => _members;

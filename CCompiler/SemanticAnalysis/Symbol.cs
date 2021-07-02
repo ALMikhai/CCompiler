@@ -15,10 +15,7 @@ namespace CCompiler.SemanticAnalysis
             DeclPosition = declPosition;
         }
         
-        public override string ToString()
-        {
-            return $"{Type.GetShortName()} :: {Id}";
-        }
+        public override string ToString() => $"{Type.GetShortName()} :: {Id}";
 
         public override bool Equals(object? obj) // TODO пока так, но не уверен
         {
@@ -59,9 +56,20 @@ namespace CCompiler.SemanticAnalysis
             IsDefined = true;
         }
         
-        public override string ToString()
+        public override string ToString() => $"{Type.GetFullName()}" + (IsDefined ? $"\n{Snapshot} " : " ") + $":: {Id}";
+    }
+
+    public class SnapshotSymbol : Symbol
+    {
+        private static int _symbolNumber = 0;
+        public EnvironmentSnapshot Snapshot { get; }
+
+        public SnapshotSymbol(EnvironmentSnapshot snapshot) : base($"__{_symbolNumber++}Snapshot",
+            new SymbolType(true, false, SymbolTypeKind.INT), new Position(0, 0))
         {
-            return $"{Type.GetFullName()}" + (IsDefined ? $"\n{Snapshot} " : " ") + $":: {Id}";
+            Snapshot = snapshot;
         }
+
+        public override string ToString() => $"Nested block {{\n{Utils.AddTab(Snapshot.ToString())}}}";
     }
 }
