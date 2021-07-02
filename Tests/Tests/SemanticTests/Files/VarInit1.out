@@ -18,16 +18,33 @@
       | |       \-ARRAY
       | |         |-a
       | |         \-10
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-b
+      | |     \-[]
+      | |       |-a
+      | |       \-0
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-FLOAT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-DECLARATOR
+      | |     |   \-c
+      | |     \-1
       | \-DECL
       |   |-DECLSPEC
       |   | |-INT
       |   \-INITDECLARATORLIST
       |     \-INITDECLARATOR
       |       |-DECLARATOR
-      |       | \-b
-      |       \-[]
-      |         |-a
-      |         \-0
+      |       | \-cr
+      |       \-s
 
 Structs{
 }
@@ -40,5 +57,7 @@ Symbols{
 	Symbols{
 		ARRAY of type INT :: a
 		INT :: b
+		FLOAT :: c
+		INT :: cr
 	} :: f
 }

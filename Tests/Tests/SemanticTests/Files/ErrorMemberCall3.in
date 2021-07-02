@@ -1,0 +1,6 @@
+struct b {} a1;
+int *a1p;
+
+int f() {
+    int a = a1p->a;
+}

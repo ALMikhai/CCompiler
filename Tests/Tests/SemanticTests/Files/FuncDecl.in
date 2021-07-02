@@ -1,3 +1,5 @@
 int f();
 float g(int a);
 int *w(int a, void b, int *foo());
+float z(a, b, c);
+int (*(*foo)(float a))[3];

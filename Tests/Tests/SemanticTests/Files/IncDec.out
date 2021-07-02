@@ -17,14 +17,23 @@
       | |     |-DECLARATOR
       | |     | \-a
       | |     \-1
+      | |-DECL
+      | | |-DECLSPEC
+      | | | |-INT
+      | | \-INITDECLARATORLIST
+      | |   \-INITDECLARATOR
+      | |     |-DECLARATOR
+      | |     | \-b
+      | |     \-POSTFIX INC
+      | |       \-a
       | \-DECL
       |   |-DECLSPEC
       |   | |-INT
       |   \-INITDECLARATORLIST
       |     \-INITDECLARATOR
       |       |-DECLARATOR
-      |       | \-b
-      |       \-POSTFIX INC
+      |       | \-c
+      |       \-PREFIX INC
       |         \-a
 
 Structs{
@@ -38,5 +47,6 @@ Symbols{
 	Symbols{
 		INT :: a
 		INT :: b
+		INT :: c
 	} :: f
 }

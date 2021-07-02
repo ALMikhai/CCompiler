@@ -42,6 +42,8 @@
           | |-TYPEQUALIFIERLIST
           | | \-CONST
           | \-POINTER
+          |   |-TYPEQUALIFIERLIST
+          |   | \-VOLATILE
           \-b1
 
 Structs{
@@ -51,5 +53,5 @@ Symbols{
 	FLOAT :: b
 	POINTER to INT :: c
 	const volatile FLOAT :: c1
-	const POINTER to POINTER to INT :: b1
+	const POINTER to volatile POINTER to INT :: b1
 }

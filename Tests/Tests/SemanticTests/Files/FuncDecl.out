@@ -22,34 +22,66 @@
   |             | |-INT
   |             \-DECLARATOR
   |               \-a
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       |-POINTER
+  |       \-FUNC
+  |         |-w
+  |         \-PARAMLIST
+  |           |-PARAMDECLARATOR
+  |           | |-DECLSPEC
+  |           | | |-INT
+  |           | \-DECLARATOR
+  |           |   \-a
+  |           |-PARAMDECLARATOR
+  |           | |-DECLSPEC
+  |           | | |-VOID
+  |           | \-DECLARATOR
+  |           |   \-b
+  |           \-PARAMDECLARATOR
+  |             |-DECLSPEC
+  |             | |-INT
+  |             \-DECLARATOR
+  |               |-POINTER
+  |               \-FUNC
+  |                 |-foo
+  |                 \-EMPTY
+  |-DECL
+  | |-DECLSPEC
+  | | |-FLOAT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-FUNC
+  |         |-z
+  |         \-IDLIST
+  |           |-a
+  |           |-b
+  |           \-c
   \-DECL
     |-DECLSPEC
     | |-INT
     \-INITDECLARATORLIST
       \-INITDECLARATOR
         \-DECLARATOR
-          |-POINTER
-          \-FUNC
-            |-w
-            \-PARAMLIST
-              |-PARAMDECLARATOR
-              | |-DECLSPEC
-              | | |-INT
-              | \-DECLARATOR
-              |   \-a
-              |-PARAMDECLARATOR
-              | |-DECLSPEC
-              | | |-VOID
-              | \-DECLARATOR
-              |   \-b
-              \-PARAMDECLARATOR
-                |-DECLSPEC
-                | |-INT
-                \-DECLARATOR
-                  |-POINTER
-                  \-FUNC
-                    |-foo
-                    \-EMPTY
+          \-ARRAY
+            |-DECLARATOR
+            | |-POINTER
+            | \-FUNC
+            |   |-DECLARATOR
+            |   | |-POINTER
+            |   | \-foo
+            |   \-PARAMLIST
+            |     \-PARAMDECLARATOR
+            |       |-DECLSPEC
+            |       | |-FLOAT
+            |       \-DECLARATOR
+            |         \-a
+            \-3
 
 Structs{
 }
@@ -69,4 +101,14 @@ Symbols{
 		Arguments{
 		} :: foo
 	} :: w
+	FUNC returning FLOAT
+	Arguments{
+		INT :: a
+		INT :: b
+		INT :: c
+	} :: z
+	POINTER to FUNC returning POINTER to ARRAY of type INT
+	Arguments{
+		FLOAT :: a
+	} :: foo
 }

@@ -1,4 +1,6 @@
 int f() {
     int a[10];
     int b = a[0];
+    float (c) = 1.0;
+    int cr = 's';
 }

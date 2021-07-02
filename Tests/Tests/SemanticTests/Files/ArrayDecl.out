@@ -1,7 +1,65 @@
-System.NotImplementedException: non-static arrays are not supported
-   at CCompiler.Parser.ArrayDecl.ParseSymbol(SymbolType type, SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 212
-   at CCompiler.Parser.Declarator.ParseSymbol(SymbolType type, SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 142
-   at CCompiler.Parser.InitDeclarator.ParseSymbolByType(SymbolType type, SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 128
-   at CCompiler.Parser.Decl.CheckSemantic(SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 30
-   at CCompiler.Parser.TranslationUnit.CheckSemantic(SemanticEnvironment& environment) in D:\Documents\All my projects\CCompiler\CCompiler\SemanticAnalysis\SemanticExtensions.cs:line 19
-   at CCompiler.Program.Main(String[] args) in D:\Documents\All my projects\CCompiler\CCompiler\Program.cs:line 55
+\-TRANSLATIONUNIT
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-ARRAY
+  |         |-a
+  |         \-1
+  |-DECL
+  | |-DECLSPEC
+  | | |-FLOAT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-ARRAY
+  |         |-b
+  |         \-1
+  |-DECL
+  | |-DECLSPEC
+  | | |-INT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       |-POINTER
+  |       \-ARRAY
+  |         |-c
+  |         \-2
+  |-DECL
+  | |-DECLSPEC
+  | | |-CONST
+  | | \-DECLSPEC
+  | |   |-VOLATILE
+  | |   \-DECLSPEC
+  | |     |-FLOAT
+  | \-INITDECLARATORLIST
+  |   \-INITDECLARATOR
+  |     \-DECLARATOR
+  |       \-ARRAY
+  |         |-c1
+  |         \-5
+  \-DECL
+    |-DECLSPEC
+    | |-INT
+    \-INITDECLARATORLIST
+      \-INITDECLARATOR
+        \-DECLARATOR
+          |-POINTER
+          | |-TYPEQUALIFIERLIST
+          | | \-CONST
+          | \-POINTER
+          \-ARRAY
+            |-b1
+            \-3
+
+Structs{
+}
+Symbols{
+	ARRAY of type INT :: a
+	ARRAY of type FLOAT :: b
+	ARRAY of type POINTER to INT :: c
+	const volatile ARRAY of type const volatile FLOAT :: c1
+	const ARRAY of type const POINTER to POINTER to INT :: b1
+}
