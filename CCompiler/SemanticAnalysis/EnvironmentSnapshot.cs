@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace CCompiler.SemanticAnalysis
+﻿namespace CCompiler.SemanticAnalysis
 {
     public class EnvironmentSnapshot
     {
@@ -9,7 +7,7 @@ namespace CCompiler.SemanticAnalysis
 
         public override string ToString()
         {
-            return $"Structs {StructTable}\nSymbols{SymbolTable}";
+            return $"Structs{StructTable}\nSymbols{SymbolTable}";
         }
     }
 }

@@ -14,7 +14,6 @@ namespace CCompiler.SemanticAnalysis
         }
 
         public void Push(string id, T member) => _members.Add(id, member);
-        
         public bool Exist(string id) => _members.ContainsKey(id);
         public T Get(string id) => _members[id];
 
@@ -22,9 +21,8 @@ namespace CCompiler.SemanticAnalysis
         {
             var result = new StringBuilder();
             foreach (var member in _members)
-            {
-                result.Append(member.Value + "\n");
-            }
+                foreach (var s in member.Value.ToString().Split('\n'))
+                    result.Append($"\t{s}\n");
 
             return "{\n" + result.ToString() + "}";
         }

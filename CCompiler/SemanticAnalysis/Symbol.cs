@@ -17,7 +17,7 @@ namespace CCompiler.SemanticAnalysis
         
         public override string ToString()
         {
-            return $"{Type} :: {Id}";
+            return $"{Type.GetShortName()} :: {Id}";
         }
 
         public override bool Equals(object? obj) // TODO пока так, но не уверен
@@ -61,7 +61,7 @@ namespace CCompiler.SemanticAnalysis
         
         public override string ToString()
         {
-            return $"{Type}" + (IsDefined ? $"\n{Snapshot} " : " ") + $":: {Id}";
+            return $"{Type.GetFullName()}" + (IsDefined ? $"\n{Snapshot} " : " ") + $":: {Id}";
         }
     }
 }

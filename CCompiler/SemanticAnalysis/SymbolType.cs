@@ -40,10 +40,10 @@ namespace CCompiler.SemanticAnalysis
             return false;
         }
 
-        public override string ToString()
-        {
-            return $"{(IsConst ? "const " : "")}{(IsVolatile ? "volatile " : "")}{SymbolTypeKind}";
-        }
+        public override string ToString() => GetFullName();
+        public virtual string GetFullName() =>
+            $"{(IsConst ? "const " : "")}{(IsVolatile ? "volatile " : "")}{SymbolTypeKind}";
+        public virtual string GetShortName() => GetFullName();
     }
 
     public class FuncType : SymbolType
@@ -72,11 +72,9 @@ namespace CCompiler.SemanticAnalysis
         {
             return Snapshot.SymbolTable.GetData();
         }
-        
-        public override string ToString()
-        {
-            return $"{SymbolTypeKind} returning {ReturnType}\nArguments {Snapshot.SymbolTable}";
-        }
+        public override string GetFullName() =>
+            $"{SymbolTypeKind} returning {ReturnType}\nArguments{Snapshot.SymbolTable}";
+        public override string GetShortName() => $"{SymbolTypeKind} returning {ReturnType}";
     }
 
     public class StructType : SymbolType
@@ -97,11 +95,8 @@ namespace CCompiler.SemanticAnalysis
             if (!(obj is StructType structType)) return false;
             return Name == structType.Name && Members.Equals(structType.Members);
         }
-        
-        public override string ToString()
-        {
-            return $"{SymbolTypeKind} called {Name}\nMembers {Members}";
-        }
+        public override string GetFullName() => $"{SymbolTypeKind} called {Name}\nMembers {Members}";
+        public override string GetShortName() => $"{SymbolTypeKind} called {Name}";
     }
 
     public class PointerType : SymbolType
@@ -122,11 +117,8 @@ namespace CCompiler.SemanticAnalysis
 
             return false;
         }
-        
-        public override string ToString()
-        {
-            return base.ToString() + $" to {PointerToType}";
-        }
+        public override string GetFullName() => base.GetFullName() + $" to {PointerToType}";
+        public override string GetShortName() => GetFullName();
     }
     
     public class ArrayType : SymbolType
@@ -148,9 +140,7 @@ namespace CCompiler.SemanticAnalysis
             return false;
         }
         
-        public override string ToString()
-        {
-            return base.ToString() + $" of type {TypeOfArray}";
-        }
+        public override string GetFullName() => base.GetFullName() + $" of type {TypeOfArray}";
+        public override string GetShortName() => GetFullName();
     }
 }
