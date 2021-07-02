@@ -117,7 +117,8 @@ namespace CCompiler.Parser
                 return symbol;
 
             throw new SemanticException(
-                $"trying to assign to variable of type {symbol.Type} value with type {valueType}",
+                $"trying to assign to variable of type {symbol.Type.GetShortName()} value with type " +
+                $"{valueType.GetShortName()}",
                 Initializer.StartNodePosition);
         }
     }
@@ -309,7 +310,8 @@ namespace CCompiler.Parser
                 throw new NotImplementedException("old-style (K&R) function definition is not supported");
             
             environment.PushSnapshot((symbol.Type as FuncType).Snapshot);
-
+            environment.PushReturnType(returnType);
+            
             if (CompoundStat.DeclList is DeclList declList)
                 foreach (var node in declList.Nodes)
                     node.CheckSemantic(ref environment);
@@ -319,6 +321,7 @@ namespace CCompiler.Parser
                     node.CheckSemantic(ref environment);
             
             symbol.SetSnapshot(environment.PopSnapshot());
+            environment.PopReturnType();
             environment.PushSymbol(symbol);
         }
     }
@@ -636,7 +639,8 @@ namespace CCompiler.Parser
                     return leftType;
 
                 throw new SemanticException(
-                    $"trying to assign to variable of type {leftType} value with type {rightType}",
+                    $"trying to assign to variable of type {leftType.GetShortName()} value with type " +
+                    $"{rightType.GetShortName()}",
                     Right.StartNodePosition);
             }
 
@@ -696,7 +700,8 @@ namespace CCompiler.Parser
                     var requiredType = requiredTypes[i].Value.Type;
                     if (currentType.Equals(requiredType) == false)
                         throw new SemanticException(
-                            $"incompatible type for argument, expected ‘{requiredType}’ but argument is of type ‘{currentType}’",
+                            $"incompatible type for argument, expected ‘{requiredType.GetShortName()}’ " +
+                            $"but argument is of type ‘{currentType.GetShortName()}’",
                             expNode.StartNodePosition);
                 }
 
@@ -704,6 +709,93 @@ namespace CCompiler.Parser
             }
 
             throw new SemanticException("called object is not a function", StartNodePosition);
+        }
+    }
+
+    public partial class ExpStat
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment)
+        {
+            if (ExpNode is ExpNode expNode)
+                expNode.GetType(ref environment);
+        }
+    }
+
+    public partial class IfStat
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment)
+        {
+            if (Exp.GetType(ref environment).IsScalar == false)
+                throw new SemanticException("scalar type is required", Exp.StartNodePosition);
+            Stat1.CheckSemantic(ref environment);
+            Stat2.CheckSemantic(ref environment);
+        }
+    }
+
+    public partial class SwitchStat
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment) =>
+            throw new NotImplementedException("switch statement is not supported");
+    }
+
+    public partial class EmptyExp
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment)
+        {
+        }
+    }
+
+    public partial class WhileStat
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment)
+        {
+            if (Exp.GetType(ref environment).IsScalar == false)
+                throw new SemanticException("scalar type is required", Exp.StartNodePosition);
+            environment.LoopEntry();
+            Stat.CheckSemantic(ref environment);
+            environment.LoopExit();
+        }
+    }
+
+    public partial class ForStat
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment)
+        {
+            if (Exp1 is ExpNode exp1)
+                exp1.GetType(ref environment);
+            if (Exp2 is ExpNode exp2)
+                if (exp2.GetType(ref environment).IsScalar == false)
+                    throw new SemanticException("scalar type is required", exp2.StartNodePosition);
+            if (Exp3 is ExpNode exp3)
+                exp3.GetType(ref environment);
+            
+            environment.LoopEntry();
+            Stat.CheckSemantic(ref environment);
+            environment.LoopExit();
+        }
+    }
+
+    public partial class JumpStat
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment)
+        {
+            if (environment.InLoop() == false)
+                throw new SemanticException("jump statement not within loop or switch", Token.Position);
+        }
+    }
+
+    public partial class ReturnStat
+    {
+        public override void CheckSemantic(ref SemanticEnvironment environment)
+        {
+            if (!(Exp is ExpNode exp)) return;
+            var currentType = exp.GetType(ref environment);
+            var requiredType = environment.PeekReturnType();
+            if (currentType.Equals(requiredType) == false)
+                throw new SemanticException(
+                    $"incompatible types when returning type ‘{currentType.GetShortName()}’ but " +
+                    $"‘{requiredType.GetShortName()}’ was expected",
+                    exp.StartNodePosition);
         }
     }
 }

@@ -39,16 +39,11 @@ namespace CCompiler.Parser
 
         private IParseResult ParseJumpStat()
         {
-            if (Accept(KeywordType.CONTINUE))
+            KeywordToken token = null;
+            if (Accept(new [] { KeywordType.CONTINUE, KeywordType.BREAK }, ref token))
             {
                 Expect(OperatorType.SEMICOLON);
-                return new SuccessParseResult(new JumpStat(KeywordType.CONTINUE));
-            }
-
-            if (Accept(KeywordType.BREAK))
-            {
-                Expect(OperatorType.SEMICOLON);
-                return new SuccessParseResult(new JumpStat(KeywordType.BREAK));
+                return new SuccessParseResult(new JumpStat(token));
             }
             
             if (Accept(KeywordType.RETURN))
@@ -62,7 +57,7 @@ namespace CCompiler.Parser
             }
 
             return new SuccessParseResult(new NullStat());
-        }
+        }   
         
         /*
          * selection_stat : 'if' '(' exp ')' stat
@@ -97,11 +92,11 @@ namespace CCompiler.Parser
                     if (stat2.IsNullStat())
                         return ExpectedStatFailure();
 
-                    return new SuccessParseResult(new IfStat(exp.ResultNode, stat.ResultNode,
+                    return new SuccessParseResult(new IfStat(exp.ResultNode as ExpNode, stat.ResultNode,
                         stat2.ResultNode));
                 }
 
-                return new SuccessParseResult(new IfStat(exp.ResultNode, stat.ResultNode, new EmptyExp()));
+                return new SuccessParseResult(new IfStat(exp.ResultNode as ExpNode, stat.ResultNode, new EmptyExp()));
             }
 
             if (Accept(KeywordType.SWITCH))
@@ -135,14 +130,14 @@ namespace CCompiler.Parser
         private IParseResult ParseExpStat()
         {
             if (Accept(OperatorType.SEMICOLON))
-                return new SuccessParseResult(new EmptyExp());
+                return new SuccessParseResult(new ExpStat(new EmptyExp()));
             
             var exp = ParseExp();
             if (!exp.IsSuccess || exp.IsNullStat())
                 return exp;
 
             Expect(OperatorType.SEMICOLON); 
-            return exp;
+            return new SuccessParseResult(new ExpStat(exp.ResultNode));
         }
         
         /*
@@ -177,7 +172,8 @@ namespace CCompiler.Parser
                 if (stat.IsNullStat())
                     return ExpectedStatFailure();
 
-                return new SuccessParseResult(new WhileStat(exp.ResultNode, stat.ResultNode, WhileType.WHILE));
+                return new SuccessParseResult(
+                    new WhileStat(exp.ResultNode as ExpNode, stat.ResultNode, WhileType.WHILE));
             }
             
             if (Accept(KeywordType.DO))
@@ -198,7 +194,8 @@ namespace CCompiler.Parser
 
                 Expect(OperatorType.RRBRACKET); 
                 Expect(OperatorType.SEMICOLON);
-                return new SuccessParseResult(new WhileStat(exp.ResultNode, stat.ResultNode, WhileType.DOWHILE));
+                return new SuccessParseResult(new WhileStat(exp.ResultNode as ExpNode, stat.ResultNode,
+                    WhileType.DOWHILE));
             }
 
             if (Accept(KeywordType.FOR))
@@ -219,9 +216,9 @@ namespace CCompiler.Parser
                         return stat1;
                     if (stat1.IsNullStat())
                         return ExpectedStatFailure();
-                    
-                    return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, new EmptyExp(),
-                        stat1.ResultNode));
+
+                    return new SuccessParseResult(new ForStat((exp1.ResultNode as ExpStat).ExpNode,
+                        (exp2.ResultNode as ExpStat).ExpNode, new EmptyExp(), stat1.ResultNode));
                 }
                 
                 var exp3 = ParseExp();
@@ -235,8 +232,8 @@ namespace CCompiler.Parser
                 if (stat2.IsNullStat())
                     return ExpectedStatFailure();
 
-                return new SuccessParseResult(new ForStat(exp1.ResultNode, exp2.ResultNode, exp3.ResultNode,
-                    stat2.ResultNode));
+                return new SuccessParseResult(new ForStat((exp1.ResultNode as ExpStat).ExpNode,
+                    (exp2.ResultNode as ExpStat).ExpNode, exp3.ResultNode, stat2.ResultNode));
             }
             
             return new SuccessParseResult(new NullStat());

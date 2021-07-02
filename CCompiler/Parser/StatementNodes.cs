@@ -4,24 +4,24 @@ using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
 {
-    public class JumpStat : Node
+    public partial class JumpStat : Node
     {
-        public KeywordType JumpType { get; }
+        public KeywordToken Token { get; }
 
-        public JumpStat(KeywordType type)
+        public JumpStat(KeywordToken token)
         {
-            JumpType = type;
+            Token = token;
         }
         
         public override NodeType Type => NodeType.JUMP;
 
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + $"{JumpType}" + "\r\n";
+            return indent + NodePrefix(last) + $"{Token.Type}" + "\r\n";
         }
     }
 
-    public class ReturnStat : Node
+    public partial class ReturnStat : Node
     {
         public Node Exp { get; }
 
@@ -39,13 +39,13 @@ namespace CCompiler.Parser
         }
     }
 
-    public class IfStat : Node
+    public partial class IfStat : Node
     {
-        public Node Exp { get; }
+        public ExpNode Exp { get; }
         public Node Stat1 { get; }
         public Node Stat2 { get; }
 
-        public IfStat(Node exp, Node stat1, Node stat2)
+        public IfStat(ExpNode exp, Node stat1, Node stat2)
         {
             Exp = exp;
             Stat1 = stat1;
@@ -63,7 +63,7 @@ namespace CCompiler.Parser
         }
     }
     
-    public class SwitchStat : Node
+    public partial class SwitchStat : Node
     {
         public Node Exp { get; }
         public Node Stat { get; }
@@ -100,13 +100,13 @@ namespace CCompiler.Parser
         DOWHILE
     }
     
-    public class WhileStat : Node
+    public partial class WhileStat : Node
     {
-        public Node Exp { get; }
+        public ExpNode Exp { get; }
         public Node Stat { get; }
         public WhileType WhileType { get; }
 
-        public WhileStat(Node exp, Node stat, WhileType whileType)
+        public WhileStat(ExpNode exp, Node stat, WhileType whileType)
         {
             Exp = exp;
             Stat = stat;
@@ -123,7 +123,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class ForStat : Node
+    public partial class ForStat : Node
     {
         public Node Exp1 { get; }
         public Node Exp2 { get; }
@@ -501,7 +501,7 @@ namespace CCompiler.Parser
         }
     }
 
-    public class EmptyExp : Node
+    public partial class EmptyExp : Node
     {
         public override NodeType Type => NodeType.EMPTY;
 
@@ -593,5 +593,17 @@ namespace CCompiler.Parser
                    Id.ToString(indent + ChildrenPrefix(last), false) +
                    StructDeclList.ToString(indent + ChildrenPrefix(last), true);
         }
+    }
+
+    public partial class ExpStat : Node
+    {
+        public Node ExpNode { get; }
+
+        public ExpStat(Node expNode)
+        {
+            ExpNode = expNode;
+        }
+        
+        public override string ToString(string indent, bool last) => ExpNode.ToString(indent, last);
     }
 }

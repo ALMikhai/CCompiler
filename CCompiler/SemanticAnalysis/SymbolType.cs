@@ -73,8 +73,8 @@ namespace CCompiler.SemanticAnalysis
             return Snapshot.SymbolTable.GetData();
         }
         public override string GetFullName() =>
-            $"{SymbolTypeKind} returning {ReturnType}\nArguments{Snapshot.SymbolTable}";
-        public override string GetShortName() => $"{SymbolTypeKind} returning {ReturnType}";
+            $"{SymbolTypeKind} returning {ReturnType.GetShortName()}\nArguments{Snapshot.SymbolTable}";
+        public override string GetShortName() => $"{SymbolTypeKind} returning {ReturnType.GetShortName()}";
     }
 
     public class StructType : SymbolType

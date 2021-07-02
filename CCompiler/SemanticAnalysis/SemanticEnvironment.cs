@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using CCompiler.Parser;
 
 namespace CCompiler.SemanticAnalysis
 {
     public class SemanticEnvironment
     {
         private Stack<EnvironmentSnapshot> _snapshots;
+        private int _nestedLoopsCount;
+        private Stack<SymbolType> _returnTypes;
 
         public SemanticEnvironment()
         {
+            _nestedLoopsCount = 0;
+            _returnTypes = new Stack<SymbolType>();
             _snapshots = new Stack<EnvironmentSnapshot>();
             _snapshots.Push(new EnvironmentSnapshot());
         }
@@ -73,5 +78,17 @@ namespace CCompiler.SemanticAnalysis
         }
 
         public void PushSnapshotAsSymbol(EnvironmentSnapshot snapshot) => PushSymbol(new SnapshotSymbol(snapshot));
+        public bool InLoop() => _nestedLoopsCount > 0;
+        public void LoopEntry() => ++_nestedLoopsCount;
+        public void LoopExit()
+        {
+            --_nestedLoopsCount;
+            if (_nestedLoopsCount < 0)
+                throw new Exception("exit from the loop which does not exist");
+        }
+
+        public void PushReturnType(SymbolType type) => _returnTypes.Push(type);
+        public SymbolType PopReturnType() => _returnTypes.Pop();
+        public SymbolType PeekReturnType() => _returnTypes.Peek();
     }
 }
