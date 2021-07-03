@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using CCompiler.Parser;
+using CCompiler.Tokenizer;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -15,7 +15,21 @@ namespace CCompiler.SemanticAnalysis
             _nestedLoopsCount = 0;
             _returnTypes = new Stack<SymbolType>();
             _snapshots = new Stack<EnvironmentSnapshot>();
-            _snapshots.Push(new EnvironmentSnapshot());
+            var environmentSnapshot = new EnvironmentSnapshot();
+
+            var stringArgument = new EnvironmentSnapshot();
+            stringArgument.SymbolTable.Push("s",
+                new VarSymbol("s", new SymbolType(false, false, SymbolTypeKind.STRING), new Position(0, 0)));
+
+            var printfSymbol = new FuncSymbol("printf", new FuncType(new SymbolType(false, false, SymbolTypeKind.VOID), stringArgument),
+                new Position(0, 0));
+            var scanfSymbol = new FuncSymbol("scanf", new FuncType(new SymbolType(false, false, SymbolTypeKind.VOID), stringArgument),
+                new Position(0, 0));
+
+            environmentSnapshot.SymbolTable.Push("printf", printfSymbol);
+            environmentSnapshot.SymbolTable.Push("scanf", scanfSymbol);
+            
+            _snapshots.Push(environmentSnapshot);
         }
 
         public void PushSymbol(Symbol symbol)

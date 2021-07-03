@@ -360,7 +360,6 @@ namespace CCompiler.Parser
     public partial class String
     {
         public override bool IsLValue() => false;
-
         public override SymbolType GetType(ref SemanticEnvironment environment) =>
             new SymbolType(true, false, SymbolTypeKind.STRING);
     }
