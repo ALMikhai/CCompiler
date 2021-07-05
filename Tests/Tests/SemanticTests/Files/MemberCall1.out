@@ -62,6 +62,14 @@ Structs {
 	}
 }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+	} :: printf
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+	} :: scanf
 	POINTER to STRUCT called a
 	Members {
 		INT :: b

@@ -51,6 +51,14 @@ Structs {
 	Members { }
 }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+	} :: printf
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+	} :: scanf
 	FUNC returning INT
 	Arguments{ }
 	Structs { }

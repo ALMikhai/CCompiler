@@ -1,4 +1,9 @@
-﻿using CCompiler.Tokenizer;
+﻿using System;
+using CCompiler.CodeGenerator;
+using CCompiler.Parser;
+using CCompiler.Tokenizer;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -17,6 +22,7 @@ namespace CCompiler.SemanticAnalysis
         
         public override string ToString() => $"{Type.GetShortName()} :: {Id}";
 
+        public virtual void Generate(ref Assembly assembly) => throw new NotImplementedException();
         public override bool Equals(object? obj) // TODO пока так, но не уверен
         {
             if (obj is Symbol symbol)
@@ -37,39 +43,34 @@ namespace CCompiler.SemanticAnalysis
 
     public class FuncSymbol : Symbol
     {
-        public EnvironmentSnapshot Snapshot { get; private set; }
+        public CompoundStat CompoundStat { get; private set; }
         public bool IsDefined { get; private set; }
         
         public FuncSymbol(string id, FuncType type, Position declPosition) : base(id, type, declPosition)
         {
             IsDefined = false;
         }
-        public FuncSymbol(string id, FuncType type, EnvironmentSnapshot snapshot, Position declPosition) : base(id, type, declPosition)
+
+        public void SetCompoundStat(CompoundStat compoundStat)
         {
-            Snapshot = snapshot;
+            CompoundStat = compoundStat;
             IsDefined = true;
         }
 
-        public void SetSnapshot(EnvironmentSnapshot snapshot)
+        public override void Generate(ref Assembly assembly)
         {
-            Snapshot = snapshot;
-            IsDefined = true;
-        }
-        
-        public override string ToString() => $"{Type.GetFullName()}" + (IsDefined ? $"\n{Snapshot} " : " ") + $":: {Id}";
-    }
+            var retType = (Type as FuncType).ReturnType;
+            var function = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
+                retType.ToTypeReference(ref assembly));
+            // TODO add params
+            var il = function.Body.GetILProcessor();
+            // TODO generate compaund
 
-    public class SnapshotSymbol : Symbol
-    {
-        private static int _symbolNumber = 0;
-        public EnvironmentSnapshot Snapshot { get; }
-
-        public SnapshotSymbol(EnvironmentSnapshot snapshot) : base($"__{_symbolNumber++}Snapshot",
-            new SymbolType(true, false, SymbolTypeKind.INT), new Position(0, 0))
-        {
-            Snapshot = snapshot;
+            il.Emit(OpCodes.Ret);
+            assembly.AddMethod(function);
         }
 
-        public override string ToString() => $"Nested block {{\n{Utils.AddTab(Snapshot.ToString())}}}";
+        public override string ToString() =>
+            $"{Type.GetFullName()}" + (IsDefined ? $"\n{CompoundStat.Snapshot} " : " ") + $":: {Id}";
     }
 }

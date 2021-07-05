@@ -1,0 +1,60 @@
+﻿using System;
+using System.IO;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
+namespace CCompiler.CodeGenerator
+{
+    public class Assembly
+    {
+        public string AssemblyName { get; }
+        public AssemblyDefinition AssemblyDefinition { get; }
+        public TypeDefinition ProgramType { get; }
+
+        public Assembly(string assemblyName)
+        {
+            AssemblyName = assemblyName;
+            var assemblyNameDefinition = new AssemblyNameDefinition(AssemblyName, new Version(1, 0, 0, 0));
+            AssemblyDefinition = AssemblyDefinition.CreateAssembly(assemblyNameDefinition,
+                AssemblyName, ModuleKind.Console);
+            var mainModule = AssemblyDefinition.MainModule;
+            ProgramType = new TypeDefinition("app", "Program", TypeAttributes.NotPublic | TypeAttributes.Sealed,
+                mainModule.TypeSystem.Object) {IsBeforeFieldInit = true};
+            
+            mainModule.Types.Add(ProgramType);
+        }
+
+        public void AddMethod(MethodDefinition methodDefinition) => ProgramType.Methods.Add(methodDefinition);
+
+        public void Save(string directoryPath)
+        {
+            AssemblyDefinition.Write(directoryPath + AssemblyName + ".exe");
+            var streamWriter = new StreamWriter(directoryPath + AssemblyName + ".runtimeconfig.json");
+            streamWriter.Write(
+                "{\n  \"runtimeOptions\": {\n    \"tfm\": \"netcoreapp3.1\",\n    \"framework\": {\n      \"name\": \"Microsoft.NETCore.App\",\n      \"version\": \"3.1.0\"\n    }\n  }\n}");
+            streamWriter.Close();
+        }
+    }
+    
+    public class BasicAssembly : Assembly
+    {
+        public BasicAssembly(string assemblyName) : base(assemblyName)
+        {
+            var mainModule = AssemblyDefinition.MainModule;
+            var main = new MethodDefinition("Main", MethodAttributes.Private | MethodAttributes.Static,
+                mainModule.TypeSystem.Void);
+
+            var writeLineInfo = typeof(Console).GetMethod("WriteLine", new Type[] {typeof(string)});
+            var writeLineReference = mainModule.ImportReference(writeLineInfo);
+
+            var il = main.Body.GetILProcessor();
+            il.Emit(OpCodes.Ldstr, "Hello world!");
+            il.Emit(OpCodes.Call, writeLineReference);
+            il.Emit(OpCodes.Ret);
+            
+            mainModule.EntryPoint = main;
+            AddMethod(main);
+            AssemblyDefinition.EntryPoint = main;
+        }
+    }
+}

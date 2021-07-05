@@ -236,13 +236,19 @@ Structs { }
 Symbols {
 	FUNC returning VOID
 	Arguments{
+		STRING :: s
+	} :: printf
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+	} :: scanf
+	FUNC returning VOID
+	Arguments{
 		POINTER to INT :: a
 		POINTER to INT :: b
 	}
 	Structs { }
 	Symbols {
-		POINTER to INT :: a
-		POINTER to INT :: b
 		INT :: t
 	} :: swap
 	FUNC returning INT
@@ -253,21 +259,9 @@ Symbols {
 	}
 	Structs { }
 	Symbols {
-		ARRAY of type INT :: arr
-		INT :: low
-		INT :: high
 		INT :: pivot
 		INT :: i
 		INT :: j
-		Nested block {
-			Structs { }
-			Symbols {
-				Nested block {
-					Structs { }
-					Symbols { }
-				}
-			}
-		}
 	} :: partition
 	FUNC returning VOID
 	Arguments{
@@ -276,17 +270,7 @@ Symbols {
 		INT :: high
 	}
 	Structs { }
-	Symbols {
-		ARRAY of type INT :: arr
-		INT :: low
-		INT :: high
-		Nested block {
-			Structs { }
-			Symbols {
-				INT :: pi
-			}
-		}
-	} :: quickSort
+	Symbols { } :: quickSort
 	FUNC returning INT
 	Arguments{ }
 	Structs { }

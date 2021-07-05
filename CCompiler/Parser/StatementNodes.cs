@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 
 namespace CCompiler.Parser
@@ -484,6 +485,7 @@ namespace CCompiler.Parser
     {
         public Node DeclList { get; }
         public Node StatList { get; }
+        public EnvironmentSnapshot Snapshot { get; private set; }
 
         public CompoundStat(Node declList, Node statList)
         {

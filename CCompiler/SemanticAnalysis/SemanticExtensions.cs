@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;    
 using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 
@@ -25,9 +26,10 @@ namespace CCompiler.Parser
         public override void CheckSemantic(ref SemanticEnvironment environment)
         {
             var type = DeclSpecs.NodeToType(DeclSpec, ref environment);
-            
+
             foreach (var node in InitDeclaratorList.Nodes)
-                environment.PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment));
+                environment.GetCurrentSnapshot()
+                    .PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment));
         }
     }
 
@@ -166,7 +168,7 @@ namespace CCompiler.Parser
             {
                 environment.PushSnapshot();
                 foreach (var node in paramList.Nodes)
-                    environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
+                    environment.GetCurrentSnapshot().PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
 
                 funcType = new FuncType(type, environment.PopSnapshot());
             }
@@ -178,7 +180,7 @@ namespace CCompiler.Parser
                     var id = node as Id;
                     var varSymbol = new VarSymbol(id.IdName,
                         new SymbolType(false, false, SymbolTypeKind.INT), id.StartNodePosition);
-                    environment.PushSymbol(varSymbol);
+                    environment.GetCurrentSnapshot().PushSymbol(varSymbol);
                 }
                 funcType = new FuncType(type, environment.PopSnapshot());
             }
@@ -292,7 +294,7 @@ namespace CCompiler.Parser
             }
 
             var structType = new StructType(false, false, Id.IdName, symbolTable, Id.StartNodePosition);
-            environment.PushStructType(structType);
+            environment.GetCurrentSnapshot().PushStructType(structType);
             return structType;
         }
     }
@@ -308,21 +310,22 @@ namespace CCompiler.Parser
             var symbol = Declarator.ParseSymbolByType(returnType, ref environment) as FuncSymbol;
             if (!(DeclList is NullStat))
                 throw new NotImplementedException("old-style (K&R) function definition is not supported");
-            
-            environment.PushSnapshot((symbol.Type as FuncType).Snapshot);
+
+            environment.PushSnapshot((symbol.Type as FuncType).ArgumentsSnapshot);
             environment.PushReturnType(returnType);
+            CompoundStat.CheckSemantic(ref environment);
             
-            if (CompoundStat.DeclList is DeclList declList)
-                foreach (var node in declList.Nodes)
-                    node.CheckSemantic(ref environment);
+            foreach (var keyValuePair in CompoundStat.Snapshot.SymbolTable.GetData())
+            {
+                if ((symbol.Type as FuncType).ArgumentsSnapshot.SymbolExist(keyValuePair.Key))
+                    throw new SemanticException($"redeclaration of '{keyValuePair.Value.Id}'",
+                        keyValuePair.Value.DeclPosition);
+            }
             
-            if (CompoundStat.StatList is StatList statList)
-                foreach (var node in statList.Nodes)
-                    node.CheckSemantic(ref environment);
-            
-            symbol.SetSnapshot(environment.PopSnapshot());
+            symbol.SetCompoundStat(CompoundStat);
             environment.PopReturnType();
-            environment.PushSymbol(symbol);
+            environment.PopSnapshot();
+            environment.GetCurrentSnapshot().PushSymbol(symbol);
         }
     }
 
@@ -331,14 +334,16 @@ namespace CCompiler.Parser
         public override void CheckSemantic(ref SemanticEnvironment environment)
         {
             environment.PushSnapshot();
+            
             if (DeclList is DeclList declList)
                 foreach (var node in declList.Nodes)
                     node.CheckSemantic(ref environment);
-            
+
             if (StatList is StatList statList)
                 foreach (var node in statList.Nodes)
                     node.CheckSemantic(ref environment);
-            environment.PushSnapshotAsSymbol(environment.PopSnapshot());
+
+            Snapshot = environment.PopSnapshot();
         }
     }
 

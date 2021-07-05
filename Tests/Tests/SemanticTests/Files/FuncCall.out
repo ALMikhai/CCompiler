@@ -34,14 +34,20 @@
 
 Structs { }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+	} :: printf
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+	} :: scanf
 	FUNC returning INT
 	Arguments{
 		INT :: a
 	}
 	Structs { }
-	Symbols {
-		INT :: a
-	} :: foo
+	Symbols { } :: foo
 	FUNC returning INT
 	Arguments{ }
 	Structs { }

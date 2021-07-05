@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using CCompiler.CodeGenerator;
 using CCompiler.Tokenizer;
+using Mono.Cecil;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -44,25 +47,36 @@ namespace CCompiler.SemanticAnalysis
         public virtual string GetFullName() =>
             $"{(IsConst ? "const " : "")}{(IsVolatile ? "volatile " : "")}{SymbolTypeKind}";
         public virtual string GetShortName() => GetFullName();
+        public virtual TypeReference ToTypeReference(ref Assembly assembly)
+        {
+            return SymbolTypeKind switch
+            {
+                SymbolTypeKind.VOID => assembly.AssemblyDefinition.MainModule.TypeSystem.Void,
+                SymbolTypeKind.INT => assembly.AssemblyDefinition.MainModule.TypeSystem.Int64,
+                SymbolTypeKind.FLOAT => assembly.AssemblyDefinition.MainModule.TypeSystem.Double,
+                SymbolTypeKind.STRING => assembly.AssemblyDefinition.MainModule.TypeSystem.String,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
     }
 
     public class FuncType : SymbolType
     {
         public SymbolType ReturnType { get; }
-        public EnvironmentSnapshot Snapshot { get; }
+        public EnvironmentSnapshot ArgumentsSnapshot { get; }
 
-        public FuncType(SymbolType returnType, EnvironmentSnapshot snapshot) : base(true, false, SymbolTypeKind.FUNC)
+        public FuncType(SymbolType returnType, EnvironmentSnapshot argumentsSnapshot) : base(true, false, SymbolTypeKind.FUNC)
         {
             ReturnType = returnType;
-            Snapshot = snapshot;
+            ArgumentsSnapshot = argumentsSnapshot;
         }
         
         public override bool Equals(object? obj)
         {
             if (!(obj is FuncType funcType)) return false;
             if (ReturnType.Equals(funcType.ReturnType) == false ||
-                Snapshot.SymbolTable.Equals(funcType.Snapshot.SymbolTable) == false ||
-                Snapshot.StructTable.Equals(funcType.Snapshot.StructTable) == false)
+                ArgumentsSnapshot.SymbolTable.Equals(funcType.ArgumentsSnapshot.SymbolTable) == false ||
+                ArgumentsSnapshot.StructTable.Equals(funcType.ArgumentsSnapshot.StructTable) == false)
                 return false;
 
             return true;
@@ -70,11 +84,15 @@ namespace CCompiler.SemanticAnalysis
 
         public Dictionary<string, Symbol> GetArguments()
         {
-            return Snapshot.SymbolTable.GetData();
+            return ArgumentsSnapshot.SymbolTable.GetData();
         }
         public override string GetFullName() =>
-            $"{SymbolTypeKind} returning {ReturnType.GetShortName()}\nArguments{Snapshot.SymbolTable}";
+            $"{SymbolTypeKind} returning {ReturnType.GetShortName()}\nArguments{ArgumentsSnapshot.SymbolTable}";
         public override string GetShortName() => $"{SymbolTypeKind} returning {ReturnType.GetShortName()}";
+        public override TypeReference ToTypeReference(ref Assembly assembly)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class StructType : SymbolType
@@ -97,6 +115,10 @@ namespace CCompiler.SemanticAnalysis
         }
         public override string GetFullName() => $"{SymbolTypeKind} called {Name}\nMembers {Members}";
         public override string GetShortName() => $"{SymbolTypeKind} called {Name}";
+        public override TypeReference ToTypeReference(ref Assembly assembly)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class PointerType : SymbolType
@@ -119,6 +141,10 @@ namespace CCompiler.SemanticAnalysis
         }
         public override string GetFullName() => base.GetFullName() + $" to {PointerToType}";
         public override string GetShortName() => GetFullName();
+        public override TypeReference ToTypeReference(ref Assembly assembly)
+        {
+            throw new NotImplementedException();
+        }
     }
     
     public class ArrayType : SymbolType
@@ -142,5 +168,9 @@ namespace CCompiler.SemanticAnalysis
         
         public override string GetFullName() => base.GetFullName() + $" of type {TypeOfArray}";
         public override string GetShortName() => GetFullName();
+        public override TypeReference ToTypeReference(ref Assembly assembly)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

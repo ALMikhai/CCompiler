@@ -43,6 +43,14 @@
 
 Structs { }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+	} :: printf
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+	} :: scanf
 	POINTER to FUNC returning POINTER to ARRAY of type INT
 	Arguments{
 		FLOAT :: a
