@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
 
 namespace CCompiler.CodeGenerator
 {
@@ -10,6 +10,11 @@ namespace CCompiler.CodeGenerator
         public string AssemblyName { get; }
         public AssemblyDefinition AssemblyDefinition { get; }
         public TypeDefinition ProgramType { get; }
+
+        public Dictionary<string, MethodReference> MethodReferences { get; } =
+            new Dictionary<string, MethodReference>();
+        public Dictionary<string, MethodDefinition> MethodDefinitions { get; } =
+            new Dictionary<string, MethodDefinition>();
 
         public Assembly(string assemblyName)
         {
@@ -41,20 +46,9 @@ namespace CCompiler.CodeGenerator
         public BasicAssembly(string assemblyName) : base(assemblyName)
         {
             var mainModule = AssemblyDefinition.MainModule;
-            var main = new MethodDefinition("Main", MethodAttributes.Private | MethodAttributes.Static,
-                mainModule.TypeSystem.Void);
-
-            var writeLineInfo = typeof(Console).GetMethod("WriteLine", new Type[] {typeof(string)});
+            var writeLineInfo = typeof(Console).GetMethod("WriteLine", new Type[] {typeof(long)});
             var writeLineReference = mainModule.ImportReference(writeLineInfo);
-
-            var il = main.Body.GetILProcessor();
-            il.Emit(OpCodes.Ldstr, "Hello world!");
-            il.Emit(OpCodes.Call, writeLineReference);
-            il.Emit(OpCodes.Ret);
-            
-            mainModule.EntryPoint = main;
-            AddMethod(main);
-            AssemblyDefinition.EntryPoint = main;
+            MethodReferences.Add("WriteLine", writeLineReference);
         }
     }
 }

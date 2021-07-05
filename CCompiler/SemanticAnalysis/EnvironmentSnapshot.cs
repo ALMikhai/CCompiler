@@ -27,19 +27,6 @@ namespace CCompiler.SemanticAnalysis
 
         public bool StructExist(string name) => StructTable.Exist(name);
 
-        public void Generate(ref Assembly assembly)
-        {
-            foreach (var structType in StructTable.GetData())
-            {
-                //structType.Value.Genarate();
-            }
-
-            foreach (var symbol in SymbolTable.GetData())
-            {
-                symbol.Value.Generate(ref assembly);    
-            }
-        }
-
         public override string ToString() => $"Structs {StructTable}\nSymbols {SymbolTable}";
     }
 }

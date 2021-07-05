@@ -4,6 +4,7 @@ using CCompiler.Parser;
 using CCompiler.Tokenizer;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using OpCodes = Mono.Cecil.Cil.OpCodes;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -36,6 +37,23 @@ namespace CCompiler.SemanticAnalysis
 
     public class VarSymbol : Symbol
     {
+        private ExpNode _initializer;
+        public bool IsArg { get; set; } = false;
+        public VariableDefinition VariableDefinition { get; set; }
+        public ParameterDefinition ParameterDefinition { get; set; }
+
+        public ExpNode Initializer
+        {
+            get => _initializer;
+            set
+            {
+                _initializer = value;
+                IsInitialized = true;
+            }
+        }
+
+        public bool IsInitialized { get; private set; } = false;
+
         public VarSymbol(string id, SymbolType type, Position declPosition) : base(id, type, declPosition)
         {
         }
@@ -59,13 +77,51 @@ namespace CCompiler.SemanticAnalysis
 
         public override void Generate(ref Assembly assembly)
         {
-            var retType = (Type as FuncType).ReturnType;
+            var funcType = Type as FuncType;
+            var retType = funcType.ReturnType;
             var function = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
-                retType.ToTypeReference(ref assembly));
-            // TODO add params
-            var il = function.Body.GetILProcessor();
-            // TODO generate compaund
+                retType.ToTypeReference(ref assembly)) {Body = {InitLocals = true}};
 
+            var il = function.Body.GetILProcessor();
+
+            var semanticEnvironment = new SemanticEnvironment();
+
+            foreach (var argument in funcType.GetArguments())
+            {
+                semanticEnvironment.GetCurrentSnapshot().PushSymbol(argument.Value);
+                var parameterDefinition = new ParameterDefinition(argument.Key, ParameterAttributes.None,
+                    argument.Value.Type.ToTypeReference(ref assembly));
+                ((VarSymbol) argument.Value).ParameterDefinition = parameterDefinition;
+                function.Parameters.Add(parameterDefinition);
+            }
+
+            foreach (var symbol in CompoundStat.Snapshot.SymbolTable.GetData())
+            {
+                var variableDefinition = new VariableDefinition(symbol.Value.Type.ToTypeReference(ref assembly));
+                var varSymbol = symbol.Value as VarSymbol;
+                varSymbol.VariableDefinition = variableDefinition;
+                semanticEnvironment.GetCurrentSnapshot().PushSymbol(symbol.Value);
+                function.Body.Variables.Add(variableDefinition);
+                
+                if (varSymbol.IsInitialized)
+                {
+                    varSymbol.Initializer.Generate(ref function, ref semanticEnvironment);
+                    il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
+                }
+            }
+            
+            //TODO Generate code for statements.
+            
+            if (Id == "main" && funcType.ReturnType.SymbolTypeKind == SymbolTypeKind.VOID &&
+                funcType.GetArguments().Count == 0)
+            {
+                assembly.AssemblyDefinition.EntryPoint = function;
+                assembly.AssemblyDefinition.MainModule.EntryPoint = function;
+                il.Emit(OpCodes.Ldloc_1);
+                il.Emit(OpCodes.Call, assembly.MethodReferences["WriteLine"]);
+            }
+            
+            assembly.MethodDefinitions.Add(Id, function);
             il.Emit(OpCodes.Ret);
             assembly.AddMethod(function);
         }

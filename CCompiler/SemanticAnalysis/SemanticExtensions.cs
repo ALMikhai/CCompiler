@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;    
 using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 
@@ -113,8 +112,9 @@ namespace CCompiler.Parser
     {
         public override Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment)
         {
-            var symbol = Declarator.ParseSymbol(type, ref environment);
+            var symbol = Declarator.ParseSymbol(type, ref environment) as VarSymbol;
             var valueType = Initializer.GetType(ref environment);
+            symbol.Initializer = Initializer;
             if (symbol.Type.Equals(valueType))
                 return symbol;
 
@@ -168,7 +168,11 @@ namespace CCompiler.Parser
             {
                 environment.PushSnapshot();
                 foreach (var node in paramList.Nodes)
-                    environment.GetCurrentSnapshot().PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
+                {
+                    var symbol = (node as ParamDecl).ParseSymbol(ref environment) as VarSymbol;
+                    symbol.IsArg = true;
+                    environment.GetCurrentSnapshot().PushSymbol(symbol);
+                }
 
                 funcType = new FuncType(type, environment.PopSnapshot());
             }
@@ -180,6 +184,7 @@ namespace CCompiler.Parser
                     var id = node as Id;
                     var varSymbol = new VarSymbol(id.IdName,
                         new SymbolType(false, false, SymbolTypeKind.INT), id.StartNodePosition);
+                    varSymbol.IsArg = true;
                     environment.GetCurrentSnapshot().PushSymbol(varSymbol);
                 }
                 funcType = new FuncType(type, environment.PopSnapshot());

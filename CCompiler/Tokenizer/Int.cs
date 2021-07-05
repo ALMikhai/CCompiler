@@ -219,7 +219,7 @@ namespace CCompiler.Tokenizer
             return token;
         }
 
-        private static ulong Convert(string source, IntToken.IntType intType, BitType bitType)
+        private static long Convert(string source, IntToken.IntType intType, BitType bitType)
         {
             var number = intType switch
             {
@@ -232,9 +232,9 @@ namespace CCompiler.Tokenizer
 
             var res = bitType switch
             {
-                BitType.OCTAL => System.Convert.ToUInt64(number, 8),
-                BitType.DECIMAL => System.Convert.ToUInt64(number, 10),
-                BitType.SIXTEEN => System.Convert.ToUInt64(number, 16),
+                BitType.OCTAL => System.Convert.ToInt64(number, 8),
+                BitType.DECIMAL => System.Convert.ToInt64(number, 10),
+                BitType.SIXTEEN => System.Convert.ToInt64(number, 16),
                 _ => throw new ArgumentOutOfRangeException(nameof(bitType), bitType, null)
             };
 
