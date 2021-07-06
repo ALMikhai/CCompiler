@@ -89,7 +89,8 @@ namespace CCompiler.SemanticAnalysis
         }
         public override string GetFullName() =>
             $"{SymbolTypeKind} returning {ReturnType.GetShortName()}\nArguments{ArgumentsSnapshot.SymbolTable}";
-        public override string GetShortName() => $"{SymbolTypeKind} returning {ReturnType.GetShortName()}";
+
+        public override string GetShortName() => GetFullName();
         public override TypeReference ToTypeReference(ref Assembly assembly)
         {
             throw new NotImplementedException();
@@ -101,6 +102,7 @@ namespace CCompiler.SemanticAnalysis
         public Position DeclPosition { get; }
         public string Name { get; }
         public Table<Symbol> Members { get; }
+        public TypeReference TypeReference { get; set; } // TODO For generation.
 
         public StructType(bool isConst, bool isVolatile, string name, Table<Symbol> members, Position declPosition) : base(isConst, isVolatile, SymbolTypeKind.STRUCT)
         {
@@ -114,12 +116,10 @@ namespace CCompiler.SemanticAnalysis
             if (!(obj is StructType structType)) return false;
             return Name == structType.Name && Members.Equals(structType.Members);
         }
+        
         public override string GetFullName() => $"{SymbolTypeKind} called {Name}\nMembers {Members}";
         public override string GetShortName() => $"{SymbolTypeKind} called {Name}";
-        public override TypeReference ToTypeReference(ref Assembly assembly)
-        {
-            throw new NotImplementedException();
-        }
+        public override TypeReference ToTypeReference(ref Assembly assembly) => TypeReference;
     }
 
     public class PointerType : SymbolType
@@ -140,12 +140,12 @@ namespace CCompiler.SemanticAnalysis
 
             return false;
         }
+
         public override string GetFullName() => base.GetFullName() + $" to {PointerToType}";
         public override string GetShortName() => GetFullName();
-        public override TypeReference ToTypeReference(ref Assembly assembly)
-        {
-            throw new NotImplementedException();
-        }
+
+        public override TypeReference ToTypeReference(ref Assembly assembly) =>
+            new Mono.Cecil.PointerType(PointerToType.ToTypeReference(ref assembly));
     }
     
     public class ArrayType : SymbolType
@@ -169,9 +169,8 @@ namespace CCompiler.SemanticAnalysis
         
         public override string GetFullName() => base.GetFullName() + $" of type {TypeOfArray}";
         public override string GetShortName() => GetFullName();
-        public override TypeReference ToTypeReference(ref Assembly assembly)
-        {
-            throw new NotImplementedException();
-        }
+
+        public override TypeReference ToTypeReference(ref Assembly assembly) =>
+            new Mono.Cecil.ArrayType(TypeOfArray.ToTypeReference(ref assembly));
     }
 }

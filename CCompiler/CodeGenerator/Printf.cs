@@ -1,4 +1,5 @@
 ﻿using System;
+using CCompiler.Parser;
 using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 using Mono.Cecil;
@@ -17,10 +18,10 @@ namespace CCompiler.CodeGenerator
             _arguments.SymbolTable.Push("o",
                 new VarSymbol("o", new SymbolType(false, false, SymbolTypeKind.INT), new Position(0, 0)));
         }
-        
-        public Printf() : base("printf", new FuncType(new SymbolType(false, false, SymbolTypeKind.VOID), _arguments), new Position(0, 0))
+
+        public Printf() : base("printf", new FuncType(new SymbolType(false, false, SymbolTypeKind.VOID), _arguments),
+            new Position(0, 0), new CompoundStat(new Node(), new Node()))
         {
-            IsDefined = true;
         }
 
         public override void Generate(ref Assembly assembly, ref SemanticEnvironment environment)

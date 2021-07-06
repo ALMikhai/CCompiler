@@ -196,7 +196,7 @@ namespace CCompiler.Parser
             
             return Left switch
             {
-                Id id => new FuncSymbol(id.IdName, funcType, id.StartNodePosition),
+                Id id => new VarSymbol(id.IdName, funcType, id.StartNodePosition),
                 Declarator declarator => declarator.ParseSymbol(funcType, ref environment),
                 GenericDeclaration genericDeclaration => genericDeclaration.ParseSymbol(funcType, ref environment),
                 _ => throw new ArgumentException()
@@ -312,25 +312,26 @@ namespace CCompiler.Parser
             if (DeclSpec is DeclSpecs declSpecs)
                 returnType = DeclSpecs.NodeToType(declSpecs, ref environment);
 
-            var symbol = Declarator.ParseSymbolByType(returnType, ref environment) as FuncSymbol;
+            var varSymbol = Declarator.ParseSymbolByType(returnType, ref environment) as VarSymbol;
+            var funcType = varSymbol.Type as FuncType;
+            var funcSymbol = new FuncSymbol(varSymbol.Id, funcType, varSymbol.DeclPosition, CompoundStat);
             if (!(DeclList is NullStat))
                 throw new NotImplementedException("old-style (K&R) function definition is not supported");
 
-            environment.PushSnapshot((symbol.Type as FuncType).ArgumentsSnapshot);
+            environment.PushSnapshot(funcType.ArgumentsSnapshot);
             environment.PushReturnType(returnType);
             CompoundStat.CheckSemantic(ref environment);
             
-            foreach (var keyValuePair in CompoundStat.Snapshot.SymbolTable.GetData())
+            foreach (var (id, symbol) in CompoundStat.Snapshot.SymbolTable.GetData())
             {
-                if ((symbol.Type as FuncType).ArgumentsSnapshot.SymbolExist(keyValuePair.Key))
-                    throw new SemanticException($"redeclaration of '{keyValuePair.Value.Id}'",
-                        keyValuePair.Value.DeclPosition);
+                if (funcType.ArgumentsSnapshot.SymbolExist(id))
+                    throw new SemanticException($"redeclaration of '{id}'",
+                        symbol.DeclPosition);
             }
             
-            symbol.SetCompoundStat(CompoundStat);
             environment.PopReturnType();
             environment.PopSnapshot();
-            environment.GetCurrentSnapshot().PushSymbol(symbol);
+            environment.GetCurrentSnapshot().PushSymbol(funcSymbol);
         }
     }
 

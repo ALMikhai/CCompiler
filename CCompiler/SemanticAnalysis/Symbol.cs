@@ -62,18 +62,11 @@ namespace CCompiler.SemanticAnalysis
 
     public class FuncSymbol : Symbol
     {
-        public CompoundStat CompoundStat { get; private set; }
-        public bool IsDefined { get; protected set; }
+        public CompoundStat CompoundStat { get; }
         
-        public FuncSymbol(string id, FuncType type, Position declPosition) : base(id, type, declPosition)
-        {
-            IsDefined = false;
-        }
-
-        public void SetCompoundStat(CompoundStat compoundStat)
+        public FuncSymbol(string id, FuncType type, Position declPosition, CompoundStat compoundStat) : base(id, type, declPosition)
         {
             CompoundStat = compoundStat;
-            IsDefined = true;
         }
 
         public override void Generate(ref Assembly assembly, ref SemanticEnvironment environment)
@@ -118,8 +111,9 @@ namespace CCompiler.SemanticAnalysis
                 }
             }
 
-            foreach (var node in ((StatList) CompoundStat.StatList).Nodes)
-                node.Generate(ref methodDefinition, ref environment);
+            if (CompoundStat.StatList is StatList statList)
+                foreach (var node in statList.Nodes)
+                    node.Generate(ref methodDefinition, ref environment);
 
             il.Emit(OpCodes.Ret);
 
@@ -135,6 +129,6 @@ namespace CCompiler.SemanticAnalysis
         }
 
         public override string ToString() =>
-            $"{Type.GetFullName()}" + (IsDefined ? $"\n{CompoundStat.Snapshot} " : " ") + $":: {Id}";
+            $"{Type.GetFullName()}" + $"\n{CompoundStat.Snapshot} " + $":: {Id}";
     }
 }
