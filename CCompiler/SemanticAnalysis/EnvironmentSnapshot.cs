@@ -1,6 +1,4 @@
-﻿using CCompiler.CodeGenerator;
-
-namespace CCompiler.SemanticAnalysis
+﻿namespace CCompiler.SemanticAnalysis
 {
     public class EnvironmentSnapshot
     {

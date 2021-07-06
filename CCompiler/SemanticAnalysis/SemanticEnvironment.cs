@@ -20,8 +20,7 @@ namespace CCompiler.SemanticAnalysis
             _returnTypes = new Stack<SymbolType>();
             _snapshots = new Stack<EnvironmentSnapshot>();
             var environmentSnapshot = new EnvironmentSnapshot();
-            environmentSnapshot.PushSymbol(new PrintfString());
-            environmentSnapshot.PushSymbol(new PrintfInt());
+            environmentSnapshot.PushSymbol(new Printf());
             _snapshots.Push(environmentSnapshot);
         }
 

@@ -81,48 +81,56 @@ namespace CCompiler.SemanticAnalysis
             environment.PushSnapshot();
             var funcType = Type as FuncType;
             var retType = funcType.ReturnType;
-            var function = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
-                retType.ToTypeReference(ref assembly)) {Body = {InitLocals = true}};
 
-            var il = function.Body.GetILProcessor();
+            var isEntryPoint = false;
+            if (Id == "main" && funcType.ReturnType.SymbolTypeKind == SymbolTypeKind.INT &&
+                funcType.GetArguments().Count == 0)
+            {
+                isEntryPoint = true;
+                retType = new SymbolType(false, false, SymbolTypeKind.VOID);
+            }
+            
+            var methodDefinition = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
+                retType.ToTypeReference(ref assembly)) {Body = {InitLocals = true}};
+            var il = methodDefinition.Body.GetILProcessor();
 
             foreach (var argument in funcType.GetArguments())
             {
-                environment.GetCurrentSnapshot().PushSymbol(argument.Value);
-                var parameterDefinition = new ParameterDefinition(argument.Key, ParameterAttributes.None,
-                    argument.Value.Type.ToTypeReference(ref assembly));
-                ((VarSymbol) argument.Value).ParameterDefinition = parameterDefinition;
-                function.Parameters.Add(parameterDefinition);
+                environment.GetCurrentSnapshot().PushSymbol(argument);
+                var parameterDefinition = new ParameterDefinition(argument.Id, ParameterAttributes.None,
+                    argument.Type.ToTypeReference(ref assembly));
+                ((VarSymbol) argument).ParameterDefinition = parameterDefinition;
+                methodDefinition.Parameters.Add(parameterDefinition);
             }
 
-            foreach (var symbol in CompoundStat.Snapshot.SymbolTable.GetData())
+            foreach (var (_, symbol) in CompoundStat.Snapshot.SymbolTable.GetData())
             {
-                var variableDefinition = new VariableDefinition(symbol.Value.Type.ToTypeReference(ref assembly));
-                var varSymbol = symbol.Value as VarSymbol;
+                var variableDefinition = new VariableDefinition(symbol.Type.ToTypeReference(ref assembly));
+                var varSymbol = symbol as VarSymbol;
                 varSymbol.VariableDefinition = variableDefinition;
-                environment.GetCurrentSnapshot().PushSymbol(symbol.Value);
-                function.Body.Variables.Add(variableDefinition);
+                environment.GetCurrentSnapshot().PushSymbol(symbol);
+                methodDefinition.Body.Variables.Add(variableDefinition);
                 
                 if (varSymbol.IsInitialized)
                 {
-                    varSymbol.Initializer.Generate(ref function, ref environment);
+                    varSymbol.Initializer.Generate(ref methodDefinition, ref environment);
                     il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
                 }
             }
 
             foreach (var node in ((StatList) CompoundStat.StatList).Nodes)
-                node.Generate(ref function, ref environment);
+                node.Generate(ref methodDefinition, ref environment);
 
             il.Emit(OpCodes.Ret);
 
-            if (Id == "main" && funcType.ReturnType.SymbolTypeKind == SymbolTypeKind.VOID &&
-                funcType.GetArguments().Count == 0)
+            if (isEntryPoint)
             {
-                assembly.AssemblyDefinition.EntryPoint = function;
-                assembly.AssemblyDefinition.MainModule.EntryPoint = function;
+                assembly.AssemblyDefinition.EntryPoint = methodDefinition;
+                assembly.AssemblyDefinition.MainModule.EntryPoint = methodDefinition;
             }
-            environment.MethodDefinitions.Add(Id, function);
-            assembly.AddMethod(function);
+            
+            environment.MethodDefinitions.Add(Id, methodDefinition); // TODO move to FuncSymbol. 
+            assembly.AddMethod(methodDefinition);
             environment.PopSnapshot();
         }
 

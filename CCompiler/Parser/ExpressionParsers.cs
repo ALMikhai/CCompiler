@@ -60,7 +60,7 @@ namespace CCompiler.Parser
 
             Token token = null;
             if (Accept(TokenType.STRING, ref token))
-                return new SuccessParseResult(new String(token.Source, token.Position));
+                return new SuccessParseResult(new String(token.Value as string, token.Position));
 
             var @const = ParseConst();
             return @const;

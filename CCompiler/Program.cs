@@ -65,17 +65,16 @@ namespace CCompiler
                     syntaxTree.CheckSemantic(ref parserEnvironment);
 
                     var assembly = new Assembly("app");
-                    var mainModule = parserEnvironment.PopSnapshot();
+                    var unitSnapshot = parserEnvironment.PopSnapshot();
                     var generatorEnvironment = new SemanticEnvironment();
-                    generatorEnvironment.PushSnapshot(mainModule);
+                    generatorEnvironment.PushSnapshot(unitSnapshot);
                     
                     // TODO Add structs
                     // foreach (var structType in mainModule.StructTable.GetData())
                     //     //structType.Value.Genarate();
 
                     // TODO Add Symbols
-                    
-                    foreach (var symbol in mainModule.SymbolTable.GetData())
+                    foreach (var symbol in unitSnapshot.SymbolTable.GetData())
                         symbol.Value.Generate(ref assembly, ref generatorEnvironment);
                     
                     assembly.Save(@"C:\Users\Alexandr\Desktop\IL\"); // TODO Make it better.

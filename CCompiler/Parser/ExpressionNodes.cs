@@ -49,7 +49,7 @@ namespace CCompiler.Parser
         
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + Str + "\r\n";
+            return indent + NodePrefix(last) + $"\"{Str}\"" + "\r\n";
         }
     }
 

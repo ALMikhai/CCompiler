@@ -1,5 +1,6 @@
 ﻿using System;
 using CCompiler.SemanticAnalysis;
+using CCompiler.Tokenizer;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using TokenType = CCompiler.Tokenizer.TokenType;
@@ -40,17 +41,17 @@ namespace CCompiler.Parser
         {
             var il = methodDefinition.Body.GetILProcessor();
             var symbol = environment.GetSymbol(IdName);
-            if (symbol is VarSymbol varSymbol)
+            switch (symbol)
             {
-                if (varSymbol.IsArg)
+                case VarSymbol {IsArg: true} varSymbol:
                     il.Emit(OpCodes.Ldarg, varSymbol.ParameterDefinition);
-                else
+                    break;
+                case VarSymbol varSymbol:
                     il.Emit(OpCodes.Ldloc, varSymbol.VariableDefinition);
-            }
-
-            if (symbol is FuncSymbol funcSymbol)
-            {
-                il.Emit(OpCodes.Call, environment.MethodDefinitions[funcSymbol.Id]);
+                    break;
+                case FuncSymbol funcSymbol:
+                    il.Emit(OpCodes.Call, environment.MethodDefinitions[funcSymbol.Id]);
+                    break;
             }
         }
     }
@@ -60,7 +61,7 @@ namespace CCompiler.Parser
         public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
         {
             var il = methodDefinition.Body.GetILProcessor();
-            il.Emit(OpCodes.Ldstr, Str);
+            il.Emit(OpCodes.Ldstr, Utils.ConvertCFormatToCsFormat(Str));
         }
     }
 
@@ -68,7 +69,7 @@ namespace CCompiler.Parser
     {
         public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
         {
-            ExpList list = new ExpList();
+            var list = new ExpList();
             if (ExpList is ExpList expList)
                 list = expList;
 

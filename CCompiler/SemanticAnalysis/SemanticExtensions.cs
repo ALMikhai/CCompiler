@@ -697,16 +697,16 @@ namespace CCompiler.Parser
                 if (ExpList is ExpList expList)
                     list = expList;
 
-                var requiredTypes = funcType.GetArguments().ToList();
+                var requiredSymbols = funcType.GetArguments();
 
-                if (list.Nodes.Count != requiredTypes.Count)
+                if (list.Nodes.Count != requiredSymbols.Count)
                     throw new SemanticException($"wrong number of arguments", StartNodePosition);
                 
                 for (int i = 0; i < list.Nodes.Count; i++)
                 {
                     var expNode = list.Nodes[i] as ExpNode;
                     var currentType = expNode.GetType(ref environment);
-                    var requiredType = requiredTypes[i].Value.Type;
+                    var requiredType = requiredSymbols[i].Type;
                     if (currentType.Equals(requiredType) == false)
                         throw new SemanticException(
                             $"incompatible type for argument, expected ‘{requiredType.GetShortName()}’ " +

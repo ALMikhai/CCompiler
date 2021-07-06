@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CCompiler.CodeGenerator;
 using CCompiler.Tokenizer;
 using Mono.Cecil;
@@ -82,9 +83,9 @@ namespace CCompiler.SemanticAnalysis
             return true;
         }
 
-        public Dictionary<string, Symbol> GetArguments()
+        public List<Symbol> GetArguments()
         {
-            return ArgumentsSnapshot.SymbolTable.GetData();
+            return ArgumentsSnapshot.SymbolTable.GetData().Values.ToList();
         }
         public override string GetFullName() =>
             $"{SymbolTypeKind} returning {ReturnType.GetShortName()}\nArguments{ArgumentsSnapshot.SymbolTable}";

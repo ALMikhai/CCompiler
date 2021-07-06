@@ -9,7 +9,7 @@ namespace CCompiler.CodeGenerator
     {
         public string AssemblyName { get; }
         public AssemblyDefinition AssemblyDefinition { get; }
-        public TypeDefinition ProgramType { get; }
+        private TypeDefinition _programType;
 
         public Assembly(string assemblyName)
         {
@@ -18,20 +18,21 @@ namespace CCompiler.CodeGenerator
             AssemblyDefinition = AssemblyDefinition.CreateAssembly(assemblyNameDefinition,
                 AssemblyName, ModuleKind.Console);
             var mainModule = AssemblyDefinition.MainModule;
-            ProgramType = new TypeDefinition("app", "Program", TypeAttributes.NotPublic | TypeAttributes.Sealed,
+            _programType = new TypeDefinition("app", "Program", TypeAttributes.NotPublic | TypeAttributes.Sealed,
                 mainModule.TypeSystem.Object) {IsBeforeFieldInit = true};
             
-            mainModule.Types.Add(ProgramType);
+            mainModule.Types.Add(_programType);
         }
 
-        public void AddMethod(MethodDefinition methodDefinition) => ProgramType.Methods.Add(methodDefinition);
+        public void AddMethod(MethodDefinition methodDefinition) => _programType.Methods.Add(methodDefinition);
 
         public void Save(string directoryPath)
         {
             AssemblyDefinition.Write(directoryPath + AssemblyName + ".exe");
             var streamWriter = new StreamWriter(directoryPath + AssemblyName + ".runtimeconfig.json");
             streamWriter.Write(
-                "{\n  \"runtimeOptions\": {\n    \"tfm\": \"netcoreapp3.1\",\n    \"framework\": {\n      \"name\": \"Microsoft.NETCore.App\",\n      \"version\": \"3.1.0\"\n    }\n  }\n}");
+                "{\n  \"runtimeOptions\": {\n    \"tfm\": \"netcoreapp3.1\",\n    \"framework\": {\n      " +
+                "\"name\": \"Microsoft.NETCore.App\",\n      \"version\": \"3.1.0\"\n    }\n  }\n}");
             streamWriter.Close();
         }
     }

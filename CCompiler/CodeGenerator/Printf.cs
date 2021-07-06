@@ -6,60 +6,19 @@ using Mono.Cecil.Cil;
 
 namespace CCompiler.CodeGenerator
 {
-    public class PrintfString : FuncSymbol
+    public class Printf : FuncSymbol
     {
-        private static EnvironmentSnapshot _argument = new EnvironmentSnapshot();
-
-        static PrintfString()
+        private static EnvironmentSnapshot _arguments;
+        static Printf()
         {
-            _argument.SymbolTable.Push("s",
+            _arguments = new EnvironmentSnapshot();
+            _arguments.SymbolTable.Push("s",
                 new VarSymbol("s", new SymbolType(false, false, SymbolTypeKind.STRING), new Position(0, 0)));
-        }
-            
-        public PrintfString() : base("printf_string", new FuncType(new SymbolType(false, false, SymbolTypeKind.VOID), _argument), new Position(0, 0))
-        {
-            IsDefined = true;
-        }
-
-        public override void Generate(ref Assembly assembly, ref SemanticEnvironment environment)
-        {
-            var funcType = Type as FuncType;
-            var retType = funcType.ReturnType;
-            var function = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
-                retType.ToTypeReference(ref assembly)) {Body = {InitLocals = true}};
-            var mainModule = assembly.AssemblyDefinition.MainModule;
-            var writeLineInfo = typeof(Console).GetMethod("WriteLine", new Type[] {typeof(string)});
-            var writeLineReference = mainModule.ImportReference(writeLineInfo);
-            var il = function.Body.GetILProcessor();
-            
-            foreach (var argument in funcType.GetArguments())
-            {
-                var parameterDefinition = new ParameterDefinition(argument.Key, ParameterAttributes.None,
-                    argument.Value.Type.ToTypeReference(ref assembly));
-                ((VarSymbol) argument.Value).ParameterDefinition = parameterDefinition;
-                function.Parameters.Add(parameterDefinition);
-            }
-            
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Call, writeLineReference);
-            il.Emit(OpCodes.Ret);
-            
-            environment.MethodDefinitions.Add(Id, function);
-            assembly.AddMethod(function);
-        }
-    }
-    
-    public class PrintfInt : FuncSymbol
-    {
-        private static EnvironmentSnapshot _argument = new EnvironmentSnapshot();
-
-        static PrintfInt()
-        {
-            _argument.SymbolTable.Push("i",
-                new VarSymbol("i", new SymbolType(false, false, SymbolTypeKind.INT), new Position(0, 0)));
+            _arguments.SymbolTable.Push("o",
+                new VarSymbol("o", new SymbolType(false, false, SymbolTypeKind.INT), new Position(0, 0)));
         }
         
-        public PrintfInt() : base("printf_int", new FuncType(new SymbolType(false, false, SymbolTypeKind.VOID), _argument), new Position(0, 0))
+        public Printf() : base("printf", new FuncType(new SymbolType(false, false, SymbolTypeKind.VOID), _arguments), new Position(0, 0))
         {
             IsDefined = true;
         }
@@ -68,27 +27,31 @@ namespace CCompiler.CodeGenerator
         {
             var funcType = Type as FuncType;
             var retType = funcType.ReturnType;
-            var function = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
+            var methodDefinition = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
                 retType.ToTypeReference(ref assembly)) {Body = {InitLocals = true}};
             var mainModule = assembly.AssemblyDefinition.MainModule;
-            var writeLineInfo = typeof(Console).GetMethod("WriteLine", new Type[] {typeof(long)});
+            var writeLineInfo = typeof(Console).GetMethod("Write", new Type[] {typeof(string), typeof(object)});
             var writeLineReference = mainModule.ImportReference(writeLineInfo);
-            var il = function.Body.GetILProcessor();
-            
+            var il = methodDefinition.Body.GetILProcessor();
+
             foreach (var argument in funcType.GetArguments())
             {
-                var parameterDefinition = new ParameterDefinition(argument.Key, ParameterAttributes.None,
-                    argument.Value.Type.ToTypeReference(ref assembly));
-                ((VarSymbol) argument.Value).ParameterDefinition = parameterDefinition;
-                function.Parameters.Add(parameterDefinition);
+                var parameterDefinition = new ParameterDefinition(argument.Id, ParameterAttributes.None,
+                    argument.Type.ToTypeReference(ref assembly));
+                ((VarSymbol) argument).ParameterDefinition = parameterDefinition;
+                methodDefinition.Parameters.Add(parameterDefinition);
             }
             
             il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Box, assembly.AssemblyDefinition.MainModule.TypeSystem.Int64);
             il.Emit(OpCodes.Call, writeLineReference);
             il.Emit(OpCodes.Ret);
             
-            environment.MethodDefinitions.Add(Id, function);
-            assembly.AddMethod(function);
+            environment.MethodDefinitions.Add(Id, methodDefinition);
+            assembly.AddMethod(methodDefinition);
         }
+        
+        public override string ToString() => $"{Type.GetFullName()}" + $":: {Id}";
     }
 }
