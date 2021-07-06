@@ -11,11 +11,6 @@ namespace CCompiler.CodeGenerator
         public AssemblyDefinition AssemblyDefinition { get; }
         public TypeDefinition ProgramType { get; }
 
-        public Dictionary<string, MethodReference> MethodReferences { get; } =
-            new Dictionary<string, MethodReference>();
-        public Dictionary<string, MethodDefinition> MethodDefinitions { get; } =
-            new Dictionary<string, MethodDefinition>();
-
         public Assembly(string assemblyName)
         {
             AssemblyName = assemblyName;
@@ -38,17 +33,6 @@ namespace CCompiler.CodeGenerator
             streamWriter.Write(
                 "{\n  \"runtimeOptions\": {\n    \"tfm\": \"netcoreapp3.1\",\n    \"framework\": {\n      \"name\": \"Microsoft.NETCore.App\",\n      \"version\": \"3.1.0\"\n    }\n  }\n}");
             streamWriter.Close();
-        }
-    }
-    
-    public class BasicAssembly : Assembly
-    {
-        public BasicAssembly(string assemblyName) : base(assemblyName)
-        {
-            var mainModule = AssemblyDefinition.MainModule;
-            var writeLineInfo = typeof(Console).GetMethod("WriteLine", new Type[] {typeof(long)});
-            var writeLineReference = mainModule.ImportReference(writeLineInfo);
-            MethodReferences.Add("WriteLine", writeLineReference);
         }
     }
 }

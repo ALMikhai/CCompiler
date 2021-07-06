@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using CCompiler.CodeGenerator;
 using CCompiler.Tokenizer;
+using Mono.Cecil;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -9,6 +11,8 @@ namespace CCompiler.SemanticAnalysis
         private Stack<EnvironmentSnapshot> _snapshots;
         private int _nestedLoopsCount;
         private Stack<SymbolType> _returnTypes;
+        public Dictionary<string, MethodDefinition> MethodDefinitions { get; } =
+            new Dictionary<string, MethodDefinition>();
 
         public SemanticEnvironment()
         {
@@ -16,18 +20,8 @@ namespace CCompiler.SemanticAnalysis
             _returnTypes = new Stack<SymbolType>();
             _snapshots = new Stack<EnvironmentSnapshot>();
             var environmentSnapshot = new EnvironmentSnapshot();
-            // var stringArgument = new EnvironmentSnapshot();
-            // stringArgument.SymbolTable.Push("s",
-            //     new VarSymbol("s", new SymbolType(false, false, SymbolTypeKind.STRING), new Position(0, 0)));
-            //
-            // var printfSymbol = new FuncSymbol("printf", new FuncType(new SymbolType(false, false, SymbolTypeKind.VOID), stringArgument),
-            //     new Position(0, 0));
-            // var scanfSymbol = new FuncSymbol("scanf", new FuncType(new SymbolType(false, false, SymbolTypeKind.VOID), stringArgument),
-            //     new Position(0, 0));
-            //
-            // environmentSnapshot.SymbolTable.Push("printf", printfSymbol);
-            // environmentSnapshot.SymbolTable.Push("scanf", scanfSymbol);
-            
+            environmentSnapshot.PushSymbol(new PrintfString());
+            environmentSnapshot.PushSymbol(new PrintfInt());
             _snapshots.Push(environmentSnapshot);
         }
 

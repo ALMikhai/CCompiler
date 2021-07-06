@@ -61,20 +61,24 @@ namespace CCompiler
                 {
                     var parser = new SyntaxParser(tokenizer, SyntaxParserType.UNIT);
                     var syntaxTree = parser.SyntaxTree;
-                    var environment = new SemanticEnvironment();
-                    var assembly = new BasicAssembly("app") as Assembly;
-                    syntaxTree.CheckSemantic(ref environment);
-                    var mainModule = environment.PopSnapshot();
+                    var parserEnvironment = new SemanticEnvironment();
+                    syntaxTree.CheckSemantic(ref parserEnvironment);
+
+                    var assembly = new Assembly("app");
+                    var mainModule = parserEnvironment.PopSnapshot();
+                    var generatorEnvironment = new SemanticEnvironment();
+                    generatorEnvironment.PushSnapshot(mainModule);
                     
                     // TODO Add structs
                     // foreach (var structType in mainModule.StructTable.GetData())
                     //     //structType.Value.Genarate();
 
                     // TODO Add Symbols
-                    foreach (var symbol in mainModule.SymbolTable.GetData())
-                        symbol.Value.Generate(ref assembly);  
                     
-                    assembly.Save(@"C:\Users\Alexandr\Desktop\IL\");
+                    foreach (var symbol in mainModule.SymbolTable.GetData())
+                        symbol.Value.Generate(ref assembly, ref generatorEnvironment);
+                    
+                    assembly.Save(@"C:\Users\Alexandr\Desktop\IL\"); // TODO Make it better.
                 }
             }
             catch (FileNotFoundException e)

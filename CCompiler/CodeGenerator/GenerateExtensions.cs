@@ -39,11 +39,52 @@ namespace CCompiler.Parser
         public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
         {
             var il = methodDefinition.Body.GetILProcessor();
-            var symbol = environment.GetSymbol(IdName) as VarSymbol;
-            if (symbol.IsArg)
-                il.Emit(OpCodes.Ldarg, symbol.ParameterDefinition);
-            else
-                il.Emit(OpCodes.Ldloc, symbol.VariableDefinition);
+            var symbol = environment.GetSymbol(IdName);
+            if (symbol is VarSymbol varSymbol)
+            {
+                if (varSymbol.IsArg)
+                    il.Emit(OpCodes.Ldarg, varSymbol.ParameterDefinition);
+                else
+                    il.Emit(OpCodes.Ldloc, varSymbol.VariableDefinition);
+            }
+
+            if (symbol is FuncSymbol funcSymbol)
+            {
+                il.Emit(OpCodes.Call, environment.MethodDefinitions[funcSymbol.Id]);
+            }
+        }
+    }
+
+    public partial class String
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            var il = methodDefinition.Body.GetILProcessor();
+            il.Emit(OpCodes.Ldstr, Str);
+        }
+    }
+
+    public partial class FuncCall
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            ExpList list = new ExpList();
+            if (ExpList is ExpList expList)
+                list = expList;
+
+            foreach (var node in list.Nodes)
+                node.Generate(ref methodDefinition, ref environment);
+            
+            PostfixNode.Generate(ref methodDefinition, ref environment);
+        }
+    }
+
+    public partial class ExpStat
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            if (ExpNode is ExpNode expNode)
+                expNode.Generate(ref methodDefinition, ref environment);
         }
     }
 }
