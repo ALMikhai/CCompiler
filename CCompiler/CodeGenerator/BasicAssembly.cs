@@ -18,7 +18,9 @@ namespace CCompiler.CodeGenerator
             AssemblyDefinition = AssemblyDefinition.CreateAssembly(assemblyNameDefinition,
                 AssemblyName, ModuleKind.Console);
             var mainModule = AssemblyDefinition.MainModule;
-            _programType = new TypeDefinition("app", "Program", TypeAttributes.NotPublic | TypeAttributes.Sealed,
+            _programType = new TypeDefinition("app", "Program",
+                TypeAttributes.AutoClass | TypeAttributes.Public | TypeAttributes.AnsiClass |
+                TypeAttributes.BeforeFieldInit,
                 mainModule.TypeSystem.Object) {IsBeforeFieldInit = true};
             
             mainModule.Types.Add(_programType);

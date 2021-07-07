@@ -38,10 +38,18 @@ namespace CCompiler.SemanticAnalysis
 
     public class VarSymbol : Symbol
     {
+        public enum VarType
+        {
+            VARIABLE,
+            PARAMETER,
+            FIELD
+        }
+        
         private ExpNode _initializer;
-        public bool IsArg { get; set; } = false;
+        public VarType VariableType { get; set; } = VarType.VARIABLE;
         public VariableDefinition VariableDefinition { get; set; }
         public ParameterDefinition ParameterDefinition { get; set; }
+        public FieldDefinition FieldDefinition { get; set; }
 
         public ExpNode Initializer
         {
@@ -100,6 +108,7 @@ namespace CCompiler.SemanticAnalysis
             {
                 var variableDefinition = new VariableDefinition(symbol.Type.ToTypeReference(ref assembly));
                 var varSymbol = symbol as VarSymbol;
+                varSymbol.VariableType = VarSymbol.VarType.VARIABLE;
                 varSymbol.VariableDefinition = variableDefinition;
                 environment.GetCurrentSnapshot().PushSymbol(symbol);
                 methodDefinition.Body.Variables.Add(variableDefinition);
@@ -108,6 +117,16 @@ namespace CCompiler.SemanticAnalysis
                 {
                     varSymbol.Initializer.Generate(ref methodDefinition, ref environment);
                     il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
+                }
+
+                if (varSymbol.Type is StructType structType)
+                {
+                    il.Emit(OpCodes.Ldloca_S, varSymbol.VariableDefinition);
+                    il.Emit(OpCodes.Initobj, structType.TypeReference);
+                }
+                if (varSymbol.Type is ArrayType arrayType)
+                {
+                    // TODO
                 }
             }
 

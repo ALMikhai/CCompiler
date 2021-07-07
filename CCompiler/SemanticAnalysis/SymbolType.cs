@@ -120,6 +120,26 @@ namespace CCompiler.SemanticAnalysis
         public override string GetFullName() => $"{SymbolTypeKind} called {Name}\nMembers {Members}";
         public override string GetShortName() => $"{SymbolTypeKind} called {Name}";
         public override TypeReference ToTypeReference(ref Assembly assembly) => TypeReference;
+
+        public void Generate(ref Assembly assembly, ref SemanticEnvironment environment)
+        {
+            var mainModule = assembly.AssemblyDefinition.MainModule;
+            var structDefinition = new TypeDefinition("app", Name,
+                TypeAttributes.SequentialLayout | TypeAttributes.Public | TypeAttributes.AnsiClass |
+                TypeAttributes.BeforeFieldInit,
+                mainModule.ImportReference(typeof(ValueType)));
+            
+            foreach (var (id, symbol) in Members.GetData())
+            {
+                var fieldDefinition = new FieldDefinition(id, FieldAttributes.Public, symbol.Type.ToTypeReference(ref assembly));
+                ((VarSymbol) symbol).VariableType = VarSymbol.VarType.FIELD;
+                ((VarSymbol) symbol).FieldDefinition = fieldDefinition;
+                structDefinition.Fields.Add(fieldDefinition);
+            }
+            
+            mainModule.Types.Add(structDefinition);
+            TypeReference = mainModule.ImportReference(structDefinition);
+        }
     }
 
     public class PointerType : SymbolType

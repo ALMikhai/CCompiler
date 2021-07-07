@@ -69,11 +69,9 @@ namespace CCompiler
                     var generatorEnvironment = new SemanticEnvironment();
                     generatorEnvironment.PushSnapshot(unitSnapshot);
                     
-                    // TODO Add structs
-                    // foreach (var structType in mainModule.StructTable.GetData())
-                    //     //structType.Value.Genarate();
+                    foreach (var structType in unitSnapshot.StructTable.GetData())
+                        structType.Value.Generate(ref assembly, ref generatorEnvironment);
 
-                    // TODO Add Symbols
                     foreach (var symbol in unitSnapshot.SymbolTable.GetData())
                         symbol.Value.Generate(ref assembly, ref generatorEnvironment);
                     

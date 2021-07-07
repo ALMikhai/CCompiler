@@ -170,7 +170,7 @@ namespace CCompiler.Parser
                 foreach (var node in paramList.Nodes)
                 {
                     var symbol = (node as ParamDecl).ParseSymbol(ref environment) as VarSymbol;
-                    symbol.IsArg = true;
+                    symbol.VariableType = VarSymbol.VarType.PARAMETER;
                     environment.GetCurrentSnapshot().PushSymbol(symbol);
                 }
 
@@ -184,7 +184,7 @@ namespace CCompiler.Parser
                     var id = node as Id;
                     var varSymbol = new VarSymbol(id.IdName,
                         new SymbolType(false, false, SymbolTypeKind.INT), id.StartNodePosition);
-                    varSymbol.IsArg = true;
+                    varSymbol.VariableType = VarSymbol.VarType.PARAMETER;
                     environment.GetCurrentSnapshot().PushSymbol(varSymbol);
                 }
                 funcType = new FuncType(type, environment.PopSnapshot());
