@@ -222,7 +222,7 @@ namespace CCompiler.Parser
             else
                 throw new NotImplementedException("non-static arrays are not supported");
             
-            var arrayType = new ArrayType(type.IsConst, type.IsVolatile, type);
+            var arrayType = new ArrayType(type.IsConst, type.IsVolatile, type, constExp);
             return Left switch
             {
                 Id id => new VarSymbol(id.IdName, arrayType, id.StartNodePosition),

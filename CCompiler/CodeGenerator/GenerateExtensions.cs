@@ -4,6 +4,7 @@ using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using ArrayType = CCompiler.SemanticAnalysis.ArrayType;
 using PointerType = CCompiler.SemanticAnalysis.PointerType;
 using TokenType = CCompiler.Tokenizer.TokenType;
 
@@ -176,7 +177,10 @@ namespace CCompiler.Parser
                 }
                 case AccessingArrayElement accessingArrayElement:
                 {
-                    throw new NotImplementedException();
+                    accessingArrayElement.PostfixNode.Generate(ref methodDefinition, ref environment);
+                    accessingArrayElement.Exp.Generate(ref methodDefinition, ref environment);
+                    Right.Generate(ref methodDefinition, ref environment);
+                    il.Emit(OpCodes.Stelem_Ref);
                     break;
                 }
                 case UnaryExp unaryExp:
@@ -223,6 +227,17 @@ namespace CCompiler.Parser
                 default:
                     throw new ArgumentException();
             }
+        }
+    }
+
+    public partial class AccessingArrayElement
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            var il = methodDefinition.Body.GetILProcessor();
+            PostfixNode.Generate(ref methodDefinition, ref environment);
+            Exp.Generate(ref methodDefinition, ref environment);
+            il.Emit(OpCodes.Ldelem_Ref);
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using CCompiler.CodeGenerator;
+using CCompiler.Parser;
 using CCompiler.Tokenizer;
 using Mono.Cecil;
 
@@ -171,10 +173,12 @@ namespace CCompiler.SemanticAnalysis
     public class ArrayType : SymbolType
     {
         public SymbolType TypeOfArray { get; }
-
-        public ArrayType(bool isConst, bool isVolatile, SymbolType typeOfArray) : base(isConst, isVolatile, SymbolTypeKind.ARRAY)
+        public ExpNode InsideBrackets { get; }
+        
+        public ArrayType(bool isConst, bool isVolatile, SymbolType typeOfArray, ExpNode insideBrackets) : base(isConst, isVolatile, SymbolTypeKind.ARRAY)
         {
             TypeOfArray = typeOfArray;
+            InsideBrackets = insideBrackets;
         }
         
         public override bool Equals(object? obj)

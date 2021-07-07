@@ -118,15 +118,17 @@ namespace CCompiler.SemanticAnalysis
                     varSymbol.Initializer.Generate(ref methodDefinition, ref environment);
                     il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
                 }
-
-                if (varSymbol.Type is StructType structType)
+                else switch (varSymbol.Type)
                 {
-                    il.Emit(OpCodes.Ldloca_S, varSymbol.VariableDefinition);
-                    il.Emit(OpCodes.Initobj, structType.TypeReference);
-                }
-                if (varSymbol.Type is ArrayType arrayType)
-                {
-                    // TODO
+                    case StructType structType:
+                        il.Emit(OpCodes.Ldloca_S, varSymbol.VariableDefinition);
+                        il.Emit(OpCodes.Initobj, structType.TypeReference);
+                        break;
+                    case ArrayType arrayType:
+                        arrayType.InsideBrackets.Generate(ref methodDefinition, ref environment);
+                        il.Emit(OpCodes.Newarr, arrayType.TypeOfArray.ToTypeReference(ref assembly));
+                        il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
+                        break;
                 }
             }
 
