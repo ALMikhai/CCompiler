@@ -240,4 +240,40 @@ namespace CCompiler.Parser
             il.Emit(OpCodes.Ldelem_Ref);
         }
     }
+
+    public partial class EmptyExp
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+        }
+    }
+    
+    public partial class IfStat
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            var il = methodDefinition.Body.GetILProcessor();
+            var elseLabel = il.Create(OpCodes.Nop);
+            var endLabel = il.Create(OpCodes.Nop);
+            Exp.Generate(ref methodDefinition, ref environment);
+            il.Emit(OpCodes.Brfalse, elseLabel);
+            Stat1.Generate(ref methodDefinition, ref environment);
+            il.Emit(OpCodes.Br, endLabel);
+            il.Append(elseLabel);
+            Stat2.Generate(ref methodDefinition, ref environment);
+            il.Append(endLabel);
+        }
+    }
+
+    public partial class CompoundStat
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            if (DeclList is DeclList)
+                throw new NotImplementedException("Declaring variables in a nested block is prohibited");
+            if (StatList is StatList statList)
+                foreach (var node in statList.Nodes)
+                    node.Generate(ref methodDefinition, ref environment);
+        }
+    }
 }
