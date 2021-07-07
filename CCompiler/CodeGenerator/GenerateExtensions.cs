@@ -1,8 +1,10 @@
 ﻿using System;
+using System.ComponentModel.Design.Serialization;
 using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using PointerType = CCompiler.SemanticAnalysis.PointerType;
 using TokenType = CCompiler.Tokenizer.TokenType;
 
 namespace CCompiler.Parser
@@ -101,22 +103,15 @@ namespace CCompiler.Parser
         public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
         {
             PostfixNode.Generate(ref methodDefinition, ref environment);
-            switch (_callType)
-            {
-                case CallType.VALUE:
-                {
-                    var structType = PostfixNode.GetType(ref environment) as StructType;
-                    var id = Id as Id;
-                    var member = structType.Members.Get(id.IdName) as VarSymbol;
-                    var il = methodDefinition.Body.GetILProcessor();
-                    il.Emit(OpCodes.Ldfld, member.FieldDefinition);
-                    break;
-                }
-                case CallType.POINTER:
-                    throw new NotImplementedException();
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            StructType structType;
+            if (TypeOfCall == CallType.VALUE)
+                structType = PostfixNode.GetType(ref environment) as StructType;
+            else
+                structType = (PostfixNode.GetType(ref environment) as PointerType).PointerToType as StructType;
+            var id = Id as Id;
+            var member = structType.Members.Get(id.IdName) as VarSymbol;
+            var il = methodDefinition.Body.GetILProcessor();
+            il.Emit(OpCodes.Ldfld, member.FieldDefinition);
         }
     }
 
@@ -127,12 +122,15 @@ namespace CCompiler.Parser
             var il = methodDefinition.Body.GetILProcessor();
             switch (Left)
             {
-                case MemberCall memberCall: // TODO add POINTER call
+                case MemberCall memberCall:
                 {
                     if (memberCall.PostfixNode is Id id)
                     {
                         var varSymbol = environment.GetSymbol(id.IdName) as VarSymbol;
-                        il.Emit(OpCodes.Ldloca_S, varSymbol.VariableDefinition);
+                        if (memberCall.TypeOfCall == MemberCall.CallType.VALUE)
+                            il.Emit(OpCodes.Ldloca_S, varSymbol.VariableDefinition);
+                        else
+                            il.Emit(OpCodes.Ldloc, varSymbol.VariableDefinition);
                     }
                     else
                     {
@@ -141,10 +139,16 @@ namespace CCompiler.Parser
                     
                     Right.Generate(ref methodDefinition, ref environment);
                     
-                    var structType = memberCall.PostfixNode.GetType(ref environment) as StructType;
+                    StructType structType;
+                    if (memberCall.TypeOfCall == MemberCall.CallType.VALUE)
+                        structType = memberCall.PostfixNode.GetType(ref environment) as StructType;
+                    else
+                        structType =
+                            (memberCall.PostfixNode.GetType(ref environment) as PointerType)
+                            .PointerToType as StructType;
+                    
                     var member = structType.Members.Get((memberCall.Id as Id).IdName) as VarSymbol;
                     il.Emit(OpCodes.Stfld, member.FieldDefinition);
-                    
                     break;
                 }
                 case Id id:
@@ -175,11 +179,49 @@ namespace CCompiler.Parser
                     throw new NotImplementedException();
                     break;
                 }
-                case UnaryExp unaryExp: // If Type == OperatorType.MULT
+                case UnaryExp unaryExp:
                 {
-                    throw new NotImplementedException();
+                    unaryExp.UnaryExpNode.Generate(ref methodDefinition, ref environment);
+                    Right.Generate(ref methodDefinition, ref environment);
+                    il.Emit(OpCodes.Stind_Ref);
                     break;
                 }
+            }
+        }
+    }
+
+    public partial class UnaryExp
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            var il = methodDefinition.Body.GetILProcessor();
+            switch (UnaryOperator.Operator.Type)
+            {
+                case OperatorType.MULT:
+                {
+                    UnaryExpNode.Generate(ref methodDefinition, ref environment);
+                    if (UnaryExpNode.GetType(ref environment) is PointerType {PointerToType: StructType structType})
+                        il.Emit(OpCodes.Ldobj, structType.TypeReference);
+                    else
+                        il.Emit(OpCodes.Ldind_Ref);
+                    break;
+                }
+                case OperatorType.BITAND:
+                {
+                    if (UnaryExpNode is Id id)
+                    {
+                        var varSymbol = environment.GetSymbol(id.IdName) as VarSymbol;
+                        il.Emit(OpCodes.Ldloca_S, varSymbol.VariableDefinition);
+                        il.Emit(OpCodes.Conv_U);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                    break;
+                }
+                default:
+                    throw new ArgumentException();
             }
         }
     }

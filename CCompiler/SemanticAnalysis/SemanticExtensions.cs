@@ -80,7 +80,13 @@ namespace CCompiler.Parser
                 }
 
                 if (spec is StructSpec structSpec)
+                {
+                    if (typeSpecExist)
+                        throw new SemanticException("two or more data types in declaration specifiers",
+                            structSpec.Id.StartNodePosition);
+                    typeSpecExist = true;
                     symbolType = structSpec.ParseType(ref environment);
+                }
                 
                 if (spec is TypeQualifier typeQualifier)
                 {
@@ -415,7 +421,7 @@ namespace CCompiler.Parser
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
             var id = Id as Id;
-            if (_callType == CallType.VALUE)
+            if (TypeOfCall == CallType.VALUE)
             {
                 if (PostfixNode.GetType(ref environment) is StructType structType)
                 {
