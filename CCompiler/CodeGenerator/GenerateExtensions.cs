@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Design.Serialization;
+using System.Security.Cryptography;
 using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
 using Mono.Cecil;
@@ -279,7 +280,28 @@ namespace CCompiler.Parser
 
     public partial class ForStat
     {
-        
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            var il = methodDefinition.Body.GetILProcessor();
+            var startLabel = il.Create(OpCodes.Nop);
+            var checkLabel = il.Create(OpCodes.Nop);
+            var expLabel = il.Create(OpCodes.Nop);
+            var endLabel = il.Create(OpCodes.Nop);
+            environment.LoopsLabels.Push(new WhileStat.Labels(expLabel, endLabel));
+            
+            Exp1.Generate(ref methodDefinition, ref environment);
+            il.Emit(OpCodes.Br, checkLabel);
+            il.Append(startLabel);
+            Stat.Generate(ref methodDefinition, ref environment);
+            il.Append(expLabel);
+            Exp3.Generate(ref methodDefinition, ref environment);
+            il.Append(checkLabel);
+            Exp2.Generate(ref methodDefinition, ref environment);
+            il.Emit(OpCodes.Brtrue, startLabel);
+            il.Append(endLabel);
+            
+            environment.LoopsLabels.Pop();
+        }
     }
 
     public partial class WhileStat
@@ -304,6 +326,37 @@ namespace CCompiler.Parser
             }
             il.Emit(OpCodes.Br, startLabel);
             il.Append(endLabel);
+            environment.LoopsLabels.Pop();
+        }
+    }
+
+    public partial class JumpStat
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            var il = methodDefinition.Body.GetILProcessor();
+            switch (Token.Type)
+            {
+                case KeywordType.CONTINUE:
+                    il.Emit(OpCodes.Br, environment.LoopsLabels.Peek().Start);
+                    break;
+                case KeywordType.BREAK:
+                    il.Emit(OpCodes.Br, environment.LoopsLabels.Peek().End);
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
+        }
+    }
+
+    public partial class ReturnStat
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            var il = methodDefinition.Body.GetILProcessor();
+            if (Exp is ExpNode exp)
+                exp.Generate(ref methodDefinition, ref environment);
+            il.Emit(OpCodes.Ret);
         }
     }
 }
