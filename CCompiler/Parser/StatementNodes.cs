@@ -2,6 +2,7 @@
 using System.Linq;
 using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
+using Mono.Cecil.Cil;
 
 namespace CCompiler.Parser
 {
@@ -103,6 +104,20 @@ namespace CCompiler.Parser
     
     public partial class WhileStat : Node
     {
+        public class Labels
+        {
+            public Instruction Start { get; }
+            public Instruction End { get; }
+            public Labels(Instruction start, Instruction end)
+            {
+                Start = start;
+                End = end;
+            }
+            public Labels()
+            {
+            }
+        }
+        
         public ExpNode Exp { get; }
         public Node Stat { get; }
         public WhileType WhileType { get; }

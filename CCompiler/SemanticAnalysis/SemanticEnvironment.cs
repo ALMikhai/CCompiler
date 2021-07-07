@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CCompiler.CodeGenerator;
+using CCompiler.Parser;
 using CCompiler.Tokenizer;
 using Mono.Cecil;
 
@@ -9,14 +10,14 @@ namespace CCompiler.SemanticAnalysis
     public class SemanticEnvironment
     {
         private Stack<EnvironmentSnapshot> _snapshots;
-        private int _nestedLoopsCount;
+        public Stack<WhileStat.Labels> LoopsLabels { get; }
         private Stack<SymbolType> _returnTypes;
         public Dictionary<string, MethodDefinition> MethodDefinitions { get; } =
             new Dictionary<string, MethodDefinition>();
 
         public SemanticEnvironment()
         {
-            _nestedLoopsCount = 0;
+            LoopsLabels = new Stack<WhileStat.Labels>();
             _returnTypes = new Stack<SymbolType>();
             _snapshots = new Stack<EnvironmentSnapshot>();
             var environmentSnapshot = new EnvironmentSnapshot();
@@ -63,15 +64,7 @@ namespace CCompiler.SemanticAnalysis
             throw new ArgumentException($"symbol '{id}' is not define");
         }
         
-        public bool InLoop() => _nestedLoopsCount > 0;
-        public void LoopEntry() => ++_nestedLoopsCount;
-        public void LoopExit()
-        {
-            --_nestedLoopsCount;
-            if (_nestedLoopsCount < 0)
-                throw new Exception("exit from the loop which does not exist");
-        }
-
+        public bool InLoop() => LoopsLabels.Count > 0;
         public void PushReturnType(SymbolType type) => _returnTypes.Push(type);
         public SymbolType PopReturnType() => _returnTypes.Pop();
         public SymbolType PeekReturnType() => _returnTypes.Peek();

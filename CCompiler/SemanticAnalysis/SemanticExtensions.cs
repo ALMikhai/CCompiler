@@ -767,9 +767,9 @@ namespace CCompiler.Parser
         {
             if (Exp.GetType(ref environment).IsScalar == false)
                 throw new SemanticException("scalar type is required", Exp.StartNodePosition);
-            environment.LoopEntry();
+            environment.LoopsLabels.Push(new Labels());
             Stat.CheckSemantic(ref environment);
-            environment.LoopExit();
+            environment.LoopsLabels.Pop();
         }
     }
 
@@ -785,9 +785,9 @@ namespace CCompiler.Parser
             if (Exp3 is ExpNode exp3)
                 exp3.GetType(ref environment);
             
-            environment.LoopEntry();
+            environment.LoopsLabels.Push(new WhileStat.Labels());
             Stat.CheckSemantic(ref environment);
-            environment.LoopExit();
+            environment.LoopsLabels.Pop();
         }
     }
 

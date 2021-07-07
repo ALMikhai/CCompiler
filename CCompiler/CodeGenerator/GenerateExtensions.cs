@@ -276,4 +276,34 @@ namespace CCompiler.Parser
                     node.Generate(ref methodDefinition, ref environment);
         }
     }
+
+    public partial class ForStat
+    {
+        
+    }
+
+    public partial class WhileStat
+    {
+        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        {
+            var il = methodDefinition.Body.GetILProcessor();
+            var startLabel = il.Create(OpCodes.Nop);
+            var endLabel = il.Create(OpCodes.Nop);
+            environment.LoopsLabels.Push(new Labels(startLabel, endLabel));
+            il.Append(startLabel);
+            if (WhileType == WhileType.WHILE)
+            {
+                Exp.Generate(ref methodDefinition, ref environment);
+                il.Emit(OpCodes.Brfalse, endLabel);
+            }
+            Stat.Generate(ref methodDefinition, ref environment);
+            if (WhileType == WhileType.DOWHILE)
+            {
+                Exp.Generate(ref methodDefinition, ref environment);
+                il.Emit(OpCodes.Brfalse, endLabel);
+            }
+            il.Emit(OpCodes.Br, startLabel);
+            il.Append(endLabel);
+        }
+    }
 }
