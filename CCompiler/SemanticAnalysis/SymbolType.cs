@@ -104,7 +104,7 @@ namespace CCompiler.SemanticAnalysis
         public Position DeclPosition { get; }
         public string Name { get; }
         public Table<Symbol> Members { get; }
-        public TypeReference TypeReference { get; set; } // TODO For generation.
+        public TypeReference TypeReference { get; set; }
 
         public StructType(bool isConst, bool isVolatile, string name, Table<Symbol> members, Position declPosition) : base(isConst, isVolatile, SymbolTypeKind.STRUCT)
         {
