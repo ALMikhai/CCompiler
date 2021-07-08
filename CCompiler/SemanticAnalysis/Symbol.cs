@@ -71,6 +71,7 @@ namespace CCompiler.SemanticAnalysis
     public class FuncSymbol : Symbol
     {
         public CompoundStat CompoundStat { get; }
+        public MethodDefinition Definition { get; protected set; }
         
         public FuncSymbol(string id, FuncType type, Position declPosition, CompoundStat compoundStat) : base(id, type, declPosition)
         {
@@ -93,6 +94,7 @@ namespace CCompiler.SemanticAnalysis
             
             var methodDefinition = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
                 retType.ToTypeReference(ref assembly)) {Body = {InitLocals = true}};
+            Definition = methodDefinition;
             var il = methodDefinition.Body.GetILProcessor();
 
             foreach (var argument in funcType.GetArguments())
@@ -144,7 +146,6 @@ namespace CCompiler.SemanticAnalysis
                 assembly.AssemblyDefinition.MainModule.EntryPoint = methodDefinition;
             }
             
-            environment.MethodDefinitions.Add(Id, methodDefinition); // TODO move to FuncSymbol. 
             assembly.AddMethod(methodDefinition);
             environment.PopSnapshot();
         }

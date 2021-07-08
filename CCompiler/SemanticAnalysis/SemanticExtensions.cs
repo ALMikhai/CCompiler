@@ -321,6 +321,7 @@ namespace CCompiler.Parser
             var varSymbol = Declarator.ParseSymbolByType(returnType, ref environment) as VarSymbol;
             var funcType = varSymbol.Type as FuncType;
             var funcSymbol = new FuncSymbol(varSymbol.Id, funcType, varSymbol.DeclPosition, CompoundStat);
+            environment.GetCurrentSnapshot().PushSymbol(funcSymbol);
             if (!(DeclList is NullStat))
                 throw new NotImplementedException("old-style (K&R) function definition is not supported");
 
@@ -337,7 +338,6 @@ namespace CCompiler.Parser
             
             environment.PopReturnType();
             environment.PopSnapshot();
-            environment.GetCurrentSnapshot().PushSymbol(funcSymbol);
         }
     }
 

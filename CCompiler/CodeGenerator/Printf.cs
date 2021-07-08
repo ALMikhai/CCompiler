@@ -30,6 +30,7 @@ namespace CCompiler.CodeGenerator
             var retType = funcType.ReturnType;
             var methodDefinition = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
                 retType.ToTypeReference(ref assembly)) {Body = {InitLocals = true}};
+            Definition = methodDefinition;
             var mainModule = assembly.AssemblyDefinition.MainModule;
             var writeLineInfo = typeof(Console).GetMethod("Write", new Type[] {typeof(string), typeof(object)});
             var writeLineReference = mainModule.ImportReference(writeLineInfo);
@@ -49,7 +50,6 @@ namespace CCompiler.CodeGenerator
             il.Emit(OpCodes.Call, writeLineReference);
             il.Emit(OpCodes.Ret);
             
-            environment.MethodDefinitions.Add(Id, methodDefinition);
             assembly.AddMethod(methodDefinition);
         }
         

@@ -12,8 +12,6 @@ namespace CCompiler.SemanticAnalysis
         private Stack<EnvironmentSnapshot> _snapshots;
         public Stack<WhileStat.Labels> LoopsLabels { get; }
         private Stack<SymbolType> _returnTypes;
-        public Dictionary<string, MethodDefinition> MethodDefinitions { get; } =
-            new Dictionary<string, MethodDefinition>();
 
         public SemanticEnvironment()
         {

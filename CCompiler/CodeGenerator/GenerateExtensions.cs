@@ -60,7 +60,7 @@ namespace CCompiler.Parser
                     }
                     break;
                 case FuncSymbol funcSymbol:
-                    il.Emit(OpCodes.Call, environment.MethodDefinitions[funcSymbol.Id]);
+                    il.Emit(OpCodes.Call, funcSymbol.Definition);
                     break;
             }
         }
@@ -196,7 +196,18 @@ namespace CCompiler.Parser
             PostfixNode.Generate(ref methodDefinition, ref environment);
             Exp.Generate(ref methodDefinition, ref environment);
             right.Generate(ref methodDefinition, ref environment);
-            il.Emit(OpCodes.Stelem_Ref);
+            switch ((right as ExpNode).GetType(ref environment).SymbolTypeKind)
+            {
+                case SymbolTypeKind.INT:
+                    il.Emit(OpCodes.Stelem_I8);
+                    break;
+                case SymbolTypeKind.FLOAT:
+                    il.Emit(OpCodes.Stelem_R8);
+                    break;
+                default:
+                    il.Emit(OpCodes.Stelem_Ref);
+                    break;
+            }
         }
     }
 
@@ -228,16 +239,13 @@ namespace CCompiler.Parser
             switch (UnaryOperator.Operator.Type)
             {
                 case OperatorType.MULT:
-                {
                     UnaryExpNode.Generate(ref methodDefinition, ref environment);
                     if (UnaryExpNode.GetType(ref environment) is PointerType {PointerToType: StructType structType})
                         il.Emit(OpCodes.Ldobj, structType.TypeReference);
                     else
                         il.Emit(OpCodes.Ldind_Ref);
                     break;
-                }
                 case OperatorType.BITAND:
-                {
                     if (UnaryExpNode is Id id)
                     {
                         var varSymbol = environment.GetSymbol(id.IdName) as VarSymbol;
@@ -249,7 +257,18 @@ namespace CCompiler.Parser
                         throw new NotImplementedException();
                     }
                     break;
-                }
+                case OperatorType.ADD:
+                    UnaryExpNode.Generate(ref methodDefinition, ref environment);
+                    break;
+                case OperatorType.SUB:
+                    il.Emit(OpCodes.Ldc_I8, 0L);
+                    UnaryExpNode.Generate(ref methodDefinition, ref environment);
+                    il.Emit(OpCodes.Sub);
+                    break;
+                case OperatorType.TILDE:
+                    UnaryExpNode.Generate(ref methodDefinition, ref environment);
+                    il.Emit(OpCodes.Not);
+                    break;
                 default:
                     throw new ArgumentException();
             }
