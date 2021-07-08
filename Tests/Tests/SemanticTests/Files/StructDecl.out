@@ -64,11 +64,8 @@ Symbols {
 	FUNC returning VOID
 	Arguments{
 		STRING :: s
-	} :: printf
-	FUNC returning VOID
-	Arguments{
-		STRING :: s
-	} :: scanf
+		INT :: o
+	}:: printf
 	STRUCT called node :: left
 	STRUCT called a :: b
 	FUNC returning VOID

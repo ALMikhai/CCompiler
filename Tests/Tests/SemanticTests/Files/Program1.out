@@ -237,11 +237,8 @@ Symbols {
 	FUNC returning VOID
 	Arguments{
 		STRING :: s
-	} :: printf
-	FUNC returning VOID
-	Arguments{
-		STRING :: s
-	} :: scanf
+		INT :: o
+	}:: printf
 	FUNC returning VOID
 	Arguments{
 		POINTER to INT :: a

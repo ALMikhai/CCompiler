@@ -51,11 +51,8 @@ Symbols {
 	FUNC returning VOID
 	Arguments{
 		STRING :: s
-	} :: printf
-	FUNC returning VOID
-	Arguments{
-		STRING :: s
-	} :: scanf
+		INT :: o
+	}:: printf
 	INT :: a
 	FLOAT :: b
 	POINTER to INT :: c

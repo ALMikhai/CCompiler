@@ -46,11 +46,8 @@ Symbols {
 	FUNC returning VOID
 	Arguments{
 		STRING :: s
-	} :: printf
-	FUNC returning VOID
-	Arguments{
-		STRING :: s
-	} :: scanf
+		INT :: o
+	}:: printf
 	POINTER to FUNC returning POINTER to ARRAY of type INT
 	Arguments{
 		FLOAT :: a

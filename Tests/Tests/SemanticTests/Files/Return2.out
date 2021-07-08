@@ -29,11 +29,8 @@ Symbols {
 	FUNC returning VOID
 	Arguments{
 		STRING :: s
-	} :: printf
-	FUNC returning VOID
-	Arguments{
-		STRING :: s
-	} :: scanf
+		INT :: o
+	}:: printf
 	STRUCT called a :: a1
 	FUNC returning STRUCT called a
 	Arguments{ }
