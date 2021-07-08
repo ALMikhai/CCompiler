@@ -29,6 +29,10 @@
                     {
                         _state = State.S;
                     }
+                    else if (ch == '#')
+                    {
+                        _state = State.LINE;
+                    }
                     else
                     {
                         Tokenizer.LastException.AddMessage("comment must start with a '//' or '/*'");

@@ -36,5 +36,57 @@ namespace Tests
 
             throw new ArgumentException("path is not correct");
         }
+
+        public static string RunAndGetOutputGCC(string fileName)
+        {
+            using var procGCC =
+                Process.Start("wsl.exe",
+                    $"gcc \"/mnt/d/Documents/All my projects/CCompiler/Tests/ProgramTests/{fileName}.c\" -o \"/mnt/d/Documents/All my projects/CCompiler/Tests/ProgramTests/{fileName}GCC.exe\"");
+            if (procGCC == null) throw new ArgumentException("path is not correct");
+            procGCC.StartInfo.CreateNoWindow = true;
+            procGCC.StartInfo.RedirectStandardOutput = true;
+            procGCC.StartInfo.UseShellExecute = false;
+            procGCC.Start();
+            procGCC.WaitForExit();
+            
+            using var procExe =
+                Process.Start("wsl.exe",
+                    $"\"/mnt/d/Documents/All my projects/CCompiler/Tests/ProgramTests/{fileName}GCC.exe\"");
+            if (procExe == null) throw new ArgumentException("path is not correct");
+            procExe.StartInfo.CreateNoWindow = true;
+            procExe.StartInfo.RedirectStandardOutput = true;
+            procExe.StartInfo.UseShellExecute = false;
+            procExe.Start();
+            var res = procExe.StandardOutput.ReadToEnd();
+            procExe.WaitForExit();
+            return res;
+        }
+        
+        public static string RunAndGetOutputMyCompiler(string fileName)
+        {
+            var args = $@"""D:\Documents\All my projects\CCompiler\Tests\ProgramTests\{fileName}.c"" -net";
+            using var proc =
+                Process.Start(@"..\..\..\..\CCompiler\bin\Debug\netcoreapp3.1\CCompiler.exe",
+                    args);
+            if (proc == null) throw new ArgumentException("path is not correct");
+            proc.StartInfo.CreateNoWindow = true;
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.StartInfo.UseShellExecute = false;
+            proc.Start();
+            proc.WaitForExit();
+
+            using var procExe =
+                Process.Start("dotnet.exe",
+                    $@"""D:\Documents\All my projects\CCompiler\Tests\ProgramTests\{fileName}.exe""");
+            if (procExe == null) throw new ArgumentException("path is not correct");
+            procExe.StartInfo.CreateNoWindow = true;
+            procExe.StartInfo.RedirectStandardOutput = true;
+            procExe.StartInfo.UseShellExecute = false;
+            procExe.Start();
+            var res = procExe.StandardOutput.ReadToEnd();
+            procExe.WaitForExit();
+            
+            return res;
+        }
     }
 }

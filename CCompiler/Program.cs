@@ -64,7 +64,8 @@ namespace CCompiler
                     var parserEnvironment = new SemanticEnvironment();
                     syntaxTree.CheckSemantic(ref parserEnvironment);
 
-                    var assembly = new Assembly("app");
+                    var fileName = new FileInfo(args[0]);
+                    var assembly = new Assembly(fileName.Name.Replace(".c",""));
                     var unitSnapshot = parserEnvironment.PopSnapshot();
                     var generatorEnvironment = new SemanticEnvironment();
                     generatorEnvironment.PushSnapshot(unitSnapshot);
@@ -75,7 +76,7 @@ namespace CCompiler
                     foreach (var symbol in unitSnapshot.SymbolTable.GetData())
                         symbol.Value.Generate(ref assembly, ref generatorEnvironment);
                     
-                    assembly.Save(@"C:\Users\Alexandr\Desktop\IL\"); // TODO Make it better.
+                    assembly.Save(fileName.DirectoryName + '\\');
                 }
             }
             catch (FileNotFoundException e)
