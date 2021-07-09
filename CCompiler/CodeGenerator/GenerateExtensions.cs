@@ -8,19 +8,10 @@ using TokenType = CCompiler.Tokenizer.TokenType;
 
 namespace CCompiler.Parser
 {
-    public partial class Node
-    {
-        public virtual void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment) =>
-            throw new NotImplementedException();
-        public virtual void Store(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment, Node right) =>
-            throw new NotImplementedException();
-    }
-
     public partial class Const
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
             switch (Token.TokenType)
             {
                 case TokenType.INT:
@@ -40,9 +31,8 @@ namespace CCompiler.Parser
 
     public partial class Id
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
             var symbol = environment.GetSymbol(IdName);
             switch (symbol)
             {
@@ -68,27 +58,23 @@ namespace CCompiler.Parser
 
     public partial class String
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
-        {
-            var il = methodDefinition.Body.GetILProcessor();
+        public override void Generate(ILProcessor il, SemanticEnvironment environment) =>
             il.Emit(OpCodes.Ldstr, Utils.ConvertCFormatToCsFormat(Str));
-        }
     }
 
     public partial class FuncCall
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
             var list = new ExpList();
             if (ExpList is ExpList expList)
                 list = expList;
 
             foreach (var node in list.Nodes)
-                node.Generate(ref methodDefinition, ref environment);
+                node.Generate(il, environment);
             
-            PostfixNode.Generate(ref methodDefinition, ref environment);
+            PostfixNode.Generate(il, environment);
             
-            var il = methodDefinition.Body.GetILProcessor();
             if (PostfixNode is Id id) // Push null to stack if function return void.
             {
                 var type = (environment.GetSymbol(id.IdName) as FuncSymbol).Type as FuncType;
@@ -102,20 +88,19 @@ namespace CCompiler.Parser
 
     public partial class ExpStat
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
             if (!(ExpNode is ExpNode expNode)) return;
-            expNode.Generate(ref methodDefinition, ref environment);
+            expNode.Generate(il, environment);
             il.Emit(OpCodes.Pop);
         }
     }
 
     public partial class MemberCall
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            PostfixNode.Generate(ref methodDefinition, ref environment);
+            PostfixNode.Generate(il, environment);
             StructType structType;
             if (TypeOfCall == CallType.VALUE)
                 structType = PostfixNode.GetType(ref environment) as StructType;
@@ -123,123 +108,27 @@ namespace CCompiler.Parser
                 structType = (PostfixNode.GetType(ref environment) as PointerType).PointerToType as StructType;
             var id = Id as Id;
             var member = structType.Members.Get(id.IdName) as VarSymbol;
-            var il = methodDefinition.Body.GetILProcessor();
             il.Emit(OpCodes.Ldfld, member.FieldDefinition);
         }
     }
 
-    public partial class MemberCall
-    {
-        public override void Store(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment, Node right)
-        {
-            var il = methodDefinition.Body.GetILProcessor();
-            
-            if (PostfixNode is Id id)
-            {
-                var varSymbol = environment.GetSymbol(id.IdName) as VarSymbol;
-                if (TypeOfCall == MemberCall.CallType.VALUE)
-                    il.Emit(OpCodes.Ldloca_S, varSymbol.VariableDefinition);
-                else
-                    il.Emit(OpCodes.Ldloc, varSymbol.VariableDefinition);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-                    
-            right.Generate(ref methodDefinition, ref environment);
-                    
-            StructType structType;
-            if (TypeOfCall == MemberCall.CallType.VALUE)
-                structType = PostfixNode.GetType(ref environment) as StructType;
-            else
-                structType =
-                    (PostfixNode.GetType(ref environment) as PointerType)
-                    .PointerToType as StructType;
-                    
-            var member = structType.Members.Get((Id as Id).IdName) as VarSymbol;
-            il.Emit(OpCodes.Stfld, member.FieldDefinition);
-        }
-    }
-
-    public partial class Id
-    {
-        public override void Store(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment, Node right)
-        {
-            var il = methodDefinition.Body.GetILProcessor();
-            right.Generate(ref methodDefinition, ref environment);
-            var symbol = environment.GetSymbol(IdName);
-            switch (symbol)
-            {
-                case VarSymbol varSymbol:
-                    switch (varSymbol.VariableType)
-                    {
-                        case VarSymbol.VarType.VARIABLE:
-                            il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
-                            break;
-                        case VarSymbol.VarType.PARAMETER:
-                            il.Emit(OpCodes.Starg, varSymbol.ParameterDefinition);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                    break;
-            }
-        }
-    }
-
-    public partial class AccessingArrayElement
-    {
-        public override void Store(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment, Node right)
-        {
-            var il = methodDefinition.Body.GetILProcessor();
-            PostfixNode.Generate(ref methodDefinition, ref environment);
-            Exp.Generate(ref methodDefinition, ref environment);
-            right.Generate(ref methodDefinition, ref environment);
-            switch ((right as ExpNode).GetType(ref environment).SymbolTypeKind)
-            {
-                case SymbolTypeKind.INT:
-                    il.Emit(OpCodes.Stelem_I8);
-                    break;
-                case SymbolTypeKind.FLOAT:
-                    il.Emit(OpCodes.Stelem_R8);
-                    break;
-                default:
-                    il.Emit(OpCodes.Stelem_Ref);
-                    break;
-            }
-        }
-    }
-
-    public partial class UnaryExp
-    {
-        public override void Store(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment, Node right)
-        {
-            var il = methodDefinition.Body.GetILProcessor();
-            UnaryExpNode.Generate(ref methodDefinition, ref environment);
-            right.Generate(ref methodDefinition, ref environment);
-            il.Emit(OpCodes.Stind_Ref);
-        }
-    }
-    
     public partial class AssignmentExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            Left.Store(ref methodDefinition, ref environment, Right);
-            Left.Generate(ref methodDefinition, ref environment);
+            Left.Store(il, environment, Right);
+            Left.Generate(il, environment);
         }
     }
 
     public partial class UnaryExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
             switch (UnaryOperator.Operator.Type)
             {
                 case OperatorType.MULT:
-                    UnaryExpNode.Generate(ref methodDefinition, ref environment);
+                    UnaryExpNode.Generate(il, environment);
                     if (UnaryExpNode.GetType(ref environment) is PointerType {PointerToType: StructType structType})
                         il.Emit(OpCodes.Ldobj, structType.TypeReference);
                     else
@@ -258,15 +147,15 @@ namespace CCompiler.Parser
                     }
                     break;
                 case OperatorType.ADD:
-                    UnaryExpNode.Generate(ref methodDefinition, ref environment);
+                    UnaryExpNode.Generate(il, environment);
                     break;
                 case OperatorType.SUB:
                     il.Emit(OpCodes.Ldc_I8, 0L);
-                    UnaryExpNode.Generate(ref methodDefinition, ref environment);
+                    UnaryExpNode.Generate(il, environment);
                     il.Emit(OpCodes.Sub);
                     break;
                 case OperatorType.TILDE:
-                    UnaryExpNode.Generate(ref methodDefinition, ref environment);
+                    UnaryExpNode.Generate(il, environment);
                     il.Emit(OpCodes.Not);
                     break;
                 default:
@@ -277,72 +166,69 @@ namespace CCompiler.Parser
 
     public partial class AccessingArrayElement
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            PostfixNode.Generate(ref methodDefinition, ref environment);
-            Exp.Generate(ref methodDefinition, ref environment);
+            PostfixNode.Generate(il, environment);
+            Exp.Generate(il, environment);
             il.Emit(OpCodes.Ldelem_Ref);
         }
     }
 
     public partial class EmptyExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
         }
     }
     
     public partial class IfStat
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
             var elseLabel = il.Create(OpCodes.Nop);
             var endLabel = il.Create(OpCodes.Nop);
-            Exp.Generate(ref methodDefinition, ref environment);
+            Exp.Generate(il, environment);
             il.Emit(OpCodes.Brfalse, elseLabel);
-            Stat1.Generate(ref methodDefinition, ref environment);
+            Stat1.Generate(il, environment);
             il.Emit(OpCodes.Br, endLabel);
             il.Append(elseLabel);
-            Stat2.Generate(ref methodDefinition, ref environment);
+            Stat2.Generate(il, environment);
             il.Append(endLabel);
         }
     }
 
     public partial class CompoundStat
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
             if (DeclList is DeclList)
                 throw new NotImplementedException("Declaring variables in a nested block is prohibited");
             if (StatList is StatList statList)
                 foreach (var node in statList.Nodes)
-                    node.Generate(ref methodDefinition, ref environment);
+                    node.Generate(il, environment);
         }
     }
 
     public partial class ForStat
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
             var startLabel = il.Create(OpCodes.Nop);
             var checkLabel = il.Create(OpCodes.Nop);
             var expLabel = il.Create(OpCodes.Nop);
             var endLabel = il.Create(OpCodes.Nop);
             environment.LoopsLabels.Push(new WhileStat.Labels(expLabel, endLabel));
             
-            Exp1.Generate(ref methodDefinition, ref environment);
+            Exp1.Generate(il, environment);
             il.Emit(OpCodes.Pop);
             il.Emit(OpCodes.Br, checkLabel);
             il.Append(startLabel);
-            Stat.Generate(ref methodDefinition, ref environment);
+            Stat.Generate(il, environment);
             il.Append(expLabel);
-            Exp3.Generate(ref methodDefinition, ref environment);
+            Exp3.Generate(il, environment);
             il.Emit(OpCodes.Pop);
             il.Append(checkLabel);
-            Exp2.Generate(ref methodDefinition, ref environment);
+            Exp2.Generate(il, environment);
             il.Emit(OpCodes.Brtrue, startLabel);
             il.Append(endLabel);
             
@@ -352,22 +238,21 @@ namespace CCompiler.Parser
 
     public partial class WhileStat
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
             var startLabel = il.Create(OpCodes.Nop);
             var endLabel = il.Create(OpCodes.Nop);
             environment.LoopsLabels.Push(new Labels(startLabel, endLabel));
             il.Append(startLabel);
             if (WhileType == WhileType.WHILE)
             {
-                Exp.Generate(ref methodDefinition, ref environment);
+                Exp.Generate(il, environment);
                 il.Emit(OpCodes.Brfalse, endLabel);
             }
-            Stat.Generate(ref methodDefinition, ref environment);
+            Stat.Generate(il, environment);
             if (WhileType == WhileType.DOWHILE)
             {
-                Exp.Generate(ref methodDefinition, ref environment);
+                Exp.Generate(il, environment);
                 il.Emit(OpCodes.Brfalse, endLabel);
             }
             il.Emit(OpCodes.Br, startLabel);
@@ -378,9 +263,8 @@ namespace CCompiler.Parser
 
     public partial class JumpStat
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
             switch (Token.Type)
             {
                 case KeywordType.CONTINUE:
@@ -397,22 +281,20 @@ namespace CCompiler.Parser
 
     public partial class ReturnStat
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
             if (Exp is ExpNode exp)
-                exp.Generate(ref methodDefinition, ref environment);
+                exp.Generate(il, environment);
             il.Emit(OpCodes.Ret);
         }
     }
 
     public partial class AdditiveExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
-            Right.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
+            Right.Generate(il, environment);
             switch (Token.Type)
             {
                 case OperatorType.ADD:
@@ -429,11 +311,10 @@ namespace CCompiler.Parser
 
     public partial class MultExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
-            Right.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
+            Right.Generate(il, environment);
             switch (Token.Type)
             {
                 case OperatorType.MULT:
@@ -453,11 +334,10 @@ namespace CCompiler.Parser
 
     public partial class ShiftExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
-            Right.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
+            Right.Generate(il, environment);
             switch (Token.Type)
             {
                 case OperatorType.LSHIFT:
@@ -474,11 +354,10 @@ namespace CCompiler.Parser
 
     public partial class RelationalExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
-            Right.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
+            Right.Generate(il, environment);
             switch (Token.Type)
             {
                 case OperatorType.MORE:
@@ -505,11 +384,10 @@ namespace CCompiler.Parser
 
     public partial class EqualityExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
-            Right.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
+            Right.Generate(il, environment);
             switch (Token.Type)
             {
                 case OperatorType.EQ:
@@ -528,49 +406,45 @@ namespace CCompiler.Parser
 
     public partial class AndExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
-            Right.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
+            Right.Generate(il, environment);
             il.Emit(OpCodes.And);
         }
     }
 
     public partial class ExclusiveOrExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
-            Right.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
+            Right.Generate(il, environment);
             il.Emit(OpCodes.Xor);
         }
     }
 
     public partial class InclusiveOrExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
-            Right.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
+            Right.Generate(il, environment);
             il.Emit(OpCodes.Or);
         }
     }
 
     public partial class LogicalAndExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
             il.Emit(OpCodes.Ldc_I8, 0L);
             il.Emit(OpCodes.Ceq);
             il.Emit(OpCodes.Ldc_I8, 0L);
             il.Emit(OpCodes.Ceq);
             
-            Right.Generate(ref methodDefinition, ref environment);
+            Right.Generate(il, environment);
             il.Emit(OpCodes.Ldc_I8, 0L);
             il.Emit(OpCodes.Ceq);
             il.Emit(OpCodes.Ldc_I8, 0L);
@@ -582,27 +456,26 @@ namespace CCompiler.Parser
 
     public partial class LogicalOrExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
-            Right.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
+            Right.Generate(il, environment);
             il.Emit(OpCodes.Or);
         }
     }
 
     public partial class ConditionalExp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
             var ifStat = new IfStat(Condition, Exp1, Exp2);
-            ifStat.Generate(ref methodDefinition, ref environment);
+            ifStat.Generate(il, environment);
         }
     }
 
     public partial class PrefixIncDec
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
             var assignmentExp = new AssignmentExp(
                 new OperatorToken(TokenType.OPERATOR, "", 0, OperatorType.EQ),
@@ -613,18 +486,114 @@ namespace CCompiler.Parser
                     new Const(new Token(TokenType.INT, "1", 1L), new Position(0, 0)), 
                     new Position(0, 0)),
                 new Position(0, 0));
-            assignmentExp.Generate(ref methodDefinition, ref environment);
+            assignmentExp.Generate(il, environment);
         }
     }
 
     public partial class Exp
     {
-        public override void Generate(ref MethodDefinition methodDefinition, ref SemanticEnvironment environment)
+        public override void Generate(ILProcessor il, SemanticEnvironment environment)
         {
-            var il = methodDefinition.Body.GetILProcessor();
-            Left.Generate(ref methodDefinition, ref environment);
+            Left.Generate(il, environment);
             il.Emit(OpCodes.Pop);
-            Right.Generate(ref methodDefinition, ref environment);
+            Right.Generate(il, environment);
+        }
+    }
+    
+    public partial class Node
+    {
+        public virtual void Generate(ILProcessor il, SemanticEnvironment environment) =>
+            throw new NotImplementedException();
+        public virtual void Store(ILProcessor il, SemanticEnvironment environment, Node right) =>
+            throw new NotImplementedException();
+    }
+    
+    public partial class MemberCall
+    {
+        public override void Store(ILProcessor il, SemanticEnvironment environment, Node right)
+        {
+            if (PostfixNode is Id id)
+            {
+                var varSymbol = environment.GetSymbol(id.IdName) as VarSymbol;
+                if (TypeOfCall == MemberCall.CallType.VALUE)
+                    il.Emit(OpCodes.Ldloca_S, varSymbol.VariableDefinition);
+                else
+                    il.Emit(OpCodes.Ldloc, varSymbol.VariableDefinition);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+                    
+            right.Generate(il, environment);
+                    
+            StructType structType;
+            if (TypeOfCall == MemberCall.CallType.VALUE)
+                structType = PostfixNode.GetType(ref environment) as StructType;
+            else
+                structType =
+                    (PostfixNode.GetType(ref environment) as PointerType)
+                    .PointerToType as StructType;
+                    
+            var member = structType.Members.Get((Id as Id).IdName) as VarSymbol;
+            il.Emit(OpCodes.Stfld, member.FieldDefinition);
+        }
+    }
+    
+    public partial class Id
+    {
+        public override void Store(ILProcessor il, SemanticEnvironment environment, Node right)
+        {
+            right.Generate(il, environment);
+            var symbol = environment.GetSymbol(IdName);
+            switch (symbol)
+            {
+                case VarSymbol varSymbol:
+                    switch (varSymbol.VariableType)
+                    {
+                        case VarSymbol.VarType.VARIABLE:
+                            il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
+                            break;
+                        case VarSymbol.VarType.PARAMETER:
+                            il.Emit(OpCodes.Starg, varSymbol.ParameterDefinition);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    break;
+            }
+        }
+    }
+    
+    public partial class AccessingArrayElement
+    {
+        public override void Store(ILProcessor il, SemanticEnvironment environment, Node right)
+        {
+            PostfixNode.Generate(il, environment);
+            Exp.Generate(il, environment);
+            right.Generate(il, environment);
+            switch ((right as ExpNode).GetType(ref environment).SymbolTypeKind)
+            {
+                case SymbolTypeKind.INT:
+                    il.Emit(OpCodes.Stelem_I8);
+                    break;
+                case SymbolTypeKind.FLOAT:
+                    il.Emit(OpCodes.Stelem_R8);
+                    break;
+                default:
+                    il.Emit(OpCodes.Stelem_Ref);
+                    break;
+            }
+        }
+    }
+    
+    public partial class UnaryExp
+    {
+        public override void Store(ILProcessor il, SemanticEnvironment environment, Node right)
+        {
+            UnaryExpNode.Generate(il, environment);
+            right.Generate(il, environment);
+            il.Emit(OpCodes.Stind_Ref);
         }
     }
 }

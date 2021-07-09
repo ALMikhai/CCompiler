@@ -117,7 +117,7 @@ namespace CCompiler.SemanticAnalysis
                 
                 if (varSymbol.IsInitialized)
                 {
-                    varSymbol.Initializer.Generate(ref methodDefinition, ref environment);
+                    varSymbol.Initializer.Generate(il, environment);
                     il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
                 }
                 else switch (varSymbol.Type)
@@ -127,7 +127,7 @@ namespace CCompiler.SemanticAnalysis
                         il.Emit(OpCodes.Initobj, structType.TypeReference);
                         break;
                     case ArrayType arrayType:
-                        arrayType.InsideBrackets.Generate(ref methodDefinition, ref environment);
+                        arrayType.InsideBrackets.Generate(il, environment);
                         il.Emit(OpCodes.Newarr, arrayType.TypeOfArray.ToTypeReference(ref assembly));
                         il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
                         break;
@@ -136,7 +136,7 @@ namespace CCompiler.SemanticAnalysis
 
             if (CompoundStat.StatList is StatList statList)
                 foreach (var node in statList.Nodes)
-                    node.Generate(ref methodDefinition, ref environment);
+                    node.Generate(il, environment);
 
             il.Emit(OpCodes.Ret);
 
