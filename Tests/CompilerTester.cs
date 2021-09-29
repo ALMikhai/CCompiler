@@ -46,8 +46,11 @@ namespace Tests
         {
             get
             {
+                var res = new List<object[]>();
                 var files = new DirectoryInfo(ProgramsPath).GetFiles("*.c");
-                return files.Select(file => new[] {file.Name.Replace(".c", "")}).Cast<object[]>().ToList();
+                res.AddRange(files.Select(file => new object[]
+                    {file.Directory + "\\" + Path.GetFileNameWithoutExtension(file.Name)}));
+                return res;
             }
         }
 
