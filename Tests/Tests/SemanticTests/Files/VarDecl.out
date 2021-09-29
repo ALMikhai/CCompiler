@@ -48,6 +48,11 @@
 
 Structs { }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+		INT :: o
+	}:: printf
 	INT :: a
 	FLOAT :: b
 	POINTER to INT :: c

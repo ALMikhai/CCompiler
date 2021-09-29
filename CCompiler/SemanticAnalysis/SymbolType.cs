@@ -1,5 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using CCompiler.CodeGenerator;
+using CCompiler.Parser;
 using CCompiler.Tokenizer;
+using Mono.Cecil;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -44,37 +50,53 @@ namespace CCompiler.SemanticAnalysis
         public virtual string GetFullName() =>
             $"{(IsConst ? "const " : "")}{(IsVolatile ? "volatile " : "")}{SymbolTypeKind}";
         public virtual string GetShortName() => GetFullName();
+        public virtual TypeReference ToTypeReference(ref Assembly assembly)
+        {
+            return SymbolTypeKind switch
+            {
+                SymbolTypeKind.VOID => assembly.AssemblyDefinition.MainModule.TypeSystem.Void,
+                SymbolTypeKind.INT => assembly.AssemblyDefinition.MainModule.TypeSystem.Int64,
+                SymbolTypeKind.FLOAT => assembly.AssemblyDefinition.MainModule.TypeSystem.Double,
+                SymbolTypeKind.STRING => assembly.AssemblyDefinition.MainModule.TypeSystem.String,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
     }
 
     public class FuncType : SymbolType
     {
         public SymbolType ReturnType { get; }
-        public EnvironmentSnapshot Snapshot { get; }
+        public EnvironmentSnapshot ArgumentsSnapshot { get; }
 
-        public FuncType(SymbolType returnType, EnvironmentSnapshot snapshot) : base(true, false, SymbolTypeKind.FUNC)
+        public FuncType(SymbolType returnType, EnvironmentSnapshot argumentsSnapshot) : base(true, false, SymbolTypeKind.FUNC)
         {
             ReturnType = returnType;
-            Snapshot = snapshot;
+            ArgumentsSnapshot = argumentsSnapshot;
         }
         
         public override bool Equals(object? obj)
         {
             if (!(obj is FuncType funcType)) return false;
             if (ReturnType.Equals(funcType.ReturnType) == false ||
-                Snapshot.SymbolTable.Equals(funcType.Snapshot.SymbolTable) == false ||
-                Snapshot.StructTable.Equals(funcType.Snapshot.StructTable) == false)
+                ArgumentsSnapshot.SymbolTable.Equals(funcType.ArgumentsSnapshot.SymbolTable) == false ||
+                ArgumentsSnapshot.StructTable.Equals(funcType.ArgumentsSnapshot.StructTable) == false)
                 return false;
 
             return true;
         }
 
-        public Dictionary<string, Symbol> GetArguments()
+        public List<Symbol> GetArguments()
         {
-            return Snapshot.SymbolTable.GetData();
+            return ArgumentsSnapshot.SymbolTable.GetData().Values.ToList();
         }
         public override string GetFullName() =>
-            $"{SymbolTypeKind} returning {ReturnType.GetShortName()}\nArguments{Snapshot.SymbolTable}";
-        public override string GetShortName() => $"{SymbolTypeKind} returning {ReturnType.GetShortName()}";
+            $"{SymbolTypeKind} returning {ReturnType.GetShortName()}\nArguments{ArgumentsSnapshot.SymbolTable}";
+
+        public override string GetShortName() => GetFullName();
+        public override TypeReference ToTypeReference(ref Assembly assembly)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class StructType : SymbolType
@@ -82,6 +104,7 @@ namespace CCompiler.SemanticAnalysis
         public Position DeclPosition { get; }
         public string Name { get; }
         public Table<Symbol> Members { get; }
+        public TypeReference TypeReference { get; set; }
 
         public StructType(bool isConst, bool isVolatile, string name, Table<Symbol> members, Position declPosition) : base(isConst, isVolatile, SymbolTypeKind.STRUCT)
         {
@@ -95,8 +118,30 @@ namespace CCompiler.SemanticAnalysis
             if (!(obj is StructType structType)) return false;
             return Name == structType.Name && Members.Equals(structType.Members);
         }
+        
         public override string GetFullName() => $"{SymbolTypeKind} called {Name}\nMembers {Members}";
         public override string GetShortName() => $"{SymbolTypeKind} called {Name}";
+        public override TypeReference ToTypeReference(ref Assembly assembly) => TypeReference;
+
+        public void Generate(ref Assembly assembly, ref SemanticEnvironment environment)
+        {
+            var mainModule = assembly.AssemblyDefinition.MainModule;
+            var structDefinition = new TypeDefinition("app", Name,
+                TypeAttributes.SequentialLayout | TypeAttributes.Public | TypeAttributes.AnsiClass |
+                TypeAttributes.BeforeFieldInit,
+                mainModule.ImportReference(typeof(ValueType)));
+            
+            foreach (var (id, symbol) in Members.GetData())
+            {
+                var fieldDefinition = new FieldDefinition(id, FieldAttributes.Public, symbol.Type.ToTypeReference(ref assembly));
+                ((VarSymbol) symbol).VariableType = VarSymbol.VarType.FIELD;
+                ((VarSymbol) symbol).FieldDefinition = fieldDefinition;
+                structDefinition.Fields.Add(fieldDefinition);
+            }
+            
+            mainModule.Types.Add(structDefinition);
+            TypeReference = mainModule.ImportReference(structDefinition);
+        }
     }
 
     public class PointerType : SymbolType
@@ -117,17 +162,23 @@ namespace CCompiler.SemanticAnalysis
 
             return false;
         }
+
         public override string GetFullName() => base.GetFullName() + $" to {PointerToType}";
         public override string GetShortName() => GetFullName();
+
+        public override TypeReference ToTypeReference(ref Assembly assembly) =>
+            new Mono.Cecil.PointerType(PointerToType.ToTypeReference(ref assembly));
     }
     
     public class ArrayType : SymbolType
     {
         public SymbolType TypeOfArray { get; }
-
-        public ArrayType(bool isConst, bool isVolatile, SymbolType typeOfArray) : base(isConst, isVolatile, SymbolTypeKind.ARRAY)
+        public ExpNode InsideBrackets { get; }
+        
+        public ArrayType(bool isConst, bool isVolatile, SymbolType typeOfArray, ExpNode insideBrackets) : base(isConst, isVolatile, SymbolTypeKind.ARRAY)
         {
             TypeOfArray = typeOfArray;
+            InsideBrackets = insideBrackets;
         }
         
         public override bool Equals(object? obj)
@@ -142,5 +193,8 @@ namespace CCompiler.SemanticAnalysis
         
         public override string GetFullName() => base.GetFullName() + $" of type {TypeOfArray}";
         public override string GetShortName() => GetFullName();
+
+        public override TypeReference ToTypeReference(ref Assembly assembly) =>
+            new Mono.Cecil.ArrayType(TypeOfArray.ToTypeReference(ref assembly));
     }
 }

@@ -25,15 +25,13 @@
 
 Structs { }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+		INT :: o
+	}:: printf
 	FUNC returning INT
 	Arguments{ }
 	Structs { }
-	Symbols {
-		Nested block {
-			Structs { }
-			Symbols {
-				INT :: a
-			}
-		}
-	} :: f
+	Symbols { } :: f
 }

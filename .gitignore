@@ -351,3 +351,6 @@ MigrationBackup/
 CCompiler/TestProgram.txt
 CCompiler/.idea
 CCompiler/Properties
+CCompiler/TestProgram.c
+CCompiler/TestProgram.exe
+CCompiler/TestProgram.runtimeconfig.json

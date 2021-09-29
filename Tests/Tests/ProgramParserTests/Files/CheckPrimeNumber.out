@@ -71,12 +71,14 @@
   |     | |-()
   |     | | |-printf
   |     | | \-EXPLIST
-  |     | |   |-"%d is a prime number.\n"
+  |     | |   |-"%d is a prime number.
+"
   |     | |   \-n
   |     | \-()
   |     |   |-printf
   |     |   \-EXPLIST
-  |     |     |-"%d is not a prime number.\n"
+  |     |     |-"%d is not a prime number.
+"
   |     |     \-n
   |     |-ASSIGN
   |     | |-flag

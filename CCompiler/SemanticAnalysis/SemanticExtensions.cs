@@ -25,9 +25,10 @@ namespace CCompiler.Parser
         public override void CheckSemantic(ref SemanticEnvironment environment)
         {
             var type = DeclSpecs.NodeToType(DeclSpec, ref environment);
-            
+
             foreach (var node in InitDeclaratorList.Nodes)
-                environment.PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment));
+                environment.GetCurrentSnapshot()
+                    .PushSymbol((node as InitDeclarator).ParseSymbolByType(type, ref environment));
         }
     }
 
@@ -79,7 +80,13 @@ namespace CCompiler.Parser
                 }
 
                 if (spec is StructSpec structSpec)
+                {
+                    if (typeSpecExist)
+                        throw new SemanticException("two or more data types in declaration specifiers",
+                            structSpec.Id.StartNodePosition);
+                    typeSpecExist = true;
                     symbolType = structSpec.ParseType(ref environment);
+                }
                 
                 if (spec is TypeQualifier typeQualifier)
                 {
@@ -111,8 +118,9 @@ namespace CCompiler.Parser
     {
         public override Symbol ParseSymbolByType(SymbolType type, ref SemanticEnvironment environment)
         {
-            var symbol = Declarator.ParseSymbol(type, ref environment);
+            var symbol = Declarator.ParseSymbol(type, ref environment) as VarSymbol;
             var valueType = Initializer.GetType(ref environment);
+            symbol.Initializer = Initializer;
             if (symbol.Type.Equals(valueType))
                 return symbol;
 
@@ -166,7 +174,11 @@ namespace CCompiler.Parser
             {
                 environment.PushSnapshot();
                 foreach (var node in paramList.Nodes)
-                    environment.PushSymbol((node as ParamDecl).ParseSymbol(ref environment));
+                {
+                    var symbol = (node as ParamDecl).ParseSymbol(ref environment) as VarSymbol;
+                    symbol.VariableType = VarSymbol.VarType.PARAMETER;
+                    environment.GetCurrentSnapshot().PushSymbol(symbol);
+                }
 
                 funcType = new FuncType(type, environment.PopSnapshot());
             }
@@ -178,7 +190,8 @@ namespace CCompiler.Parser
                     var id = node as Id;
                     var varSymbol = new VarSymbol(id.IdName,
                         new SymbolType(false, false, SymbolTypeKind.INT), id.StartNodePosition);
-                    environment.PushSymbol(varSymbol);
+                    varSymbol.VariableType = VarSymbol.VarType.PARAMETER;
+                    environment.GetCurrentSnapshot().PushSymbol(varSymbol);
                 }
                 funcType = new FuncType(type, environment.PopSnapshot());
             }
@@ -189,7 +202,7 @@ namespace CCompiler.Parser
             
             return Left switch
             {
-                Id id => new FuncSymbol(id.IdName, funcType, id.StartNodePosition),
+                Id id => new VarSymbol(id.IdName, funcType, id.StartNodePosition),
                 Declarator declarator => declarator.ParseSymbol(funcType, ref environment),
                 GenericDeclaration genericDeclaration => genericDeclaration.ParseSymbol(funcType, ref environment),
                 _ => throw new ArgumentException()
@@ -209,7 +222,7 @@ namespace CCompiler.Parser
             else
                 throw new NotImplementedException("non-static arrays are not supported");
             
-            var arrayType = new ArrayType(type.IsConst, type.IsVolatile, type);
+            var arrayType = new ArrayType(type.IsConst, type.IsVolatile, type, constExp);
             return Left switch
             {
                 Id id => new VarSymbol(id.IdName, arrayType, id.StartNodePosition),
@@ -292,7 +305,7 @@ namespace CCompiler.Parser
             }
 
             var structType = new StructType(false, false, Id.IdName, symbolTable, Id.StartNodePosition);
-            environment.PushStructType(structType);
+            environment.GetCurrentSnapshot().PushStructType(structType);
             return structType;
         }
     }
@@ -305,24 +318,26 @@ namespace CCompiler.Parser
             if (DeclSpec is DeclSpecs declSpecs)
                 returnType = DeclSpecs.NodeToType(declSpecs, ref environment);
 
-            var symbol = Declarator.ParseSymbolByType(returnType, ref environment) as FuncSymbol;
+            var varSymbol = Declarator.ParseSymbolByType(returnType, ref environment) as VarSymbol;
+            var funcType = varSymbol.Type as FuncType;
+            var funcSymbol = new FuncSymbol(varSymbol.Id, funcType, varSymbol.DeclPosition, CompoundStat);
+            environment.GetCurrentSnapshot().PushSymbol(funcSymbol);
             if (!(DeclList is NullStat))
                 throw new NotImplementedException("old-style (K&R) function definition is not supported");
-            
-            environment.PushSnapshot((symbol.Type as FuncType).Snapshot);
+
+            environment.PushSnapshot(funcType.ArgumentsSnapshot);
             environment.PushReturnType(returnType);
+            CompoundStat.CheckSemantic(ref environment);
             
-            if (CompoundStat.DeclList is DeclList declList)
-                foreach (var node in declList.Nodes)
-                    node.CheckSemantic(ref environment);
+            foreach (var (id, symbol) in CompoundStat.Snapshot.SymbolTable.GetData())
+            {
+                if (funcType.ArgumentsSnapshot.SymbolExist(id))
+                    throw new SemanticException($"redeclaration of '{id}'",
+                        symbol.DeclPosition);
+            }
             
-            if (CompoundStat.StatList is StatList statList)
-                foreach (var node in statList.Nodes)
-                    node.CheckSemantic(ref environment);
-            
-            symbol.SetSnapshot(environment.PopSnapshot());
             environment.PopReturnType();
-            environment.PushSymbol(symbol);
+            environment.PopSnapshot();
         }
     }
 
@@ -331,14 +346,16 @@ namespace CCompiler.Parser
         public override void CheckSemantic(ref SemanticEnvironment environment)
         {
             environment.PushSnapshot();
+            
             if (DeclList is DeclList declList)
                 foreach (var node in declList.Nodes)
                     node.CheckSemantic(ref environment);
-            
+
             if (StatList is StatList statList)
                 foreach (var node in statList.Nodes)
                     node.CheckSemantic(ref environment);
-            environment.PushSnapshotAsSymbol(environment.PopSnapshot());
+
+            Snapshot = environment.PopSnapshot();
         }
     }
 
@@ -360,7 +377,6 @@ namespace CCompiler.Parser
     public partial class String
     {
         public override bool IsLValue() => false;
-
         public override SymbolType GetType(ref SemanticEnvironment environment) =>
             new SymbolType(true, false, SymbolTypeKind.STRING);
     }
@@ -405,7 +421,7 @@ namespace CCompiler.Parser
         public override SymbolType GetType(ref SemanticEnvironment environment)
         {
             var id = Id as Id;
-            if (_callType == CallType.VALUE)
+            if (TypeOfCall == CallType.VALUE)
             {
                 if (PostfixNode.GetType(ref environment) is StructType structType)
                 {
@@ -688,16 +704,16 @@ namespace CCompiler.Parser
                 if (ExpList is ExpList expList)
                     list = expList;
 
-                var requiredTypes = funcType.GetArguments().ToList();
+                var requiredSymbols = funcType.GetArguments();
 
-                if (list.Nodes.Count != requiredTypes.Count)
+                if (list.Nodes.Count != requiredSymbols.Count)
                     throw new SemanticException($"wrong number of arguments", StartNodePosition);
                 
                 for (int i = 0; i < list.Nodes.Count; i++)
                 {
                     var expNode = list.Nodes[i] as ExpNode;
                     var currentType = expNode.GetType(ref environment);
-                    var requiredType = requiredTypes[i].Value.Type;
+                    var requiredType = requiredSymbols[i].Type;
                     if (currentType.Equals(requiredType) == false)
                         throw new SemanticException(
                             $"incompatible type for argument, expected ‘{requiredType.GetShortName()}’ " +
@@ -751,9 +767,9 @@ namespace CCompiler.Parser
         {
             if (Exp.GetType(ref environment).IsScalar == false)
                 throw new SemanticException("scalar type is required", Exp.StartNodePosition);
-            environment.LoopEntry();
+            environment.LoopsLabels.Push(new Labels());
             Stat.CheckSemantic(ref environment);
-            environment.LoopExit();
+            environment.LoopsLabels.Pop();
         }
     }
 
@@ -769,9 +785,9 @@ namespace CCompiler.Parser
             if (Exp3 is ExpNode exp3)
                 exp3.GetType(ref environment);
             
-            environment.LoopEntry();
+            environment.LoopsLabels.Push(new WhileStat.Labels());
             Stat.CheckSemantic(ref environment);
-            environment.LoopExit();
+            environment.LoopsLabels.Pop();
         }
     }
 

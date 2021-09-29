@@ -1,2 +1,1 @@
-(1:1)	INT	18446744073709551615	18446744073709551615	INT
-(2:1): error: integer literal is too large to be represented in any integer type
+(1:1): error: integer literal is too large to be represented in any integer type

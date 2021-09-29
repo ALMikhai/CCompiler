@@ -56,6 +56,11 @@
 
 Structs { }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+		INT :: o
+	}:: printf
 	ARRAY of type INT :: a
 	ARRAY of type FLOAT :: b
 	ARRAY of type POINTER to INT :: c

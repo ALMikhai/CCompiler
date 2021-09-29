@@ -1,4 +1,10 @@
-﻿using CCompiler.Tokenizer;
+﻿using System;
+using CCompiler.CodeGenerator;
+using CCompiler.Parser;
+using CCompiler.Tokenizer;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using OpCodes = Mono.Cecil.Cil.OpCodes;
 
 namespace CCompiler.SemanticAnalysis
 {
@@ -17,6 +23,8 @@ namespace CCompiler.SemanticAnalysis
         
         public override string ToString() => $"{Type.GetShortName()} :: {Id}";
 
+        public virtual void Generate(ref Assembly assembly, ref SemanticEnvironment environment) =>
+            throw new NotImplementedException();
         public override bool Equals(object? obj) // TODO пока так, но не уверен
         {
             if (obj is Symbol symbol)
@@ -30,6 +38,31 @@ namespace CCompiler.SemanticAnalysis
 
     public class VarSymbol : Symbol
     {
+        public enum VarType
+        {
+            VARIABLE,
+            PARAMETER,
+            FIELD
+        }
+        
+        private ExpNode _initializer;
+        public VarType VariableType { get; set; } = VarType.VARIABLE;
+        public VariableDefinition VariableDefinition { get; set; }
+        public ParameterDefinition ParameterDefinition { get; set; }
+        public FieldDefinition FieldDefinition { get; set; }
+
+        public ExpNode Initializer
+        {
+            get => _initializer;
+            set
+            {
+                _initializer = value;
+                IsInitialized = true;
+            }
+        }
+
+        public bool IsInitialized { get; private set; } = false;
+
         public VarSymbol(string id, SymbolType type, Position declPosition) : base(id, type, declPosition)
         {
         }
@@ -37,39 +70,87 @@ namespace CCompiler.SemanticAnalysis
 
     public class FuncSymbol : Symbol
     {
-        public EnvironmentSnapshot Snapshot { get; private set; }
-        public bool IsDefined { get; private set; }
+        public CompoundStat CompoundStat { get; }
+        public MethodDefinition Definition { get; protected set; }
         
-        public FuncSymbol(string id, FuncType type, Position declPosition) : base(id, type, declPosition)
+        public FuncSymbol(string id, FuncType type, Position declPosition, CompoundStat compoundStat) : base(id, type, declPosition)
         {
-            IsDefined = false;
-        }
-        public FuncSymbol(string id, FuncType type, EnvironmentSnapshot snapshot, Position declPosition) : base(id, type, declPosition)
-        {
-            Snapshot = snapshot;
-            IsDefined = true;
+            CompoundStat = compoundStat;
         }
 
-        public void SetSnapshot(EnvironmentSnapshot snapshot)
+        public override void Generate(ref Assembly assembly, ref SemanticEnvironment environment)
         {
-            Snapshot = snapshot;
-            IsDefined = true;
+            environment.PushSnapshot();
+            var funcType = Type as FuncType;
+            var retType = funcType.ReturnType;
+
+            var isEntryPoint = false;
+            if (Id == "main" && funcType.ReturnType.SymbolTypeKind == SymbolTypeKind.INT &&
+                funcType.GetArguments().Count == 0)
+            {
+                isEntryPoint = true;
+                retType = new SymbolType(false, false, SymbolTypeKind.VOID);
+            }
+            
+            var methodDefinition = new MethodDefinition(Id, MethodAttributes.Public | MethodAttributes.Static,
+                retType.ToTypeReference(ref assembly)) {Body = {InitLocals = true}};
+            Definition = methodDefinition;
+            var il = methodDefinition.Body.GetILProcessor();
+
+            foreach (var argument in funcType.GetArguments())
+            {
+                environment.GetCurrentSnapshot().PushSymbol(argument);
+                var parameterDefinition = new ParameterDefinition(argument.Id, ParameterAttributes.None,
+                    argument.Type.ToTypeReference(ref assembly));
+                ((VarSymbol) argument).ParameterDefinition = parameterDefinition;
+                methodDefinition.Parameters.Add(parameterDefinition);
+            }
+
+            foreach (var (_, symbol) in CompoundStat.Snapshot.SymbolTable.GetData())
+            {
+                var variableDefinition = new VariableDefinition(symbol.Type.ToTypeReference(ref assembly));
+                var varSymbol = symbol as VarSymbol;
+                varSymbol.VariableType = VarSymbol.VarType.VARIABLE;
+                varSymbol.VariableDefinition = variableDefinition;
+                environment.GetCurrentSnapshot().PushSymbol(symbol);
+                methodDefinition.Body.Variables.Add(variableDefinition);
+                
+                if (varSymbol.IsInitialized)
+                {
+                    varSymbol.Initializer.Generate(il, environment);
+                    il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
+                }
+                else switch (varSymbol.Type)
+                {
+                    case StructType structType:
+                        il.Emit(OpCodes.Ldloca_S, varSymbol.VariableDefinition);
+                        il.Emit(OpCodes.Initobj, structType.TypeReference);
+                        break;
+                    case ArrayType arrayType:
+                        arrayType.InsideBrackets.Generate(il, environment);
+                        il.Emit(OpCodes.Newarr, arrayType.TypeOfArray.ToTypeReference(ref assembly));
+                        il.Emit(OpCodes.Stloc, varSymbol.VariableDefinition);
+                        break;
+                }
+            }
+
+            if (CompoundStat.StatList is StatList statList)
+                foreach (var node in statList.Nodes)
+                    node.Generate(il, environment);
+
+            il.Emit(OpCodes.Ret);
+
+            if (isEntryPoint)
+            {
+                assembly.AssemblyDefinition.EntryPoint = methodDefinition;
+                assembly.AssemblyDefinition.MainModule.EntryPoint = methodDefinition;
+            }
+            
+            assembly.AddMethod(methodDefinition);
+            environment.PopSnapshot();
         }
-        
-        public override string ToString() => $"{Type.GetFullName()}" + (IsDefined ? $"\n{Snapshot} " : " ") + $":: {Id}";
-    }
 
-    public class SnapshotSymbol : Symbol
-    {
-        private static int _symbolNumber = 0;
-        public EnvironmentSnapshot Snapshot { get; }
-
-        public SnapshotSymbol(EnvironmentSnapshot snapshot) : base($"__{_symbolNumber++}Snapshot",
-            new SymbolType(true, false, SymbolTypeKind.INT), new Position(0, 0))
-        {
-            Snapshot = snapshot;
-        }
-
-        public override string ToString() => $"Nested block {{\n{Utils.AddTab(Snapshot.ToString())}}}";
+        public override string ToString() =>
+            $"{Type.GetFullName()}" + $"\n{CompoundStat.Snapshot} " + $":: {Id}";
     }
 }

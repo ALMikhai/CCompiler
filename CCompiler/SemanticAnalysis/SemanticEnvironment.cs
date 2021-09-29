@@ -1,60 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using CCompiler.CodeGenerator;
 using CCompiler.Parser;
+using CCompiler.Tokenizer;
+using Mono.Cecil;
 
 namespace CCompiler.SemanticAnalysis
 {
     public class SemanticEnvironment
     {
         private Stack<EnvironmentSnapshot> _snapshots;
-        private int _nestedLoopsCount;
+        public Stack<WhileStat.Labels> LoopsLabels { get; }
         private Stack<SymbolType> _returnTypes;
 
         public SemanticEnvironment()
         {
-            _nestedLoopsCount = 0;
+            LoopsLabels = new Stack<WhileStat.Labels>();
             _returnTypes = new Stack<SymbolType>();
             _snapshots = new Stack<EnvironmentSnapshot>();
-            _snapshots.Push(new EnvironmentSnapshot());
+            var environmentSnapshot = new EnvironmentSnapshot();
+            environmentSnapshot.PushSymbol(new Printf());
+            _snapshots.Push(environmentSnapshot);
         }
 
-        public void PushSymbol(Symbol symbol)
-        {
-            if (SymbolExist(symbol.Id))
-                throw new SemanticException($"redeclaration of '{symbol.Id}'", symbol.DeclPosition);
-
-            _snapshots.Peek().SymbolTable.Push(symbol.Id, symbol);
-        }
-
-        public bool SymbolExist(string id) => _snapshots.Peek().SymbolTable.Exist(id);
-
+        public EnvironmentSnapshot GetCurrentSnapshot() => _snapshots.Peek();
+        
         public void PushSnapshot() => _snapshots.Push(new EnvironmentSnapshot());
-
         public void PushSnapshot(EnvironmentSnapshot snapshot)
         {
             PushSnapshot();
             foreach (var pair in snapshot.SymbolTable.GetData())
             {
-                PushSymbol(pair.Value);
+                _snapshots.Peek().PushSymbol(pair.Value);
             }
             foreach (var pair in snapshot.StructTable.GetData())
             {
-                PushStructType(pair.Value);
+                _snapshots.Peek().PushStructType(pair.Value);
             }
         }
-
         public EnvironmentSnapshot PopSnapshot() => _snapshots.Pop();
-
-        public void PushStructType(StructType type)
-        {
-            if (StructExist(type.Name))
-                throw new SemanticException($"redeclaration of '{type.Name}'", type.DeclPosition);
-            
-            _snapshots.Peek().StructTable.Push(type.Name, type);
-        }
-
-        public bool StructExist(string name) => _snapshots.Peek().StructTable.Exist(name);
-
+        
         public StructType GetStructType(string name)
         {
             foreach (var snapshot in _snapshots)
@@ -76,17 +61,8 @@ namespace CCompiler.SemanticAnalysis
 
             throw new ArgumentException($"symbol '{id}' is not define");
         }
-
-        public void PushSnapshotAsSymbol(EnvironmentSnapshot snapshot) => PushSymbol(new SnapshotSymbol(snapshot));
-        public bool InLoop() => _nestedLoopsCount > 0;
-        public void LoopEntry() => ++_nestedLoopsCount;
-        public void LoopExit()
-        {
-            --_nestedLoopsCount;
-            if (_nestedLoopsCount < 0)
-                throw new Exception("exit from the loop which does not exist");
-        }
-
+        
+        public bool InLoop() => LoopsLabels.Count > 0;
         public void PushReturnType(SymbolType type) => _returnTypes.Push(type);
         public SymbolType PopReturnType() => _returnTypes.Pop();
         public SymbolType PeekReturnType() => _returnTypes.Peek();

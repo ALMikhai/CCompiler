@@ -28,6 +28,11 @@
 
 Structs { }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+		INT :: o
+	}:: printf
 	FUNC returning INT
 	Arguments{ }
 	Structs { }

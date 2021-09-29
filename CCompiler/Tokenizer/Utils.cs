@@ -22,6 +22,8 @@ namespace CCompiler.Tokenizer
                 result.Append($"\t{s}\n");
             
             return result.ToString();
-        } 
+        }
+
+        public static string ConvertCFormatToCsFormat(string s) => s.Replace("%d", "{0:D}");
     }
 }

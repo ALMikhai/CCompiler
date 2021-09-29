@@ -61,6 +61,11 @@ Structs {
 	Members { }
 }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+		INT :: o
+	}:: printf
 	STRUCT called node :: left
 	STRUCT called a :: b
 	FUNC returning VOID

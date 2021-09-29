@@ -49,7 +49,7 @@ namespace CCompiler.Parser
         
         public override string ToString(string indent, bool last)
         {
-            return indent + NodePrefix(last) + Str + "\r\n";
+            return indent + NodePrefix(last) + $"\"{Str}\"" + "\r\n";
         }
     }
 
@@ -108,11 +108,11 @@ namespace CCompiler.Parser
         public ExpNode PostfixNode { get; }
         public ExpNode Id { get; }
 
-        private readonly CallType _callType;
+        public CallType TypeOfCall { get; }
 
-        public MemberCall(ExpNode postfixNode, ExpNode id, CallType callType, Position startNodePosition) : base(startNodePosition)
+        public MemberCall(ExpNode postfixNode, ExpNode id, CallType typeOfCall, Position startNodePosition) : base(startNodePosition)
         {
-            _callType = callType;
+            TypeOfCall = typeOfCall;
             PostfixNode = postfixNode;
             Id = id;
         }
@@ -122,7 +122,7 @@ namespace CCompiler.Parser
         public override string ToString(string indent, bool last)
         {
             return
-                indent + NodePrefix(last) + (_callType == CallType.VALUE ? "." : "->") + "\r\n" +
+                indent + NodePrefix(last) + (TypeOfCall == CallType.VALUE ? "." : "->") + "\r\n" +
                 PostfixNode.ToString(indent + ChildrenPrefix(last), false) +
                 Id.ToString(indent + ChildrenPrefix(last), true);
         }

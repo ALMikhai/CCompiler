@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Xml;
+using CCompiler.CodeGenerator;
 using CCompiler.Parser;
 using CCompiler.SemanticAnalysis;
 using CCompiler.Tokenizer;
@@ -55,6 +55,28 @@ namespace CCompiler
                     syntaxTree.CheckSemantic(ref environment);
                     Console.WriteLine(syntaxTree);
                     Console.WriteLine(environment.PopSnapshot());
+                }
+
+                if (args.Contains("-net"))
+                {
+                    var parser = new SyntaxParser(tokenizer, SyntaxParserType.UNIT);
+                    var syntaxTree = parser.SyntaxTree;
+                    var parserEnvironment = new SemanticEnvironment();
+                    syntaxTree.CheckSemantic(ref parserEnvironment);
+
+                    var fileName = new FileInfo(args[0]);
+                    var assembly = new Assembly(fileName.Name.Replace(".c",""));
+                    var unitSnapshot = parserEnvironment.PopSnapshot();
+                    var generatorEnvironment = new SemanticEnvironment();
+                    generatorEnvironment.PushSnapshot(unitSnapshot);
+                    
+                    foreach (var structType in unitSnapshot.StructTable.GetData())
+                        structType.Value.Generate(ref assembly, ref generatorEnvironment);
+
+                    foreach (var symbol in unitSnapshot.SymbolTable.GetData())
+                        symbol.Value.Generate(ref assembly, ref generatorEnvironment);
+                    
+                    assembly.Save(fileName.DirectoryName + '\\');
                 }
             }
             catch (FileNotFoundException e)

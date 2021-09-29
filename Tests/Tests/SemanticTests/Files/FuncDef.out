@@ -39,18 +39,18 @@
 
 Structs { }
 Symbols {
+	FUNC returning VOID
+	Arguments{
+		STRING :: s
+		INT :: o
+	}:: printf
 	FUNC returning INT
 	Arguments{
 		STRUCT called a :: a1
 		INT :: b
 	}
-	Structs {
-		STRUCT called a
-		Members { }
-	}
+	Structs { }
 	Symbols {
-		STRUCT called a :: a1
-		INT :: b
 		STRUCT called a :: a2
 		FLOAT :: c
 	} :: foo
